@@ -1,12 +1,11 @@
-import Versions from "./components/Versions";
-import electronLogo from "./assets/electron.svg";
+import { Button } from "./components/ui/button";
 
-function App(): React.JSX.Element {
+const App: React.FC = () => {
   const ipcHandle = (): void => window.electron.ipcRenderer.send("ping");
+  const versions = window.electron.process.versions;
 
   return (
     <>
-      <img alt="logo" className="logo" src={electronLogo} />
       <div className="creator">Powered by electron-vite</div>
       <div className="text">
         Build an Electron app with <span className="react">React</span>
@@ -21,15 +20,21 @@ function App(): React.JSX.Element {
             Documentation
           </a>
         </div>
-        <div className="action">
-          <a target="_blank" rel="noreferrer" onClick={ipcHandle}>
-            Send IPC
-          </a>
-        </div>
+        <Button className="action" onClick={ipcHandle}>
+          Send IPC
+        </Button>
       </div>
-      <Versions></Versions>
+      <Button variant="outline" className="electron-version">
+        Electron v{versions.electron}
+      </Button>
+      <Button variant="outline" className="chrome-version">
+        Chromium v{versions.chrome}
+      </Button>
+      <Button variant="outline" className="node-version">
+        Node v{versions.node}
+      </Button>
     </>
   );
-}
+};
 
 export default App;
