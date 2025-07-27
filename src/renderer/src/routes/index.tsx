@@ -1,4 +1,5 @@
 import { Button } from "@renderer/components/ui/button";
+import { useCounterStore } from "@renderer/store/counterStore";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
@@ -8,6 +9,9 @@ export const Route = createFileRoute("/")({
 function Index() {
   const ipcHandle = (): void => window.electron.ipcRenderer.send("ping");
   const versions = window.electron.process.versions;
+
+  const { count, increment, decrement, reset, updateMaxHistory, history, settings, setStep, clearHistory, step } =
+    useCounterStore();
 
   return (
     <>
@@ -38,6 +42,20 @@ function Index() {
       <Button variant="outline" className="node-version">
         Node v{versions.node}
       </Button>
+      <div className="flex flex-col items-center gap-4">
+        <div className="text-2xl font-bold">{count}</div>
+        <div className="text-2xl font-bold">{step}</div>
+        <div className="text-2xl font-bold">{JSON.stringify(settings)}</div>
+        <div className="text-2xl font-bold">{JSON.stringify(history)}</div>
+        <div className="flex gap-2">
+          <Button onClick={increment}>+1</Button>
+          <Button onClick={decrement}>-1</Button>
+          <Button onClick={reset}>Reset</Button>
+          <Button onClick={() => updateMaxHistory(10)}>Update Max History</Button>
+          <Button onClick={() => setStep(2)}>Set Step to 2</Button>
+          <Button onClick={() => clearHistory()}>Clear History</Button>
+        </div>
+      </div>
     </>
   );
 }
