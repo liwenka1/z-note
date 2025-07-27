@@ -1,6 +1,11 @@
-import { Button } from "./components/ui/button";
+import { Button } from "@renderer/components/ui/button";
+import { createFileRoute } from "@tanstack/react-router";
 
-const App: React.FC = () => {
+export const Route = createFileRoute("/")({
+  component: Index
+});
+
+function Index() {
   const ipcHandle = (): void => window.electron.ipcRenderer.send("ping");
   const versions = window.electron.process.versions;
 
@@ -35,6 +40,4 @@ const App: React.FC = () => {
       </Button>
     </>
   );
-};
-
-export default App;
+}
