@@ -1,5 +1,3 @@
-import { Button } from "@renderer/components/ui/button";
-import { useCounterStore } from "@renderer/store/counterStore";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
@@ -7,55 +5,27 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const ipcHandle = (): void => window.electron.ipcRenderer.send("ping");
-  const versions = window.electron.process.versions;
-
-  const { count, increment, decrement, reset, updateMaxHistory, history, settings, setStep, clearHistory, step } =
-    useCounterStore();
-
   return (
-    <>
-      <div className="creator">Powered by electron-vite</div>
-      <div className="text">
-        Build an Electron app with <span className="react">React</span>
-        &nbsp;and <span className="ts">TypeScript</span>
-      </div>
-      <p className="tip">
-        Please try pressing <code>F12</code> to open the devTool
-      </p>
-      <div className="actions">
-        <div className="action">
-          <a href="https://electron-vite.org/" target="_blank" rel="noreferrer">
-            Documentation
-          </a>
-        </div>
-        <Button className="action" onClick={ipcHandle}>
-          Send IPC
-        </Button>
-      </div>
-      <Button variant="outline" className="electron-version">
-        Electron v{versions.electron}
-      </Button>
-      <Button variant="outline" className="chrome-version">
-        Chromium v{versions.chrome}
-      </Button>
-      <Button variant="outline" className="node-version">
-        Node v{versions.node}
-      </Button>
-      <div className="flex flex-col items-center gap-4">
-        <div className="text-2xl font-bold">{count}</div>
-        <div className="text-2xl font-bold">{step}</div>
-        <div className="text-2xl font-bold">{JSON.stringify(settings)}</div>
-        <div className="text-2xl font-bold">{JSON.stringify(history)}</div>
-        <div className="flex gap-2">
-          <Button onClick={increment}>+1</Button>
-          <Button onClick={decrement}>-1</Button>
-          <Button onClick={reset}>Reset</Button>
-          <Button onClick={() => updateMaxHistory(10)}>Update Max History</Button>
-          <Button onClick={() => setStep(2)}>Set Step to 2</Button>
-          <Button onClick={() => clearHistory()}>Clear History</Button>
+    <div className="flex-1 p-6">
+      <div className="mx-auto max-w-4xl">
+        <h1 className="mb-6 text-2xl font-semibold">主页</h1>
+        <div className="bg-card rounded-lg border p-6">
+          <h2 className="mb-4 text-lg font-medium">欢迎使用 Z-Note</h2>
+          <p className="text-muted-foreground mb-4">这是一个基于 Electron 和 React 的笔记应用</p>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="bg-muted rounded-lg p-4">
+              <h3 className="mb-2 font-medium">快速开始</h3>
+              <p className="text-muted-foreground text-sm">
+                点击左侧的&ldquo;笔记&rdquo;旁边的 + 按钮开始创建你的第一篇笔记
+              </p>
+            </div>
+            <div className="bg-muted rounded-lg p-4">
+              <h3 className="mb-2 font-medium">搜索功能</h3>
+              <p className="text-muted-foreground text-sm">使用搜索功能快速找到你需要的笔记内容</p>
+            </div>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
