@@ -9,12 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./routes/__root";
-import { Route as AboutRouteImport } from "./routes/about";
+import { Route as TrashRouteImport } from "./routes/trash";
+import { Route as SettingsRouteImport } from "./routes/settings";
 import { Route as IndexRouteImport } from "./routes/index";
+import { Route as NotesNoteIdRouteImport } from "./routes/notes.$noteId";
 
-const AboutRoute = AboutRouteImport.update({
-  id: "/about",
-  path: "/about",
+const TrashRoute = TrashRouteImport.update({
+  id: "/trash",
+  path: "/trash",
+  getParentRoute: () => rootRouteImport
+} as any);
+const SettingsRoute = SettingsRouteImport.update({
+  id: "/settings",
+  path: "/settings",
   getParentRoute: () => rootRouteImport
 } as any);
 const IndexRoute = IndexRouteImport.update({
@@ -22,40 +29,60 @@ const IndexRoute = IndexRouteImport.update({
   path: "/",
   getParentRoute: () => rootRouteImport
 } as any);
+const NotesNoteIdRoute = NotesNoteIdRouteImport.update({
+  id: "/notes/$noteId",
+  path: "/notes/$noteId",
+  getParentRoute: () => rootRouteImport
+} as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
-  "/about": typeof AboutRoute;
+  "/settings": typeof SettingsRoute;
+  "/trash": typeof TrashRoute;
+  "/notes/$noteId": typeof NotesNoteIdRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
-  "/about": typeof AboutRoute;
+  "/settings": typeof SettingsRoute;
+  "/trash": typeof TrashRoute;
+  "/notes/$noteId": typeof NotesNoteIdRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
-  "/about": typeof AboutRoute;
+  "/settings": typeof SettingsRoute;
+  "/trash": typeof TrashRoute;
+  "/notes/$noteId": typeof NotesNoteIdRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/about";
+  fullPaths: "/" | "/settings" | "/trash" | "/notes/$noteId";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/about";
-  id: "__root__" | "/" | "/about";
+  to: "/" | "/settings" | "/trash" | "/notes/$noteId";
+  id: "__root__" | "/" | "/settings" | "/trash" | "/notes/$noteId";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
-  AboutRoute: typeof AboutRoute;
+  SettingsRoute: typeof SettingsRoute;
+  TrashRoute: typeof TrashRoute;
+  NotesNoteIdRoute: typeof NotesNoteIdRoute;
 }
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    "/about": {
-      id: "/about";
-      path: "/about";
-      fullPath: "/about";
-      preLoaderRoute: typeof AboutRouteImport;
+    "/trash": {
+      id: "/trash";
+      path: "/trash";
+      fullPath: "/trash";
+      preLoaderRoute: typeof TrashRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/settings": {
+      id: "/settings";
+      path: "/settings";
+      fullPath: "/settings";
+      preLoaderRoute: typeof SettingsRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/": {
@@ -65,11 +92,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof IndexRouteImport;
       parentRoute: typeof rootRouteImport;
     };
+    "/notes/$noteId": {
+      id: "/notes/$noteId";
+      path: "/notes/$noteId";
+      fullPath: "/notes/$noteId";
+      preLoaderRoute: typeof NotesNoteIdRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute
+  SettingsRoute: SettingsRoute,
+  TrashRoute: TrashRoute,
+  NotesNoteIdRoute: NotesNoteIdRoute
 };
 export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>();
