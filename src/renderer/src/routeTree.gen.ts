@@ -8,97 +8,97 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as TrashRouteImport } from "./routes/trash";
-import { Route as SettingsRouteImport } from "./routes/settings";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as NotesNoteIdRouteImport } from "./routes/notes.$noteId";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as TrashRouteImport } from './routes/trash'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as NotesNoteIdRouteImport } from './routes/notes.$noteId'
 
 const TrashRoute = TrashRouteImport.update({
-  id: "/trash",
-  path: "/trash",
-  getParentRoute: () => rootRouteImport
-} as any);
+  id: '/trash',
+  path: '/trash',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
-  id: "/settings",
-  path: "/settings",
-  getParentRoute: () => rootRouteImport
-} as any);
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
-  getParentRoute: () => rootRouteImport
-} as any);
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NotesNoteIdRoute = NotesNoteIdRouteImport.update({
-  id: "/notes/$noteId",
-  path: "/notes/$noteId",
-  getParentRoute: () => rootRouteImport
-} as any);
+  id: '/notes/$noteId',
+  path: '/notes/$noteId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/settings": typeof SettingsRoute;
-  "/trash": typeof TrashRoute;
-  "/notes/$noteId": typeof NotesNoteIdRoute;
+  '/': typeof IndexRoute
+  '/settings': typeof SettingsRoute
+  '/trash': typeof TrashRoute
+  '/notes/$noteId': typeof NotesNoteIdRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/settings": typeof SettingsRoute;
-  "/trash": typeof TrashRoute;
-  "/notes/$noteId": typeof NotesNoteIdRoute;
+  '/': typeof IndexRoute
+  '/settings': typeof SettingsRoute
+  '/trash': typeof TrashRoute
+  '/notes/$noteId': typeof NotesNoteIdRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/settings": typeof SettingsRoute;
-  "/trash": typeof TrashRoute;
-  "/notes/$noteId": typeof NotesNoteIdRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/settings': typeof SettingsRoute
+  '/trash': typeof TrashRoute
+  '/notes/$noteId': typeof NotesNoteIdRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/settings" | "/trash" | "/notes/$noteId";
-  fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/settings" | "/trash" | "/notes/$noteId";
-  id: "__root__" | "/" | "/settings" | "/trash" | "/notes/$noteId";
-  fileRoutesById: FileRoutesById;
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/settings' | '/trash' | '/notes/$noteId'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/settings' | '/trash' | '/notes/$noteId'
+  id: '__root__' | '/' | '/settings' | '/trash' | '/notes/$noteId'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  SettingsRoute: typeof SettingsRoute;
-  TrashRoute: typeof TrashRoute;
-  NotesNoteIdRoute: typeof NotesNoteIdRoute;
+  IndexRoute: typeof IndexRoute
+  SettingsRoute: typeof SettingsRoute
+  TrashRoute: typeof TrashRoute
+  NotesNoteIdRoute: typeof NotesNoteIdRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/trash": {
-      id: "/trash";
-      path: "/trash";
-      fullPath: "/trash";
-      preLoaderRoute: typeof TrashRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/settings": {
-      id: "/settings";
-      path: "/settings";
-      fullPath: "/settings";
-      preLoaderRoute: typeof SettingsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/notes/$noteId": {
-      id: "/notes/$noteId";
-      path: "/notes/$noteId";
-      fullPath: "/notes/$noteId";
-      preLoaderRoute: typeof NotesNoteIdRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+    '/trash': {
+      id: '/trash'
+      path: '/trash'
+      fullPath: '/trash'
+      preLoaderRoute: typeof TrashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notes/$noteId': {
+      id: '/notes/$noteId'
+      path: '/notes/$noteId'
+      fullPath: '/notes/$noteId'
+      preLoaderRoute: typeof NotesNoteIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -106,6 +106,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SettingsRoute: SettingsRoute,
   TrashRoute: TrashRoute,
-  NotesNoteIdRoute: NotesNoteIdRoute
-};
-export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>();
+  NotesNoteIdRoute: NotesNoteIdRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
