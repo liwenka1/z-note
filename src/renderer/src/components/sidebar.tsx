@@ -3,10 +3,12 @@ import { Button } from "@renderer/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@renderer/components/ui/avatar";
 import { Link } from "@tanstack/react-router";
 import { Search, Home, Settings, Trash2, Plus, ChevronLeft } from "lucide-react";
+import { useSearchStore } from "@renderer/store";
 
 export function Sidebar() {
   // 临时状态来模拟是否有笔记
   const [hasNotes, setHasNotes] = useState(false);
+  const { openSearch } = useSearchStore();
 
   return (
     <aside className="bg-sidebar border-sidebar-border flex w-64 flex-col border-r">
@@ -50,10 +52,7 @@ export function Sidebar() {
           <Button
             variant="ghost"
             className="text-sidebar-foreground hover:bg-sidebar-accent w-full justify-start"
-            onClick={() => {
-              // TODO: 打开搜索弹窗
-              console.log("打开搜索");
-            }}
+            onClick={openSearch}
           >
             <Search className="mr-3 h-4 w-4" />
             搜索
