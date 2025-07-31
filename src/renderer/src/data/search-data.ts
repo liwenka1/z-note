@@ -1,3 +1,5 @@
+import { mockData } from "./mock-data";
+
 export interface SearchItem {
   id: string;
   title: string;
@@ -7,36 +9,29 @@ export interface SearchItem {
   description?: string;
 }
 
+// 从模拟数据生成搜索数据
 export const searchData: SearchItem[] = [
-  // 笔记
-  {
-    id: "note-1",
-    title: "我的第一篇笔记",
-    type: "note",
-    icon: "📄",
-    description: "这是我创建的第一篇笔记，记录了一些想法..."
-  },
-  {
-    id: "note-2",
-    title: "工作日志",
-    type: "note",
-    icon: "📄",
-    description: "记录每日工作内容和进展"
-  },
-  {
-    id: "note-3",
-    title: "学习笔记",
-    type: "note",
-    icon: "📄",
-    description: "React 和 TypeScript 学习记录"
-  },
-  {
-    id: "note-4",
-    title: "项目规划",
-    type: "note",
-    icon: "📄",
-    description: "Z-Note 项目的开发计划和功能规划"
-  },
+  // 笔记数据
+  ...mockData.notes
+    .filter((note) => !note.isDeleted)
+    .map((note) => ({
+      id: note.id,
+      title: note.title,
+      type: "note" as const,
+      icon: "📄",
+      description: note.excerpt || note.content.slice(0, 100) + "..."
+    })),
+
+  // 文件夹数据
+  ...mockData.folders
+    .filter((folder) => !folder.isDeleted)
+    .map((folder) => ({
+      id: folder.id,
+      title: folder.name,
+      type: "folder" as const,
+      icon: folder.icon || "📁",
+      description: folder.description
+    })),
 
   // 页面
   {
@@ -62,29 +57,6 @@ export const searchData: SearchItem[] = [
     icon: "🗑️",
     path: "/trash",
     description: "已删除的笔记和文件夹"
-  },
-
-  // 文件夹
-  {
-    id: "folder-1",
-    title: "工作文件夹",
-    type: "folder",
-    icon: "📁",
-    description: "存放工作相关的笔记和文档"
-  },
-  {
-    id: "folder-2",
-    title: "学习资料",
-    type: "folder",
-    icon: "📁",
-    description: "技术学习和知识管理"
-  },
-  {
-    id: "folder-3",
-    title: "个人笔记",
-    type: "folder",
-    icon: "📁",
-    description: "个人想法和生活记录"
   }
 ];
 
