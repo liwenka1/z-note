@@ -1,4 +1,4 @@
-import type { Note, Folder, Tag } from "@renderer/types";
+import type { Note, Folder, Tag, CreateNoteInput, CreateFolderInput } from "@renderer/types";
 
 // ==================== 数据生成工具函数 ====================
 
@@ -11,7 +11,7 @@ export function generateId(): string {
 export function generateExcerpt(content: string, maxLength: number = 150): string {
   // 移除 Markdown 语法
   const plainText = content
-    .replace(/[#*`_~\[\]()]/g, "") // 移除 Markdown 标记
+    .replace(/[#*`_~[\]()]/g, "") // 移除 Markdown 标记
     .replace(/\n+/g, " ") // 换行转空格
     .trim();
 
@@ -26,7 +26,7 @@ export function generateExcerpt(content: string, maxLength: number = 150): strin
 export function calculateWordCount(content: string): number {
   // 移除 Markdown 语法后计算字数
   const plainText = content
-    .replace(/[#*`_~\[\]()]/g, "")
+    .replace(/[#*`_~[\]()]/g, "")
     .replace(/\n+/g, " ")
     .trim();
 
@@ -63,7 +63,7 @@ export function generateRandomColor(): string {
 }
 
 // 创建笔记时的数据处理
-export function createNoteData(input: { title: string; content: string; folderId?: string; tags?: string[] }): Note {
+export function createNoteData(input: CreateNoteInput): Note {
   const now = new Date();
   const wordCount = calculateWordCount(input.content);
 
@@ -73,9 +73,9 @@ export function createNoteData(input: { title: string; content: string; folderId
     content: input.content,
     excerpt: generateExcerpt(input.content),
     folderId: input.folderId,
-    tags: input.tags || [],
-    isFavorite: false,
-    isDeleted: false,
+    tags: input.tags,
+    isFavorite: input.isFavorite,
+    isDeleted: input.isDeleted,
     createdAt: now,
     updatedAt: now,
     wordCount,
@@ -99,13 +99,7 @@ export function updateNoteData(note: Note, updates: Partial<Note>): Note {
 }
 
 // 创建文件夹时的数据处理
-export function createFolderData(input: {
-  name: string;
-  parentId?: string;
-  color?: string;
-  icon?: string;
-  description?: string;
-}): Folder {
+export function createFolderData(input: CreateFolderInput): Folder {
   const now = new Date();
 
   return {
@@ -114,10 +108,10 @@ export function createFolderData(input: {
     parentId: input.parentId,
     color: input.color || generateRandomColor(),
     icon: input.icon || "📁",
-    description: input.description,
-    isDeleted: false,
+    description: input.description || "",
+    isDeleted: input.isDeleted,
     isExpanded: false,
-    sortOrder: Date.now(), // 使用时间戳作为默认排序
+    sortOrder: input.sortOrder || Date.now(), // 使用时间戳作为默认排序
     createdAt: now,
     updatedAt: now
   };
