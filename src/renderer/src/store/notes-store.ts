@@ -354,10 +354,10 @@ export const useNotesStore = create<NotesStore>()(
             state.folders[folderIndex].updatedAt = new Date();
           }
 
-          // 移动该文件夹下的笔记到根目录
+          // 删除该文件夹下的笔记
           state.notes.forEach((note) => {
             if (note.folderId === folderId) {
-              note.folderId = undefined;
+              note.isDeleted = true;
               note.updatedAt = new Date();
             }
           });
@@ -440,8 +440,6 @@ export const useNotesStore = create<NotesStore>()(
         state.error = undefined;
       });
     },
-
-
 
     // ==================== 查询方法 ====================
     getNoteById: (id: string) => {
