@@ -1,5 +1,7 @@
 # ZNote
 
+## 项目说明
+
 ### 提交规范
 
 遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范：
