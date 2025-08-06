@@ -1,6 +1,14 @@
 import { Button } from "@renderer/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@renderer/components/ui/dropdown-menu";
 import { useNotesStore } from "@renderer/store";
 import { useNavigate, Link } from "@tanstack/react-router";
+import { cn } from "@renderer/lib/utils";
 import type { Folder } from "@renderer/types";
 import {
   ChevronRight,
@@ -16,7 +24,7 @@ import {
   FileText,
   NotebookPen
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 
 interface FolderTreeItemProps {
   folder: Folder;
@@ -42,8 +50,6 @@ function FolderTreeItem({
   const { folders, notes, updateFolder, deleteFolder } = useNotesStore();
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(folder.name);
-  const [showMenu, setShowMenu] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   // 获取子文件夹
   const activeFolders = folders.filter((f) => !f.isDeleted);
@@ -53,21 +59,6 @@ function FolderTreeItem({
   // 计算文件夹内的笔记数量（只计算直接属于该文件夹的笔记）
   const notesInFolder = notes.filter((note) => !note.isDeleted && note.folderId === folder.id);
   const notesCount = notesInFolder.length;
-
-  // 点击外部关闭菜单
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowMenu(false);
-      }
-    };
-
-    if (showMenu) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }
-    return undefined;
-  }, [showMenu]);
 
   const handleToggleExpand = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -80,7 +71,6 @@ function FolderTreeItem({
 
   const handleEdit = () => {
     setIsEditing(true);
-    setShowMenu(false);
   };
 
   const handleSave = () => {
@@ -98,7 +88,6 @@ function FolderTreeItem({
 
   const handleDelete = () => {
     deleteFolder(folder.id);
-    setShowMenu(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -112,24 +101,25 @@ function FolderTreeItem({
   return (
     <div>
       <div
-        className={`group hover:bg-sidebar-accent flex cursor-pointer items-center rounded py-2 text-sm transition-colors ${
-          isSelected ? "bg-sidebar-accent text-sidebar-accent-foreground" : ""
-        }`}
-        style={{ paddingLeft: `${level * 12}px` }}
+        className={cn(
+          "group hover:bg-secondary/60 flex cursor-pointer items-center rounded-md py-1.5 pr-2 text-sm transition-colors",
+          isSelected && "bg-secondary/80 text-foreground"
+        )}
+        style={{ paddingLeft: `${level * 12 + 8}px` }}
         onClick={handleSelect}
       >
         {/* 展开/收起按钮 */}
         <Button
           variant="ghost"
           size="sm"
-          className="text-sidebar-foreground mr-2 h-4 w-4 p-0"
+          className="text-muted-foreground hover:text-foreground mr-2 h-4 w-4 p-0"
           onClick={handleToggleExpand}
         >
           {folder.isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
         </Button>
 
         {/* 文件夹图标 */}
-        <div className="mr-3">
+        <div className="mr-2">
           {folder.isExpanded ? (
             <FolderOpen className="h-4 w-4 text-blue-500" />
           ) : (
@@ -145,82 +135,72 @@ function FolderTreeItem({
             onChange={(e) => setEditName(e.target.value)}
             onBlur={handleSave}
             onKeyDown={handleKeyDown}
-            className="bg-background border-border mr-2 flex-1 rounded border px-1 py-0.5 text-sm"
+            className="bg-background border-border focus:ring-ring mr-2 flex-1 rounded border px-2 py-0.5 text-sm focus:ring-1 focus:outline-none"
             autoFocus
           />
         ) : (
-          <span className="flex-1 truncate">{folder.name}</span>
+          <span className="text-foreground flex-1 truncate">{folder.name}</span>
         )}
 
         {/* 文件夹笔记数量 */}
-        <span className="text-muted-foreground mr-2 text-xs">{notesCount}</span>
+        {notesCount > 0 && (
+          <span className="text-muted-foreground bg-secondary/50 mr-1 rounded px-1 text-xs">{notesCount}</span>
+        )}
 
         {/* 更多操作按钮 */}
-        <div className="relative">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-sidebar-foreground hover:bg-sidebar-accent h-4 w-4 p-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowMenu(!showMenu);
-            }}
-          >
-            <MoreHorizontal className="h-3 w-3" />
-          </Button>
-
-          {/* 下拉菜单 */}
-          {showMenu && (
-            <div
-              ref={menuRef}
-              className="bg-sidebar border-sidebar-border absolute top-5 right-0 z-50 min-w-32 rounded-md border p-1 shadow-lg"
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:bg-secondary hover:text-foreground h-4 w-4 p-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
             >
-              <button
-                className="text-sidebar-foreground hover:bg-sidebar-accent flex w-full items-center px-3 py-1.5 text-sm transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onCreateNote(folder.id);
-                  setShowMenu(false);
-                }}
-              >
-                <FileText className="mr-2 h-3 w-3" />
-                新建笔记
-              </button>
-              <button
-                className="text-sidebar-foreground hover:bg-sidebar-accent flex w-full items-center px-3 py-1.5 text-sm transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onCreateSubfolder(folder.id);
-                  setShowMenu(false);
-                }}
-              >
-                <Plus className="mr-2 h-3 w-3" />
-                新建文件夹
-              </button>
-              <div className="border-sidebar-border my-1 border-t"></div>
-              <button
-                className="text-sidebar-foreground hover:bg-sidebar-accent flex w-full items-center px-3 py-1.5 text-sm transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEdit();
-                }}
-              >
-                <Edit2 className="mr-2 h-3 w-3" />
-                重命名
-              </button>
-              <button
-                className="text-sidebar-foreground hover:bg-sidebar-accent flex w-full items-center px-3 py-1.5 text-sm transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete();
-                }}
-              >
-                <Trash2 className="mr-2 h-3 w-3" />
-                删除
-              </button>
-            </div>
-          )}
-        </div>
+              <MoreHorizontal className="h-3 w-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onCreateNote(folder.id);
+              }}
+            >
+              <FileText className="mr-2 h-3 w-3" />
+              新建笔记
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onCreateSubfolder(folder.id);
+              }}
+            >
+              <Plus className="mr-2 h-3 w-3" />
+              新建文件夹
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit();
+              }}
+            >
+              <Edit2 className="mr-2 h-3 w-3" />
+              重命名
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete();
+              }}
+            >
+              <Trash2 className="mr-2 h-3 w-3" />
+              删除
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* 编辑模式的保存/取消按钮 */}
         {isEditing && (
@@ -288,27 +268,9 @@ function NoteItem({ note, level }: NoteItemProps) {
   const { updateNote, deleteNote } = useNotesStore();
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(note.title);
-  const [showMenu, setShowMenu] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  // 点击外部关闭菜单
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowMenu(false);
-      }
-    };
-
-    if (showMenu) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }
-    return undefined;
-  }, [showMenu]);
 
   const handleEdit = () => {
     setIsEditing(true);
-    setShowMenu(false);
   };
 
   const handleSave = () => {
@@ -326,7 +288,6 @@ function NoteItem({ note, level }: NoteItemProps) {
 
   const handleDelete = () => {
     deleteNote(note.id);
-    setShowMenu(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -339,10 +300,10 @@ function NoteItem({ note, level }: NoteItemProps) {
 
   return (
     <div
-      className="group hover:bg-sidebar-accent flex cursor-pointer items-center rounded py-2 text-sm transition-colors"
-      style={{ paddingLeft: `${(level + 1) * 12}px` }}
+      className="group hover:bg-secondary/60 flex cursor-pointer items-center rounded-md py-1.5 pr-2 text-sm transition-colors"
+      style={{ paddingLeft: `${(level + 1) * 12 + 8}px` }}
     >
-      <div className="mr-3">
+      <div className="mr-2">
         <NotebookPen className="h-4 w-4 text-blue-500" />
       </div>
 
@@ -354,62 +315,54 @@ function NoteItem({ note, level }: NoteItemProps) {
           onChange={(e) => setEditTitle(e.target.value)}
           onBlur={handleSave}
           onKeyDown={handleKeyDown}
-          className="bg-background border-border mr-2 flex-1 rounded border px-1 py-0.5 text-sm"
+          className="bg-background border-border focus:ring-ring mr-2 flex-1 rounded border px-2 py-0.5 text-sm focus:ring-1 focus:outline-none"
           autoFocus
         />
       ) : (
         <Link
           to="/notes/$noteId"
           params={{ noteId: note.id }}
-          className="text-sidebar-foreground flex-1 truncate hover:bg-transparent"
+          className="text-foreground hover:text-foreground flex-1 truncate hover:bg-transparent"
         >
           {note.title}
         </Link>
       )}
 
       {/* 更多操作按钮 */}
-      <div className="relative">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-sidebar-foreground hover:bg-sidebar-accent h-4 w-4 p-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowMenu(!showMenu);
-          }}
-        >
-          <MoreHorizontal className="h-3 w-3" />
-        </Button>
-
-        {/* 下拉菜单 */}
-        {showMenu && (
-          <div
-            ref={menuRef}
-            className="bg-sidebar border-sidebar-border absolute top-5 right-0 z-50 min-w-32 rounded-md border p-1 shadow-lg"
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:bg-secondary hover:text-foreground h-4 w-4 p-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
           >
-            <button
-              className="text-sidebar-foreground hover:bg-sidebar-accent flex w-full items-center px-3 py-1.5 text-sm transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleEdit();
-              }}
-            >
-              <Edit2 className="mr-2 h-3 w-3" />
-              重命名
-            </button>
-            <button
-              className="text-sidebar-foreground hover:bg-sidebar-accent flex w-full items-center px-3 py-1.5 text-sm transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete();
-              }}
-            >
-              <Trash2 className="mr-2 h-3 w-3" />
-              删除
-            </button>
-          </div>
-        )}
-      </div>
+            <MoreHorizontal className="h-3 w-3" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEdit();
+            }}
+          >
+            <Edit2 className="mr-2 h-3 w-3" />
+            重命名
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete();
+            }}
+          >
+            <Trash2 className="mr-2 h-3 w-3" />
+            删除
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {/* 编辑模式的保存/取消按钮 */}
       {isEditing && (
@@ -519,7 +472,7 @@ export function FolderTree() {
       {rootNotes
         .sort((a, b) => a.title.localeCompare(b.title))
         .map((note) => (
-          <NoteItem key={note.id} note={note} level={0} />
+          <NoteItem key={note.id} note={note} level={-1} />
         ))}
 
       {/* 创建新文件夹按钮 - 只在没有文件夹和笔记时显示 */}
