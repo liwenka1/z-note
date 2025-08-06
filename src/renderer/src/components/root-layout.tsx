@@ -1,10 +1,11 @@
 import { Outlet, useNavigate } from "@tanstack/react-router";
-import { FolderOpen, Search, FileText, Settings, Trash, BookOpen, Tag, BarChart3 } from "lucide-react";
+import { FolderOpen, Search, FileText, Settings, Trash, BookOpen, Tag, BarChart3, Plus } from "lucide-react";
 import { useState } from "react";
 
 import { SearchCommand } from "@renderer/components/search-command";
-import { SimpleNotesList } from "@renderer/components/simple-notes-list";
+import { FolderTree } from "@renderer/components/folder-tree";
 import { StatusBar } from "@renderer/components/status-bar";
+import { Button } from "@renderer/components/ui/button";
 import { useNotesStore, useSearchStore } from "@renderer/store";
 import { useEffect } from "react";
 import { cn } from "@renderer/lib/utils";
@@ -25,7 +26,7 @@ const rightActivityButtons = [
 ];
 
 export function RootLayout() {
-  const { initializeData } = useNotesStore();
+  const { initializeData, createNote, createFolder } = useNotesStore();
   const { openSearch } = useSearchStore();
   const navigate = useNavigate();
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
@@ -71,6 +72,32 @@ export function RootLayout() {
     // 右侧按钮（outline、tags、stats）暂时无行为
   };
 
+  // 创建新笔记
+  const handleCreateNote = () => {
+    const newNoteId = createNote({
+      title: `新笔记 ${Date.now()}`,
+      content: "",
+      folderId: undefined,
+      tags: [],
+      isFavorite: false,
+      isDeleted: false
+    });
+    navigate({ to: "/notes/$noteId", params: { noteId: newNoteId } });
+  };
+
+  // 创建新文件夹
+  const handleCreateFolder = () => {
+    createFolder({
+      name: `新文件夹 ${Date.now()}`,
+      description: "",
+      parentId: undefined,
+      color: "#6b7280",
+      icon: "📁",
+      isDeleted: false,
+      sortOrder: 0
+    });
+  };
+
   return (
     <div className="bg-background flex h-screen w-screen flex-col overflow-hidden">
       {/* 上半部分：活动栏 + 侧边栏 + 主内容 */}
@@ -94,10 +121,32 @@ export function RootLayout() {
           </div>
         </div>
 
-        {/* 左侧边栏 */}
+        {/* 左侧边栏 - 文件资源管理器 */}
         {leftSidebarOpen && activePanel === "files" && (
-          <div className="bg-secondary/30 h-full w-80 border-r">
-            <SimpleNotesList />
+          <div className="bg-secondary/20 border-border/50 flex h-full w-80 flex-col border-r">
+            {/* 头部标题栏 */}
+            <div className="border-border/50 bg-secondary/30 flex items-center justify-between border-b px-4 py-3">
+              <h2 className="text-foreground text-sm font-medium">文件资源管理器</h2>
+              <div className="flex gap-1">
+                <Button variant="ghost" size="sm" onClick={handleCreateNote} className="h-7 w-7 p-0" title="新建笔记">
+                  <FileText className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCreateFolder}
+                  className="h-7 w-7 p-0"
+                  title="新建文件夹"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* 文件树内容 */}
+            <div className="flex-1 overflow-auto p-3">
+              <FolderTree />
+            </div>
           </div>
         )}
 
@@ -105,7 +154,6 @@ export function RootLayout() {
         <div className="flex-1 overflow-hidden">
           <Outlet />
         </div>
-
         {/* 右侧活动栏 */}
         <div className="bg-secondary/30 flex w-12 flex-col border-l">
           <div className="flex flex-1 flex-col items-center gap-1 py-2">
