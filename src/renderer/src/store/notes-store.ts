@@ -65,6 +65,13 @@ interface NotesActions {
   toggleFolderExpanded: (id: string) => void;
   moveFolderToParent: (folderId: string, parentId?: string) => void;
 
+  // ==================== 标签操作 ====================
+  createTag: (input: CreateNoteInput) => string; // 返回新标签ID
+  updateTag: (id: string, updates: UpdateNoteInput) => void;
+  deleteTag: (id: string) => void; // 删除标签
+  addTagToNote: (noteId: string, tagId: string) => void;
+  removeTagFromNote: (noteId: string, tagId: string) => void;
+
   // ==================== UI 状态管理 ====================
   setSelectedFolder: (folderId?: string) => void;
   setSelectedNote: (noteId?: string) => void;
@@ -395,6 +402,95 @@ export const useNotesStore = create<NotesStore>()(
         if (folderIndex !== -1) {
           state.folders[folderIndex].parentId = parentId;
           state.folders[folderIndex].updatedAt = new Date();
+        }
+      });
+
+      get().saveToLocalStorage();
+    },
+
+    // ==================== 标签操作 ====================
+    createTag: (input: CreateNoteInput) => {
+      const newTag: Tag = {
+        id: crypto.randomUUID(),
+        ...input,
+        usageCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        name: "",
+        color: ""
+      };
+
+      set((state) => {
+        state.tags.push(newTag);
+      });
+
+      get().saveToLocalStorage();
+      return newTag.id;
+    },
+
+    updateTag: (id: string, updates: UpdateNoteInput) => {
+      set((state) => {
+        const tagIndex = state.tags.findIndex((t) => t.id === id);
+        if (tagIndex !== -1) {
+          Object.assign(state.tags[tagIndex], {
+            ...updates,
+            updatedAt: new Date()
+          });
+        }
+      });
+
+      get().saveToLocalStorage();
+    },
+
+    deleteTag: (id: string) => {
+      set((state) => {
+        // 从所有笔记中移除此标签
+        state.notes.forEach((note) => {
+          note.tags = note.tags.filter((tagId) => tagId !== id);
+        });
+
+        // 删除标签
+        state.tags = state.tags.filter((t) => t.id !== id);
+      });
+
+      get().saveToLocalStorage();
+    },
+
+    addTagToNote: (noteId: string, tagId: string) => {
+      set((state) => {
+        const noteIndex = state.notes.findIndex((n) => n.id === noteId);
+        const tag = state.tags.find((t) => t.id === tagId);
+
+        if (noteIndex !== -1 && tag && !state.notes[noteIndex].tags.includes(tagId)) {
+          state.notes[noteIndex].tags.push(tagId);
+          state.notes[noteIndex].updatedAt = new Date();
+
+          // 更新标签使用计数
+          tag.usageCount++;
+          tag.updatedAt = new Date();
+        }
+      });
+
+      get().saveToLocalStorage();
+    },
+
+    removeTagFromNote: (noteId: string, tagId: string) => {
+      set((state) => {
+        const noteIndex = state.notes.findIndex((n) => n.id === noteId);
+        const tag = state.tags.find((t) => t.id === tagId);
+
+        if (noteIndex !== -1 && tag) {
+          const tagIndex = state.notes[noteIndex].tags.indexOf(tagId);
+          if (tagIndex !== -1) {
+            state.notes[noteIndex].tags.splice(tagIndex, 1);
+            state.notes[noteIndex].updatedAt = new Date();
+
+            // 更新标签使用计数
+            if (tag.usageCount > 0) {
+              tag.usageCount--;
+              tag.updatedAt = new Date();
+            }
+          }
         }
       });
 
