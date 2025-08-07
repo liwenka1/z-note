@@ -6,6 +6,7 @@ import { SearchCommand } from "@renderer/components/search-command";
 import { FolderTree } from "@renderer/components/folder-tree";
 import { StatusBar } from "@renderer/components/status-bar";
 import { Button } from "@renderer/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@renderer/components/ui/tooltip";
 import { useNotesStore, useSearchStore } from "@renderer/store";
 import { useEffect } from "react";
 import { cn } from "@renderer/lib/utils";
@@ -113,17 +114,22 @@ export function RootLayout() {
           <div className="bg-secondary/30 flex w-10 flex-col border-r">
             <div className="flex flex-1 flex-col items-center gap-1 py-2">
               {leftActivityButtons.map((button) => (
-                <button
-                  key={button.id}
-                  onClick={() => toggleSidebar(button.id)}
-                  className={cn(
-                    "text-muted-foreground hover:bg-secondary hover:text-foreground flex h-8 w-8 items-center justify-center rounded-md transition-colors",
-                    activePanel === button.id && "bg-secondary text-foreground"
-                  )}
-                  title={button.tooltip}
-                >
-                  <button.icon className="h-5 w-5" />
-                </button>
+                <Tooltip key={button.id}>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => toggleSidebar(button.id)}
+                      className={cn(
+                        "text-muted-foreground hover:bg-secondary hover:text-foreground flex h-8 w-8 items-center justify-center rounded-md transition-colors",
+                        activePanel === button.id && "bg-secondary text-foreground"
+                      )}
+                    >
+                      <button.icon className="h-5 w-5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <p>{button.tooltip}</p>
+                  </TooltipContent>
+                </Tooltip>
               ))}
             </div>
           </div>
@@ -167,14 +173,19 @@ export function RootLayout() {
           <div className="bg-secondary/30 flex w-10 flex-col border-l">
             <div className="flex flex-1 flex-col items-center gap-1 py-2">
               {rightActivityButtons.map((button) => (
-                <button
-                  key={button.id}
-                  onClick={() => toggleSidebar(button.id)}
-                  className="text-muted-foreground hover:bg-secondary hover:text-foreground flex h-8 w-8 items-center justify-center rounded-md transition-colors"
-                  title={button.tooltip}
-                >
-                  <button.icon className="h-5 w-5" />
-                </button>
+                <Tooltip key={button.id}>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => toggleSidebar(button.id)}
+                      className="text-muted-foreground hover:bg-secondary hover:text-foreground flex h-8 w-8 items-center justify-center rounded-md transition-colors"
+                    >
+                      <button.icon className="h-5 w-5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="left">
+                    <p>{button.tooltip}</p>
+                  </TooltipContent>
+                </Tooltip>
               ))}
             </div>
           </div>
