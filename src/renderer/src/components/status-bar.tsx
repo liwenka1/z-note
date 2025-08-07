@@ -1,42 +1,35 @@
-import { useNotesStore } from "@renderer/store";
-import { useParams } from "@tanstack/react-router";
+import { Button } from "@renderer/components/ui/button";
+import { PanelLeftClose, HelpCircle } from "lucide-react";
 
-export function StatusBar() {
-  const { notes } = useNotesStore();
+interface StatusBarProps {
+  onToggleDock?: () => void;
+  isDockVisible?: boolean;
+}
 
-  // 尝试获取当前笔记参数
-  let currentNoteId: string | undefined;
-  try {
-    const params = useParams({ from: "/notes/$noteId" });
-    currentNoteId = params?.noteId;
-  } catch {
-    // 如果不在笔记页面，忽略错误
-  }
-
-  // 获取当前笔记
-  const currentNote = currentNoteId ? notes.find((note) => note.id === currentNoteId) : null;
-
-  // 计算统计信息
-  const activeNotes = notes.filter((note) => !note.isDeleted);
-  const totalNotes = activeNotes.length;
-  const currentNoteWords = currentNote?.content?.length || 0;
+export function StatusBar({ onToggleDock, isDockVisible = false }: StatusBarProps) {
+  // 暂时不需要获取笔记数据，使用固定值
 
   return (
-    <div className="border-border bg-secondary/30 text-foreground fixed right-0 bottom-0 left-0 z-50 flex h-6 w-full items-center justify-between border-t px-4 text-xs">
-      <div className="flex items-center gap-4">
-        <span>总笔记: {totalNotes}</span>
-        {currentNote && (
-          <>
-            <span>•</span>
-            <span>字数: {currentNoteWords}</span>
-            <span>•</span>
-            <span>修改: {new Date(currentNote.updatedAt).toLocaleString()}</span>
-          </>
-        )}
+    <div className="border-border bg-secondary/30 text-foreground fixed right-0 bottom-0 left-0 z-50 flex h-6 w-full items-center justify-between border-t px-2 text-xs">
+      {/* 左侧：停靠栏切换按钮和文字 */}
+      <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onToggleDock}
+          className="hover:bg-secondary/50 h-5 w-5 p-0"
+          title="显示/隐藏停靠栏"
+        >
+          <PanelLeftClose className={`h-3 w-3 transition-transform ${isDockVisible ? "" : "rotate-180"}`} />
+        </Button>
       </div>
 
+      {/* 右侧：字符数和帮助按钮 */}
       <div className="flex items-center gap-2">
-        <span>Z-Note</span>
+        <span>字符 123</span>
+        <Button variant="ghost" size="sm" className="hover:bg-secondary/50 h-5 w-5 p-0" title="帮助">
+          <HelpCircle className="h-3 w-3" />
+        </Button>
       </div>
     </div>
   );

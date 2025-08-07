@@ -31,11 +31,17 @@ export function RootLayout() {
   const navigate = useNavigate();
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [activePanel, setActivePanel] = useState<string | null>(null);
+  const [dockVisible, setDockVisible] = useState(true);
 
   // 初始化数据
   useEffect(() => {
     initializeData();
   }, [initializeData]);
+
+  // 切换停靠栏显示/隐藏
+  const toggleDock = () => {
+    setDockVisible(!dockVisible);
+  };
 
   // 切换侧边栏
   const toggleSidebar = (panelId: string) => {
@@ -103,26 +109,28 @@ export function RootLayout() {
       {/* 上半部分：活动栏 + 侧边栏 + 主内容 */}
       <div className="flex h-[calc(100vh-24px)]">
         {/* 左侧活动栏 */}
-        <div className="bg-secondary/30 flex w-12 flex-col border-r">
-          <div className="flex flex-1 flex-col items-center gap-1 py-2">
-            {leftActivityButtons.map((button) => (
-              <button
-                key={button.id}
-                onClick={() => toggleSidebar(button.id)}
-                className={cn(
-                  "text-muted-foreground hover:bg-secondary hover:text-foreground flex h-10 w-10 items-center justify-center rounded-md transition-colors",
-                  activePanel === button.id && "bg-secondary text-foreground"
-                )}
-                title={button.tooltip}
-              >
-                <button.icon className="h-5 w-5" />
-              </button>
-            ))}
+        {dockVisible && (
+          <div className="bg-secondary/30 flex w-12 flex-col border-r">
+            <div className="flex flex-1 flex-col items-center gap-1 py-2">
+              {leftActivityButtons.map((button) => (
+                <button
+                  key={button.id}
+                  onClick={() => toggleSidebar(button.id)}
+                  className={cn(
+                    "text-muted-foreground hover:bg-secondary hover:text-foreground flex h-10 w-10 items-center justify-center rounded-md transition-colors",
+                    activePanel === button.id && "bg-secondary text-foreground"
+                  )}
+                  title={button.tooltip}
+                >
+                  <button.icon className="h-5 w-5" />
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 左侧边栏 - 文件资源管理器 */}
-        {leftSidebarOpen && activePanel === "files" && (
+        {dockVisible && leftSidebarOpen && activePanel === "files" && (
           <div className="bg-secondary/20 border-border/50 flex h-full w-80 flex-col border-r">
             {/* 头部标题栏 */}
             <div className="border-border/50 bg-secondary/30 flex items-center justify-between border-b px-4 py-3">
@@ -155,24 +163,26 @@ export function RootLayout() {
           <Outlet />
         </div>
         {/* 右侧活动栏 */}
-        <div className="bg-secondary/30 flex w-12 flex-col border-l">
-          <div className="flex flex-1 flex-col items-center gap-1 py-2">
-            {rightActivityButtons.map((button) => (
-              <button
-                key={button.id}
-                onClick={() => toggleSidebar(button.id)}
-                className="text-muted-foreground hover:bg-secondary hover:text-foreground flex h-10 w-10 items-center justify-center rounded-md transition-colors"
-                title={button.tooltip}
-              >
-                <button.icon className="h-5 w-5" />
-              </button>
-            ))}
+        {dockVisible && (
+          <div className="bg-secondary/30 flex w-12 flex-col border-l">
+            <div className="flex flex-1 flex-col items-center gap-1 py-2">
+              {rightActivityButtons.map((button) => (
+                <button
+                  key={button.id}
+                  onClick={() => toggleSidebar(button.id)}
+                  className="text-muted-foreground hover:bg-secondary hover:text-foreground flex h-10 w-10 items-center justify-center rounded-md transition-colors"
+                  title={button.tooltip}
+                >
+                  <button.icon className="h-5 w-5" />
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* 底部状态栏 - 占满整个底部 */}
-      <StatusBar />
+      <StatusBar onToggleDock={toggleDock} isDockVisible={dockVisible} />
 
       {/* 搜索弹窗 */}
       <SearchCommand />
