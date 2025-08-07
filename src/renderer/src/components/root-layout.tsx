@@ -110,14 +110,14 @@ export function RootLayout() {
       <div className="flex h-[calc(100vh-24px)]">
         {/* 左侧活动栏 */}
         {dockVisible && (
-          <div className="bg-secondary/30 flex w-12 flex-col border-r">
+          <div className="bg-secondary/30 flex w-10 flex-col border-r">
             <div className="flex flex-1 flex-col items-center gap-1 py-2">
               {leftActivityButtons.map((button) => (
                 <button
                   key={button.id}
                   onClick={() => toggleSidebar(button.id)}
                   className={cn(
-                    "text-muted-foreground hover:bg-secondary hover:text-foreground flex h-10 w-10 items-center justify-center rounded-md transition-colors",
+                    "text-muted-foreground hover:bg-secondary hover:text-foreground flex h-8 w-8 items-center justify-center rounded-md transition-colors",
                     activePanel === button.id && "bg-secondary text-foreground"
                   )}
                   title={button.tooltip}
@@ -131,7 +131,7 @@ export function RootLayout() {
 
         {/* 左侧边栏 - 文件资源管理器 */}
         {dockVisible && leftSidebarOpen && activePanel === "files" && (
-          <div className="bg-secondary/20 border-border/50 flex h-full w-80 flex-col border-r">
+          <div className="bg-secondary/20 border-border/50 flex h-full w-64 flex-col border-r">
             {/* 头部标题栏 */}
             <div className="border-border/50 bg-secondary/30 flex items-center justify-between border-b px-4 py-3">
               <h2 className="text-foreground text-sm font-medium">文件资源管理器</h2>
@@ -164,13 +164,13 @@ export function RootLayout() {
         </div>
         {/* 右侧活动栏 */}
         {dockVisible && (
-          <div className="bg-secondary/30 flex w-12 flex-col border-l">
+          <div className="bg-secondary/30 flex w-10 flex-col border-l">
             <div className="flex flex-1 flex-col items-center gap-1 py-2">
               {rightActivityButtons.map((button) => (
                 <button
                   key={button.id}
                   onClick={() => toggleSidebar(button.id)}
-                  className="text-muted-foreground hover:bg-secondary hover:text-foreground flex h-10 w-10 items-center justify-center rounded-md transition-colors"
+                  className="text-muted-foreground hover:bg-secondary hover:text-foreground flex h-8 w-8 items-center justify-center rounded-md transition-colors"
                   title={button.tooltip}
                 >
                   <button.icon className="h-5 w-5" />
