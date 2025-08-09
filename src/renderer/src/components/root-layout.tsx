@@ -1,13 +1,27 @@
 import { Outlet, useNavigate } from "@tanstack/react-router";
-import { FolderOpen, Search, FileText, Settings, Trash, BookOpen, Tag, BarChart3, Plus } from "lucide-react";
+import {
+  FolderOpen,
+  Search,
+  FileText,
+  Settings,
+  Trash,
+  BookOpen,
+  Tag,
+  BarChart3,
+  Plus,
+  MessageSquare
+} from "lucide-react";
 import { useState } from "react";
 
 import { SearchCommand } from "@renderer/components/search-command";
 import { FolderTree } from "@renderer/components/folder-tree";
 import { StatusBar } from "@renderer/components/status-bar";
+import { ChatPanel } from "@renderer/components/chat/chat-panel";
 import { Button } from "@renderer/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@renderer/components/ui/tooltip";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@renderer/components/ui/resizable";
 import { useNotesStore, useSearchStore } from "@renderer/store";
+import { useChatStore } from "@renderer/store/chat-store";
 import { useEffect } from "react";
 import { cn } from "@renderer/lib/utils";
 
@@ -21,6 +35,7 @@ const leftActivityButtons = [
 ];
 
 const rightActivityButtons = [
+  { id: "chat", icon: MessageSquare, tooltip: "AI 助手", badge: 0 },
   { id: "outline", icon: BookOpen, tooltip: "文档大纲" },
   { id: "tags", icon: Tag, tooltip: "标签管理" },
   { id: "stats", icon: BarChart3, tooltip: "统计信息" }
@@ -29,9 +44,12 @@ const rightActivityButtons = [
 export function RootLayout() {
   const { initializeData, createNote, createFolder } = useNotesStore();
   const { openSearch } = useSearchStore();
+  const { sessions } = useChatStore();
   const navigate = useNavigate();
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [activePanel, setActivePanel] = useState<string | null>(null);
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
+  const [rightActivePanel, setRightActivePanel] = useState<string | null>(null);
   const [dockVisible, setDockVisible] = useState(true);
 
   // 初始化数据
@@ -44,8 +62,8 @@ export function RootLayout() {
     setDockVisible(!dockVisible);
   };
 
-  // 切换侧边栏
-  const toggleSidebar = (panelId: string) => {
+  // 切换左侧边栏
+  const toggleLeftSidebar = (panelId: string) => {
     if (panelId === "files") {
       if (activePanel === "files" && leftSidebarOpen) {
         setLeftSidebarOpen(false);
@@ -76,7 +94,28 @@ export function RootLayout() {
       setLeftSidebarOpen(false);
       setActivePanel(null);
     }
-    // 右侧按钮（outline、tags、stats）暂时无行为
+  };
+
+  // 切换右侧边栏
+  const toggleRightSidebar = (panelId: string) => {
+    if (panelId === "chat") {
+      if (rightActivePanel === "chat" && rightSidebarOpen) {
+        setRightSidebarOpen(false);
+        setRightActivePanel(null);
+      } else {
+        setRightSidebarOpen(true);
+        setRightActivePanel("chat");
+      }
+    } else if (panelId === "outline") {
+      if (rightActivePanel === "outline" && rightSidebarOpen) {
+        setRightSidebarOpen(false);
+        setRightActivePanel(null);
+      } else {
+        setRightSidebarOpen(true);
+        setRightActivePanel("outline");
+      }
+    }
+    // 其他右侧按钮（tags、stats）暂时无行为
   };
 
   // 创建新笔记
@@ -117,7 +156,7 @@ export function RootLayout() {
                 <Tooltip key={button.id}>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => toggleSidebar(button.id)}
+                      onClick={() => toggleLeftSidebar(button.id)}
                       className={cn(
                         "text-muted-foreground hover:bg-secondary hover:text-foreground flex h-8 w-8 items-center justify-center rounded-md transition-colors",
                         activePanel === button.id && "bg-secondary text-foreground"
@@ -164,10 +203,34 @@ export function RootLayout() {
           </div>
         )}
 
-        {/* 主内容区域 */}
-        <div className="flex-1 overflow-hidden">
-          <Outlet />
-        </div>
+        {/* 主内容区域 + 右侧面板 */}
+        <ResizablePanelGroup direction="horizontal" className="flex-1">
+          {/* 主内容区域 */}
+          <ResizablePanel defaultSize={rightSidebarOpen ? 70 : 100} minSize={50}>
+            <div className="h-full overflow-hidden">
+              <Outlet />
+            </div>
+          </ResizablePanel>
+
+          {/* 右侧面板分割线 */}
+          {dockVisible && rightSidebarOpen && <ResizableHandle withHandle />}
+
+          {/* 右侧面板内容 */}
+          {dockVisible && rightSidebarOpen && (
+            <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
+              <div className="bg-secondary/20 border-border/50 h-full border-l">
+                {rightActivePanel === "chat" && <ChatPanel />}
+                {rightActivePanel === "outline" && (
+                  <div className="p-4">
+                    <h3 className="text-sm font-medium">文档大纲</h3>
+                    <p className="text-muted-foreground mt-2 text-xs">功能开发中...</p>
+                  </div>
+                )}
+              </div>
+            </ResizablePanel>
+          )}
+        </ResizablePanelGroup>
+
         {/* 右侧活动栏 */}
         {dockVisible && (
           <div className="bg-secondary/30 flex w-10 flex-col border-l">
@@ -176,10 +239,19 @@ export function RootLayout() {
                 <Tooltip key={button.id}>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => toggleSidebar(button.id)}
-                      className="text-muted-foreground hover:bg-secondary hover:text-foreground flex h-8 w-8 items-center justify-center rounded-md transition-colors"
+                      onClick={() => toggleRightSidebar(button.id)}
+                      className={cn(
+                        "text-muted-foreground hover:bg-secondary hover:text-foreground relative flex h-8 w-8 items-center justify-center rounded-md transition-colors",
+                        rightActivePanel === button.id && "bg-secondary text-foreground"
+                      )}
                     >
                       <button.icon className="h-5 w-5" />
+                      {/* 显示徽章（如未读消息数） */}
+                      {button.id === "chat" && sessions.length > 0 && (
+                        <div className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full text-[10px]">
+                          {sessions.length > 9 ? "9+" : sessions.length}
+                        </div>
+                      )}
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="left">
