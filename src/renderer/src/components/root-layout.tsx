@@ -1,23 +1,11 @@
 import { Outlet, useNavigate } from "@tanstack/react-router";
-import {
-  FolderOpen,
-  Search,
-  FileText,
-  Settings,
-  Trash,
-  BookOpen,
-  Tag,
-  BarChart3,
-  Plus,
-  MessageSquare
-} from "lucide-react";
+import { FolderOpen, Search, FileText, Settings, Trash, BookOpen, Tag, BarChart3, MessageSquare } from "lucide-react";
 import { useState } from "react";
 
 import { SearchCommand } from "@renderer/components/search-command";
-import { FolderTree } from "@renderer/components/folder-tree";
+import { FilesPanel } from "@renderer/components/files/files-panel";
 import { StatusBar } from "@renderer/components/status-bar";
 import { ChatPanel } from "@renderer/components/chat/chat-panel";
-import { Button } from "@renderer/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@renderer/components/ui/tooltip";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@renderer/components/ui/resizable";
 import { useNotesStore, useSearchStore } from "@renderer/store";
@@ -42,7 +30,7 @@ const rightActivityButtons = [
 ];
 
 export function RootLayout() {
-  const { initializeData, createNote, createFolder } = useNotesStore();
+  const { initializeData } = useNotesStore();
   const { openSearch } = useSearchStore();
   const { sessions } = useChatStore();
   const navigate = useNavigate();
@@ -118,32 +106,6 @@ export function RootLayout() {
     // 其他右侧按钮（tags、stats）暂时无行为
   };
 
-  // 创建新笔记
-  const handleCreateNote = () => {
-    const newNoteId = createNote({
-      title: `新笔记 ${Date.now()}`,
-      content: "",
-      folderId: undefined,
-      tags: [],
-      isFavorite: false,
-      isDeleted: false
-    });
-    navigate({ to: "/notes/$noteId", params: { noteId: newNoteId } });
-  };
-
-  // 创建新文件夹
-  const handleCreateFolder = () => {
-    createFolder({
-      name: `新文件夹 ${Date.now()}`,
-      description: "",
-      parentId: undefined,
-      color: "#6b7280",
-      icon: "📁",
-      isDeleted: false,
-      sortOrder: 0
-    });
-  };
-
   return (
     <div className="bg-background flex h-screen w-screen flex-col overflow-hidden">
       {/* 上半部分：活动栏 + 侧边栏 + 主内容 */}
@@ -174,60 +136,42 @@ export function RootLayout() {
           </div>
         )}
 
-        {/* 左侧边栏 - 文件资源管理器 */}
-        {dockVisible && leftSidebarOpen && activePanel === "files" && (
-          <div className="bg-secondary/20 border-border/50 flex h-full w-64 flex-col border-r">
-            {/* 头部标题栏 */}
-            <div className="border-border/50 bg-secondary/30 flex items-center justify-between border-b px-4 py-3">
-              <h2 className="text-foreground text-sm font-medium">文件资源管理器</h2>
-              <div className="flex gap-1">
-                <Button variant="ghost" size="sm" onClick={handleCreateNote} className="h-7 w-7 p-0" title="新建笔记">
-                  <FileText className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCreateFolder}
-                  className="h-7 w-7 p-0"
-                  title="新建文件夹"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* 文件树内容 */}
-            <div className="flex-1 overflow-auto p-3">
-              <FolderTree />
-            </div>
-          </div>
-        )}
-
-        {/* 主内容区域 + 右侧面板 */}
+        {/* 主内容区域 - 包含左侧面板、主内容和右侧面板 */}
         <ResizablePanelGroup direction="horizontal" className="flex-1">
+          {/* 左侧边栏面板 */}
+          {dockVisible && leftSidebarOpen && activePanel === "files" && (
+            <>
+              <ResizablePanel id="left-sidebar" defaultSize={25} minSize={20} maxSize={50} order={1}>
+                <div className="bg-secondary/20 border-border/50 h-full border-r">
+                  <FilesPanel />
+                </div>
+              </ResizablePanel>
+              <ResizableHandle />
+            </>
+          )}
           {/* 主内容区域 */}
-          <ResizablePanel defaultSize={rightSidebarOpen ? 70 : 100} minSize={50}>
+          <ResizablePanel id="main-content" minSize={30} order={2}>
             <div className="h-full overflow-hidden">
               <Outlet />
             </div>
           </ResizablePanel>
 
-          {/* 右侧面板分割线 */}
-          {dockVisible && rightSidebarOpen && <ResizableHandle withHandle />}
-
           {/* 右侧面板内容 */}
           {dockVisible && rightSidebarOpen && (
-            <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
-              <div className="bg-secondary/20 border-border/50 h-full border-l">
-                {rightActivePanel === "chat" && <ChatPanel />}
-                {rightActivePanel === "outline" && (
-                  <div className="p-4">
-                    <h3 className="text-sm font-medium">文档大纲</h3>
-                    <p className="text-muted-foreground mt-2 text-xs">功能开发中...</p>
-                  </div>
-                )}
-              </div>
-            </ResizablePanel>
+            <>
+              <ResizableHandle />
+              <ResizablePanel id="right-sidebar" defaultSize={25} minSize={20} maxSize={50} order={3}>
+                <div className="bg-secondary/20 border-border/50 h-full border-l">
+                  {rightActivePanel === "chat" && <ChatPanel />}
+                  {rightActivePanel === "outline" && (
+                    <div className="p-4">
+                      <h3 className="text-sm font-medium">文档大纲</h3>
+                      <p className="text-muted-foreground mt-2 text-xs">功能开发中...</p>
+                    </div>
+                  )}
+                </div>
+              </ResizablePanel>
+            </>
           )}
         </ResizablePanelGroup>
 
