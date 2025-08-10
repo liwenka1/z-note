@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { FolderOpen, Search, FileText, Settings, Trash, BookOpen, Tag, BarChart3, MessageSquare } from "lucide-react";
 import { useState } from "react";
 
@@ -6,6 +6,7 @@ import { SearchCommand } from "@renderer/components/search-command";
 import { FilesPanel } from "@renderer/components/files/files-panel";
 import { StatusBar } from "@renderer/components/status-bar";
 import { ChatPanel } from "@renderer/components/chat/chat-panel";
+import { EditorLayout } from "@renderer/components/editor/editor-layout";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@renderer/components/ui/tooltip";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@renderer/components/ui/resizable";
 import { useNotesStore, useSearchStore } from "@renderer/store";
@@ -152,7 +153,7 @@ export function RootLayout() {
           {/* 主内容区域 */}
           <ResizablePanel id="main-content" minSize={30} order={2}>
             <div className="h-full overflow-hidden">
-              <Outlet />
+              <EditorLayout />
             </div>
           </ResizablePanel>
 
