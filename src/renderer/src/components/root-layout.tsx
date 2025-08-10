@@ -15,7 +15,7 @@ import { cn } from "@renderer/lib/utils";
 
 // 活动栏按钮配置
 const leftActivityButtons = [
-  { id: "files", icon: FolderOpen, tooltip: "文件资源管理器 (Ctrl+Shift+E)" },
+  { id: "files", icon: FolderOpen, tooltip: "笔记 (Ctrl+Shift+E)" },
   { id: "search", icon: Search, tooltip: "搜索 (Ctrl+Shift+F)" },
   { id: "recent", icon: FileText, tooltip: "最近文档" },
   { id: "settings", icon: Settings, tooltip: "设置" },
@@ -141,7 +141,7 @@ export function RootLayout() {
           {/* 左侧边栏面板 */}
           {dockVisible && leftSidebarOpen && activePanel === "files" && (
             <>
-              <ResizablePanel id="left-sidebar" defaultSize={25} minSize={20} maxSize={50} order={1}>
+              <ResizablePanel id="left-sidebar" defaultSize={15} minSize={10} maxSize={50} order={1}>
                 <div className="bg-secondary/20 border-border/50 h-full border-r">
                   <FilesPanel />
                 </div>

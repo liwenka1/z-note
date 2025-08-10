@@ -35,7 +35,7 @@ export function FilesHeader() {
     <div className="border-border/50 bg-secondary/30 border-b">
       {/* 标题栏 */}
       <div className="flex items-center justify-between px-4 py-3">
-        <h2 className="text-foreground text-sm font-medium">文件资源管理器</h2>
+        <h2 className="text-foreground text-sm font-medium">笔记</h2>
         <div className="flex gap-1">
           <Button variant="ghost" size="sm" onClick={handleCreateNote} className="h-7 w-7 p-0" title="新建笔记">
             <FileText className="h-4 w-4" />
