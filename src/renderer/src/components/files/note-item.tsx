@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { MoreHorizontal, Edit2, Trash2, Check, X, NotebookPen } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import {
@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger
 } from "@renderer/components/ui/dropdown-menu";
 import { useNotesStore } from "@renderer/store";
+import { useTabStore } from "@renderer/store/tab-store";
 
 interface NoteItemProps {
   note: { id: string; title: string; folderId?: string };
@@ -17,8 +18,16 @@ interface NoteItemProps {
 
 export function NoteItem({ note, level }: NoteItemProps) {
   const { updateNote, deleteNote } = useNotesStore();
+  const { openTab } = useTabStore();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(note.title);
+
+  const handleNoteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    openTab(note.id, note.title);
+    navigate({ to: "/notes/$noteId", params: { noteId: note.id } });
+  };
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -74,6 +83,7 @@ export function NoteItem({ note, level }: NoteItemProps) {
           to="/notes/$noteId"
           params={{ noteId: note.id }}
           className="text-foreground hover:text-foreground flex-1 truncate hover:bg-transparent"
+          onClick={handleNoteClick}
         >
           {note.title}
         </Link>
