@@ -3,3 +3,5 @@ export { useThemeStore, type Theme } from "./theme-store";
 export { useSearchStore } from "./search-store";
 export { useNotesStore } from "./notes-store";
 export { useChatStore, type Message, type ChatSession } from "./chat-store";
+export { useTabStore, type Tab } from "./tab-store";
+export { useEditorStore } from "./editor-store";
