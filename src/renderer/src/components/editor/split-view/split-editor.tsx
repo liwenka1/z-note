@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@renderer/components/ui/resizable";
-import { MonacoEditor } from "../monaco-editor/monaco-editor";
+import { MonacoEditor, MonacoEditorRef } from "../monaco-editor/monaco-editor";
 import { MarkdownPreview } from "../preview/markdown-preview";
 import { useEditorStore } from "@renderer/store/editor-store";
 
@@ -13,26 +13,62 @@ interface SplitEditorProps {
 
 export function SplitEditor({ value, onChange, onSave }: SplitEditorProps) {
   const { viewMode, splitRatio, syncScroll, setSplitRatio } = useEditorStore();
-  const editorRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<MonacoEditorRef>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+  const isSyncingRef = useRef(false);
 
-  // 同步滚动处理
-  const handleEditorScroll = (scrollTop: number) => {
-    if (syncScroll && previewRef.current) {
-      // 简单的比例映射，实际项目中可能需要更复杂的算法
-      const scrollRatio = scrollTop / (editorRef.current?.scrollHeight || 1);
-      const previewScrollTop = scrollRatio * (previewRef.current?.scrollHeight || 0);
-      previewRef.current.scrollTop = previewScrollTop;
-    }
+  // 计算精确的滚动比例
+  const calculateScrollRatio = (scrollTop: number, scrollHeight: number, clientHeight: number) => {
+    const maxScroll = scrollHeight - clientHeight;
+    return maxScroll > 0 ? scrollTop / maxScroll : 0;
   };
 
+  // 使用RAF执行同步，防止循环触发
+  const syncWithRAF = (callback: () => void) => {
+    if (isSyncingRef.current) return;
+    isSyncingRef.current = true;
+    callback();
+    requestAnimationFrame(() => {
+      isSyncingRef.current = false;
+    });
+  };
+
+  // Monaco Editor 滚动处理
+  const handleEditorScroll = (scrollTop: number, scrollHeight: number, clientHeight: number) => {
+    if (!syncScroll || !previewRef.current) return;
+
+    syncWithRAF(() => {
+      const previewElement = previewRef.current!;
+
+      const scrollRatio = calculateScrollRatio(scrollTop, scrollHeight, clientHeight);
+
+      const maxPreviewScroll = previewElement.scrollHeight - previewElement.clientHeight;
+      const previewScrollTop = scrollRatio * maxPreviewScroll;
+
+      previewElement.scrollTop = previewScrollTop;
+    });
+  };
+
+  // Preview 滚动处理
   const handlePreviewScroll = (scrollTop: number) => {
-    if (syncScroll && editorRef.current) {
-      // 反向同步
-      const scrollRatio = scrollTop / (previewRef.current?.scrollHeight || 1);
-      const editorScrollTop = scrollRatio * (editorRef.current?.scrollHeight || 0);
-      editorRef.current.scrollTop = editorScrollTop;
-    }
+    if (!syncScroll || !previewRef.current || !editorRef.current) return;
+
+    syncWithRAF(() => {
+      const previewElement = previewRef.current!;
+
+      const scrollRatio = calculateScrollRatio(scrollTop, previewElement.scrollHeight, previewElement.clientHeight);
+
+      // 使用 editorRef 来设置 Monaco Editor 的滚动位置
+      const monacoEditor = editorRef.current!.getEditor();
+      if (monacoEditor) {
+        const editorScrollHeight = monacoEditor.getScrollHeight();
+        const editorClientHeight = monacoEditor.getLayoutInfo().height;
+        const maxEditorScroll = editorScrollHeight - editorClientHeight;
+        const editorScrollTop = scrollRatio * maxEditorScroll;
+
+        monacoEditor.setScrollTop(editorScrollTop);
+      }
+    });
   };
 
   // 根据视图模式渲染不同的布局
@@ -62,25 +98,20 @@ export function SplitEditor({ value, onChange, onSave }: SplitEditorProps) {
         maxSize={80}
         onResize={(size) => setSplitRatio(size / 100)}
       >
-        <div
+        <MonacoEditor
           ref={editorRef}
-          className="h-full overflow-hidden"
-          onScroll={(e) => handleEditorScroll(e.currentTarget.scrollTop)}
-        >
-          <MonacoEditor value={value} onChange={onChange} onSave={onSave} className="h-full" />
-        </div>
+          value={value}
+          onChange={onChange}
+          onSave={onSave}
+          onScroll={handleEditorScroll}
+          className="h-full"
+        />
       </ResizablePanel>
 
       <ResizableHandle />
 
       <ResizablePanel id="preview-panel" minSize={20} maxSize={80}>
-        <div
-          ref={previewRef}
-          className="h-full overflow-hidden"
-          onScroll={(e) => handlePreviewScroll(e.currentTarget.scrollTop)}
-        >
-          <MarkdownPreview content={value} className="h-full" />
-        </div>
+        <MarkdownPreview ref={previewRef} content={value} onScroll={handlePreviewScroll} className="h-full" />
       </ResizablePanel>
     </ResizablePanelGroup>
   );
