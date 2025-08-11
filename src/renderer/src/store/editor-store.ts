@@ -18,6 +18,10 @@ interface EditorSettings {
   lineNumbers: boolean;
   theme: EditorTheme;
   tabSize: number;
+  padding: {
+    top: number;
+    bottom: number;
+  };
 }
 
 // 预览设置
@@ -89,7 +93,11 @@ export const useEditorStore = create<EditorStore>()(
       minimap: true,
       lineNumbers: true,
       theme: "vs-dark" as EditorTheme,
-      tabSize: 2
+      tabSize: 2,
+      padding: {
+        top: 16,
+        bottom: 16
+      }
     },
     previewSettings: {
       theme: "github" as PreviewTheme,

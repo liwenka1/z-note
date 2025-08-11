@@ -78,7 +78,8 @@ export const MonacoEditor = forwardRef<MonacoEditorRef, MonacoEditorProps>(
             automaticLayout: true,
             scrollBeyondLastLine: false,
             smoothScrolling: true,
-            cursorBlinking: "blink"
+            cursorBlinking: "blink",
+            padding: editorSettings.padding
           }}
           onMount={handleEditorDidMount}
           onChange={handleEditorChange}
