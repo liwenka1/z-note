@@ -21,7 +21,7 @@ export const MarkdownPreview = forwardRef<HTMLDivElement, MarkdownPreviewProps>(
 
     return (
       <div ref={ref} className={`h-full overflow-y-auto p-6 ${className}`} onScroll={handleScroll}>
-        <div className="prose prose-slate dark:prose-invert max-w-none">
+        <div className="prose prose-neutral dark:prose-invert max-w-none">
           <ReactMarkdown remarkPlugins={remarkPlugins}>
             {content || "*预览区域*\n\n在左侧编辑器中输入 Markdown 内容..."}
           </ReactMarkdown>
