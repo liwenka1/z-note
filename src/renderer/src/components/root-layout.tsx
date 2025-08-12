@@ -1,16 +1,19 @@
-import { useNavigate } from "@tanstack/react-router";
-import { FolderOpen, Search, FileText, Settings, Trash, BookOpen, Tag, BarChart3, MessageSquare } from "lucide-react";
+import { FolderOpen, Search, Settings, Trash, BookOpen, Tag, BarChart3, MessageSquare } from "lucide-react";
 import { useState } from "react";
 
 import { SearchCommand } from "@renderer/components/search-command";
 import { FilesPanel } from "@renderer/components/files/files-panel";
+import { TrashPanel } from "@renderer/components/trash/trash-panel";
+import { ThemeToggleButton } from "@renderer/components/theme-toggle-button";
 import { StatusBar } from "@renderer/components/status-bar";
 import { ChatPanel } from "@renderer/components/chat/chat-panel";
 import { EditorLayout } from "@renderer/components/editor/editor-layout";
+import { Button } from "@renderer/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@renderer/components/ui/tooltip";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@renderer/components/ui/resizable";
 import { useNotesStore, useSearchStore } from "@renderer/store";
 import { useChatStore } from "@renderer/store/chat-store";
+import { useTabStore } from "@renderer/store/tab-store";
 import { useEffect } from "react";
 import { cn } from "@renderer/lib/utils";
 
@@ -18,10 +21,10 @@ import { cn } from "@renderer/lib/utils";
 const leftActivityButtons = [
   { id: "files", icon: FolderOpen, tooltip: "笔记 (Ctrl+Shift+E)" },
   { id: "search", icon: Search, tooltip: "搜索 (Ctrl+Shift+F)" },
-  { id: "recent", icon: FileText, tooltip: "最近文档" },
-  { id: "settings", icon: Settings, tooltip: "设置" },
   { id: "trash", icon: Trash, tooltip: "回收站" }
 ];
+
+const leftBottomButtons = [{ id: "settings", icon: Settings, tooltip: "设置" }];
 
 const rightActivityButtons = [
   { id: "chat", icon: MessageSquare, tooltip: "AI 助手", badge: 0 },
@@ -34,7 +37,7 @@ export function RootLayout() {
   const { initializeData } = useNotesStore();
   const { openSearch } = useSearchStore();
   const { sessions } = useChatStore();
-  const navigate = useNavigate();
+  const { openSettingsTab } = useTabStore();
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [activePanel, setActivePanel] = useState<string | null>(null);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
@@ -64,25 +67,21 @@ export function RootLayout() {
     } else if (panelId === "search") {
       // 搜索
       openSearch();
-    } else if (panelId === "settings") {
-      // 跳转到设置页面
-      navigate({ to: "/settings" });
-      // 关闭侧边栏
-      setLeftSidebarOpen(false);
-      setActivePanel(null);
     } else if (panelId === "trash") {
-      // 跳转到回收站页面
-      navigate({ to: "/trash" });
-      // 关闭侧边栏
-      setLeftSidebarOpen(false);
-      setActivePanel(null);
-    } else if (panelId === "recent") {
-      // 跳转到首页（最近文档）
-      navigate({ to: "/" });
-      // 关闭侧边栏
-      setLeftSidebarOpen(false);
-      setActivePanel(null);
+      // 垃圾桶改为侧边栏模式
+      if (activePanel === "trash" && leftSidebarOpen) {
+        setLeftSidebarOpen(false);
+        setActivePanel(null);
+      } else {
+        setLeftSidebarOpen(true);
+        setActivePanel("trash");
+      }
     }
+  };
+
+  // 处理设置按钮点击
+  const handleSettingsClick = () => {
+    openSettingsTab();
   };
 
   // 切换右侧边栏
@@ -114,19 +113,44 @@ export function RootLayout() {
         {/* 左侧活动栏 */}
         {dockVisible && (
           <div className="bg-secondary/30 flex w-10 flex-col border-r">
+            {/* 上半部分：主要功能按钮 */}
             <div className="flex flex-1 flex-col items-center gap-1 py-2">
               {leftActivityButtons.map((button) => (
                 <Tooltip key={button.id}>
                   <TooltipTrigger asChild>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => toggleLeftSidebar(button.id)}
                       className={cn(
-                        "text-muted-foreground hover:bg-secondary hover:text-foreground flex h-8 w-8 items-center justify-center rounded-md transition-colors",
+                        "text-muted-foreground hover:bg-secondary hover:text-foreground h-8 w-8 transition-colors",
                         activePanel === button.id && "bg-secondary text-foreground"
                       )}
                     >
                       <button.icon className="h-5 w-5" />
-                    </button>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <p>{button.tooltip}</p>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+            </div>
+
+            {/* 下半部分：主题切换和设置 */}
+            <div className="flex flex-col items-center gap-1 pb-2">
+              <ThemeToggleButton />
+              {leftBottomButtons.map((button) => (
+                <Tooltip key={button.id}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleSettingsClick}
+                      className="text-muted-foreground hover:bg-secondary hover:text-foreground h-8 w-8 transition-colors"
+                    >
+                      <button.icon className="h-5 w-5" />
+                    </Button>
                   </TooltipTrigger>
                   <TooltipContent side="right">
                     <p>{button.tooltip}</p>
@@ -140,11 +164,12 @@ export function RootLayout() {
         {/* 主内容区域 - 包含左侧面板、主内容和右侧面板 */}
         <ResizablePanelGroup direction="horizontal" className="flex-1">
           {/* 左侧边栏面板 */}
-          {dockVisible && leftSidebarOpen && activePanel === "files" && (
+          {dockVisible && leftSidebarOpen && (
             <>
               <ResizablePanel id="left-sidebar" defaultSize={15} minSize={10} maxSize={50} order={1}>
                 <div className="bg-secondary/20 border-border/50 h-full border-r">
-                  <FilesPanel />
+                  {activePanel === "files" && <FilesPanel />}
+                  {activePanel === "trash" && <TrashPanel />}
                 </div>
               </ResizablePanel>
               <ResizableHandle />
@@ -183,10 +208,12 @@ export function RootLayout() {
               {rightActivityButtons.map((button) => (
                 <Tooltip key={button.id}>
                   <TooltipTrigger asChild>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => toggleRightSidebar(button.id)}
                       className={cn(
-                        "text-muted-foreground hover:bg-secondary hover:text-foreground relative flex h-8 w-8 items-center justify-center rounded-md transition-colors",
+                        "text-muted-foreground hover:bg-secondary hover:text-foreground relative h-8 w-8 transition-colors",
                         rightActivePanel === button.id && "bg-secondary text-foreground"
                       )}
                     >
@@ -197,7 +224,7 @@ export function RootLayout() {
                           {sessions.length > 9 ? "9+" : sessions.length}
                         </div>
                       )}
-                    </button>
+                    </Button>
                   </TooltipTrigger>
                   <TooltipContent side="left">
                     <p>{button.tooltip}</p>
