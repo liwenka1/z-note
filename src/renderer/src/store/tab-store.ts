@@ -4,6 +4,7 @@ import { immer } from "zustand/middleware/immer";
 export interface Tab {
   id: string;
   title: string;
+  type: "note" | "settings";
   isModified?: boolean;
   isDirty?: boolean;
 }
@@ -14,7 +15,8 @@ interface TabState {
 }
 
 interface TabActions {
-  openTab: (noteId: string, title: string) => void;
+  openTab: (noteId: string, title: string, type?: "note" | "settings") => void;
+  openSettingsTab: () => void;
   closeTab: (tabId: string) => void;
   closeAllTabs: () => void;
   closeOtherTabs: (keepTabId: string) => void;
@@ -33,7 +35,7 @@ export const useTabStore = create<TabStore>()(
     activeTabId: null,
 
     // Actions
-    openTab: (noteId: string, title: string) => {
+    openTab: (noteId: string, title: string, type: "note" | "settings" = "note") => {
       set((state) => {
         // Check if tab already exists
         const existingTab = state.openTabs.find((tab) => tab.id === noteId);
@@ -43,16 +45,39 @@ export const useTabStore = create<TabStore>()(
           state.openTabs.push({
             id: noteId,
             title,
+            type,
             isModified: false,
             isDirty: false
           });
         } else {
           // Update existing tab title if needed
           existingTab.title = title;
+          existingTab.type = type;
         }
 
         // Set as active tab
         state.activeTabId = noteId;
+      });
+    },
+
+    openSettingsTab: () => {
+      set((state) => {
+        const settingsTabId = "settings";
+        const existingTab = state.openTabs.find((tab) => tab.id === settingsTabId);
+
+        if (!existingTab) {
+          // Add settings tab
+          state.openTabs.push({
+            id: settingsTabId,
+            title: "设置",
+            type: "settings",
+            isModified: false,
+            isDirty: false
+          });
+        }
+
+        // Set as active tab
+        state.activeTabId = settingsTabId;
       });
     },
 
