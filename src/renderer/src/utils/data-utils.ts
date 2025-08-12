@@ -154,7 +154,11 @@ export function filterNotesByFavorite(notes: Note[], isFavorite?: boolean): Note
 
 // 根据删除状态筛选笔记
 export function filterNotesByDeleted(notes: Note[], isDeleted: boolean = false): Note[] {
-  return notes.filter((note) => note.isDeleted === isDeleted);
+  return notes.filter((note) => {
+    // 处理 isDeleted 为 undefined 的情况，将其视为 false
+    const noteDeleted = note.isDeleted === true;
+    return noteDeleted === isDeleted;
+  });
 }
 
 // 搜索笔记
