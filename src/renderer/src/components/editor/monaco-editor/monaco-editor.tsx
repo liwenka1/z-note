@@ -20,9 +20,12 @@ export interface MonacoEditorRef {
 
 export const MonacoEditor = forwardRef<MonacoEditorRef, MonacoEditorProps>(
   ({ value, onChange, onSave, onScroll, className }, ref) => {
-    const { theme } = useThemeStore();
+    const { resolvedTheme } = useThemeStore();
     const { editorSettings } = useEditorStore();
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+
+    // 计算当前主题
+    const currentTheme = resolvedTheme === "dark" ? "vs-dark" : "light";
 
     useImperativeHandle(ref, () => ({
       getEditor: () => editorRef.current,
@@ -68,7 +71,7 @@ export const MonacoEditor = forwardRef<MonacoEditorRef, MonacoEditorProps>(
           defaultLanguage="markdown"
           language="markdown"
           value={value || ""}
-          theme={theme === "dark" ? "vs-dark" : "light"}
+          theme={currentTheme}
           options={{
             fontSize: editorSettings.fontSize,
             wordWrap: editorSettings.wordWrap ? "on" : "off",
