@@ -64,13 +64,54 @@ function ViewModeButtons() {
 
 export function TabBar() {
   const { openTabs, activeTabId, closeTab, closeAllTabs, closeOtherTabs, setActiveTab } = useTabStore();
-  const { notes, createNote } = useNotesStore();
+  const { createNote } = useNotesStore();
   const { isNoteModified, stopEditing } = useEditorStore();
   const navigate = useNavigate();
   const [scrollLeft, setScrollLeft] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const activeTabRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+
+  // 获取当前激活的 tab 类型
+  const activeTab = openTabs.find((tab) => tab.id === activeTabId);
+  const isNoteTab = activeTab?.type === "note" || activeTab?.type === undefined; // 兼容旧数据
+
+  // 自动滚动到激活的 tab
+  const scrollToActiveTab = () => {
+    if (activeTabRef.current && scrollContainerRef.current) {
+      const activeTabElement = activeTabRef.current;
+      const container = scrollContainerRef.current;
+
+      const tabLeft = activeTabElement.offsetLeft;
+      const tabWidth = activeTabElement.offsetWidth;
+      const containerScrollLeft = container.scrollLeft;
+      const containerWidth = container.clientWidth;
+
+      // 检查 tab 是否完全可见
+      const isTabVisible = tabLeft >= containerScrollLeft && tabLeft + tabWidth <= containerScrollLeft + containerWidth;
+
+      if (!isTabVisible) {
+        // 计算需要滚动到的位置，让 tab 居中显示
+        const scrollTo = tabLeft - containerWidth / 2 + tabWidth / 2;
+        container.scrollTo({ left: Math.max(0, scrollTo), behavior: "smooth" });
+      }
+    }
+  };
+
+  // 当激活的 tab 改变时，自动滚动到该 tab
+  useEffect(() => {
+    scrollToActiveTab();
+  }, [activeTabId]);
+
+  // 当 tabs 数组改变时，也检查是否需要滚动（新增 tab 的情况）
+  useEffect(() => {
+    // 延迟一点确保 DOM 已更新
+    const timer = setTimeout(() => {
+      scrollToActiveTab();
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [openTabs.length]);
 
   // 检查是否可以滚动
   const checkScrollability = () => {
@@ -99,27 +140,15 @@ export function TabBar() {
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
-    navigate({ to: "/notes/$noteId", params: { noteId: tabId } });
+    if (tabId !== "settings") {
+      navigate({ to: "/notes/$noteId", params: { noteId: tabId } });
+    }
   };
 
   const handleTabClose = (e: React.MouseEvent, tabId: string) => {
     e.stopPropagation();
-
-    // 关闭标签时清除编辑状态
     stopEditing(tabId);
     closeTab(tabId);
-
-    // 如果关闭的是当前活跃标签，需要切换到其他标签或首页
-    if (tabId === activeTabId) {
-      const remainingTabs = openTabs.filter((tab) => tab.id !== tabId);
-      if (remainingTabs.length > 0) {
-        const nextTab = remainingTabs[remainingTabs.length - 1];
-        setActiveTab(nextTab.id);
-        navigate({ to: "/notes/$noteId", params: { noteId: nextTab.id } });
-      } else {
-        navigate({ to: "/" });
-      }
-    }
   };
 
   const handleNewNote = () => {
@@ -155,12 +184,12 @@ export function TabBar() {
       >
         <div className="flex h-full">
           {openTabs.map((tab) => {
-            const note = notes.find((n) => n.id === tab.id);
             const isActive = tab.id === activeTabId;
 
             return (
               <div
                 key={tab.id}
+                ref={isActive ? activeTabRef : null}
                 className={cn(
                   "border-border hover:bg-secondary/50 group flex h-full max-w-[200px] min-w-[120px] cursor-pointer items-center border-r px-3 transition-colors",
                   isActive && "bg-background relative border-b-transparent"
@@ -172,8 +201,10 @@ export function TabBar() {
 
                 {/* 标签内容 */}
                 <div className="flex min-w-0 flex-1 items-center gap-2">
-                  <span className="truncate text-sm">{note?.title || "未知笔记"}</span>
-                  {isNoteModified(tab.id) && <div className="bg-muted-foreground h-1 w-1 rounded-full"></div>}
+                  <span className="truncate text-sm">{tab.title}</span>
+                  {tab.type === "note" && isNoteModified(tab.id) && (
+                    <div className="bg-muted-foreground h-1 w-1 rounded-full"></div>
+                  )}
                 </div>
 
                 {/* 关闭按钮 */}
@@ -200,65 +231,69 @@ export function TabBar() {
 
       {/* 右侧操作按钮 */}
       <div className="border-border flex border-l">
-        {/* 新建笔记 */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 w-8 rounded-none p-0" onClick={handleNewNote}>
-              <Plus className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>新建笔记 (Ctrl+N)</p>
-          </TooltipContent>
-        </Tooltip>
-
-        {/* 视图模式切换 */}
-        <ViewModeButtons />
-
-        {/* 更多操作 */}
-        <DropdownMenu>
+        {/* 新建笔记 - 只在笔记 tab 时显示 */}
+        {isNoteTab && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 rounded-none p-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
+              <Button variant="ghost" size="sm" className="h-8 w-8 rounded-none p-0" onClick={handleNewNote}>
+                <Plus className="h-4 w-4" />
+              </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>更多操作</p>
+              <p>新建笔记 (Ctrl+N)</p>
             </TooltipContent>
           </Tooltip>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => {
-                // 关闭所有标签时清除所有编辑状态
-                openTabs.forEach((tab) => stopEditing(tab.id));
-                closeAllTabs();
-              }}
-            >
-              关闭所有标签
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                if (activeTabId) {
-                  // 关闭其他标签时清除其他标签的编辑状态
-                  openTabs.forEach((tab) => {
-                    if (tab.id !== activeTabId) {
-                      stopEditing(tab.id);
-                    }
-                  });
-                  closeOtherTabs(activeTabId);
-                }
-              }}
-              disabled={!activeTabId}
-            >
-              关闭其他标签
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>保存所有标签</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        )}
+
+        {/* 视图模式切换 - 只在笔记 tab 时显示 */}
+        {isNoteTab && <ViewModeButtons />}
+
+        {/* 更多操作 - 只在笔记 tab 时显示 */}
+        {isNoteTab && (
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 rounded-none p-0">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>更多操作</p>
+              </TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => {
+                  // 关闭所有标签时清除所有编辑状态
+                  openTabs.forEach((tab) => stopEditing(tab.id));
+                  closeAllTabs();
+                }}
+              >
+                关闭所有标签
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  if (activeTabId) {
+                    // 关闭其他标签时清除其他标签的编辑状态
+                    openTabs.forEach((tab) => {
+                      if (tab.id !== activeTabId) {
+                        stopEditing(tab.id);
+                      }
+                    });
+                    closeOtherTabs(activeTabId);
+                  }
+                }}
+                disabled={!activeTabId}
+              >
+                关闭其他标签
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>保存所有标签</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
     </div>
   );
