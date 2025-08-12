@@ -1,5 +1,3 @@
-import { ThemeToggle } from "@renderer/components/theme-toggle";
-
 export function SettingsPage() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -12,10 +10,7 @@ export function SettingsPage() {
             <div className="bg-card rounded-lg border p-6">
               <h2 className="mb-4 text-lg font-medium">外观</h2>
               <div className="space-y-4">
-                <ThemeToggle />
-                <div className="text-muted-foreground text-sm">
-                  选择应用的主题模式。&ldquo;跟随系统&rdquo;会根据你的系统设置自动切换。
-                </div>
+                <div className="text-muted-foreground text-sm">主题切换已移至左侧活动栏，外观设置选项待开发...</div>
               </div>
             </div>
 
