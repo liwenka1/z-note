@@ -62,6 +62,8 @@ interface NotesActions {
   createFolder: (input: CreateFolderInput) => string; // 返回新文件夹ID
   updateFolder: (id: string, updates: UpdateFolderInput) => void;
   deleteFolder: (id: string) => void; // 删除文件夹及其子文件夹
+  permanentDeleteFolder: (id: string) => void; // 永久删除文件夹及其子文件夹
+  restoreFolder: (id: string, targetParentId?: string) => void; // 从垃圾箱恢复文件夹
   toggleFolderExpanded: (id: string) => void;
   moveFolderToParent: (folderId: string, parentId?: string) => void;
 
@@ -137,8 +139,14 @@ export const useNotesStore = create<NotesStore>()(
       set((state) => {
         if (!hasData) {
           // 如果没有保存的数据，使用模拟数据
-          state.notes = [...mockData.notes];
-          state.folders = [...mockData.folders];
+          state.notes = [...mockData.notes].map((note) => ({
+            ...note,
+            isDeleted: Boolean(note.isDeleted)
+          }));
+          state.folders = [...mockData.folders].map((folder) => ({
+            ...folder,
+            isDeleted: Boolean(folder.isDeleted)
+          }));
           state.tags = [...mockData.tags];
         }
 
@@ -164,14 +172,15 @@ export const useNotesStore = create<NotesStore>()(
         }
 
         set((state) => {
-          // 恢复数据时需要将日期字符串转换为 Date 对象
+          // 恢复数据时需要将日期字符串转换为 Date 对象，并确保 isDeleted 字段有正确的默认值
           state.notes = data.notes.map((note: unknown) => {
             const n = note as Record<string, unknown>;
             return {
               ...n,
               createdAt: new Date(n.createdAt as string),
               updatedAt: new Date(n.updatedAt as string),
-              lastViewedAt: n.lastViewedAt ? new Date(n.lastViewedAt as string) : undefined
+              lastViewedAt: n.lastViewedAt ? new Date(n.lastViewedAt as string) : undefined,
+              isDeleted: n.isDeleted === true // 确保 isDeleted 是 boolean 值
             } as Note;
           });
 
@@ -379,6 +388,64 @@ export const useNotesStore = create<NotesStore>()(
         // 如果删除的是当前选中的文件夹，清除选中状态
         if (state.selectedFolderId === id) {
           state.selectedFolderId = undefined;
+        }
+      });
+
+      get().saveToLocalStorage();
+    },
+
+    permanentDeleteFolder: (id: string) => {
+      set((state) => {
+        // 递归永久删除子文件夹
+        const deleteRecursive = (folderId: string) => {
+          // 永久删除该文件夹下的笔记
+          state.notes = state.notes.filter((note) => note.folderId !== folderId);
+
+          // 获取子文件夹列表
+          const children = state.folders.filter((f) => f.parentId === folderId);
+          children.forEach((child) => deleteRecursive(child.id));
+
+          // 永久删除文件夹
+          state.folders = state.folders.filter((f) => f.id !== folderId);
+        };
+
+        deleteRecursive(id);
+
+        // 如果删除的是当前选中的文件夹，清除选中状态
+        if (state.selectedFolderId === id) {
+          state.selectedFolderId = undefined;
+        }
+      });
+
+      get().saveToLocalStorage();
+    },
+
+    restoreFolder: (id: string, targetParentId?: string) => {
+      set((state) => {
+        const folderIndex = state.folders.findIndex((f) => f.id === id);
+        if (folderIndex !== -1) {
+          state.folders[folderIndex].isDeleted = false;
+          // 如果指定了新的父级，则移动到新位置
+          if (targetParentId !== undefined) {
+            state.folders[folderIndex].parentId = targetParentId;
+          }
+          state.folders[folderIndex].updatedAt = new Date();
+
+          // 恢复该文件夹下的笔记
+          state.notes.forEach((note) => {
+            if (note.folderId === id) {
+              note.isDeleted = false;
+              note.updatedAt = new Date();
+            }
+          });
+
+          // 递归恢复子文件夹
+          const children = state.folders.filter((f) => f.parentId === id);
+          children.forEach((child) => {
+            if (child.isDeleted) {
+              get().restoreFolder(child.id);
+            }
+          });
         }
       });
 
