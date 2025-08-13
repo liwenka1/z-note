@@ -104,6 +104,20 @@ export function TabBar() {
     scrollToActiveTab();
   }, [activeTabId]);
 
+  // 监听 activeTabId 变化并导航到对应页面
+  useEffect(() => {
+    if (activeTabId) {
+      const activeTab = openTabs.find((tab) => tab.id === activeTabId);
+      if (activeTab) {
+        if (activeTab.id === "settings") {
+          navigate({ to: "/settings" });
+        } else {
+          navigate({ to: "/notes/$noteId", params: { noteId: activeTab.id } });
+        }
+      }
+    }
+  }, [activeTabId, openTabs, navigate]);
+
   // 当 tabs 数组改变时，也检查是否需要滚动（新增 tab 的情况）
   useEffect(() => {
     // 延迟一点确保 DOM 已更新
@@ -269,6 +283,8 @@ export function TabBar() {
                   // 关闭所有标签时清除所有编辑状态
                   openTabs.forEach((tab) => stopEditing(tab.id));
                   closeAllTabs();
+                  // 导航到首页
+                  navigate({ to: "/" });
                 }}
               >
                 关闭所有标签
