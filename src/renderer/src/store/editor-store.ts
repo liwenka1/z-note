@@ -1,36 +1,21 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
-// 编辑器视图模式
-type ViewMode = "edit" | "preview" | "split";
-
 // 编辑器主题
-type EditorTheme = "vs-dark" | "vs-light";
-
-// 预览主题
-type PreviewTheme = "github" | "dark";
+type EditorTheme = "dark" | "light";
 
 // 编辑器设置
 interface EditorSettings {
   fontSize: number;
   wordWrap: boolean;
-  minimap: boolean;
-  lineNumbers: boolean;
   theme: EditorTheme;
-  tabSize: number;
-  padding: {
-    top: number;
-    bottom: number;
-  };
 }
 
-// 预览设置
-interface PreviewSettings {
-  theme: PreviewTheme;
+// 功能设置
+interface FeatureSettings {
   mathSupport: boolean;
   mermaidSupport: boolean;
   codeHighlight: boolean;
-  showLineNumbers: boolean;
 }
 
 // 编辑器状态接口
@@ -42,12 +27,9 @@ interface EditorState {
   // 自动保存定时器
   autoSaveTimers: Record<string, NodeJS.Timeout>;
 
-  // 新增：视图模式和设置
-  viewMode: ViewMode;
-  splitRatio: number; // 分屏比例 0-1
-  syncScroll: boolean; // 是否同步滚动
+  // 设置
   editorSettings: EditorSettings;
-  previewSettings: PreviewSettings;
+  featureSettings: FeatureSettings;
 }
 
 interface EditorActions {
@@ -66,12 +48,9 @@ interface EditorActions {
   // 重置笔记到原始状态
   resetNote: (noteId: string) => void;
 
-  // 新增：视图和设置相关 actions
-  setViewMode: (mode: ViewMode) => void;
-  setSplitRatio: (ratio: number) => void;
-  toggleSyncScroll: () => void;
+  // 设置相关 actions
   updateEditorSettings: (settings: Partial<EditorSettings>) => void;
-  updatePreviewSettings: (settings: Partial<PreviewSettings>) => void;
+  updateFeatureSettings: (settings: Partial<FeatureSettings>) => void;
 }
 
 type EditorStore = EditorState & EditorActions;
@@ -83,28 +62,16 @@ export const useEditorStore = create<EditorStore>()(
     originalContent: {},
     autoSaveTimers: {},
 
-    // 新增默认状态
-    viewMode: "edit" as ViewMode,
-    splitRatio: 0.5,
-    syncScroll: true,
+    // 默认设置
     editorSettings: {
       fontSize: 14,
       wordWrap: true,
-      minimap: true,
-      lineNumbers: true,
-      theme: "vs-dark" as EditorTheme,
-      tabSize: 2,
-      padding: {
-        top: 16,
-        bottom: 16
-      }
+      theme: "dark" as EditorTheme
     },
-    previewSettings: {
-      theme: "github" as PreviewTheme,
+    featureSettings: {
       mathSupport: true,
       mermaidSupport: true,
-      codeHighlight: true,
-      showLineNumbers: true
+      codeHighlight: true
     },
 
     // Actions
@@ -179,34 +146,16 @@ export const useEditorStore = create<EditorStore>()(
       });
     },
 
-    // 新增 actions
-    setViewMode: (mode: ViewMode) => {
-      set((state) => {
-        state.viewMode = mode;
-      });
-    },
-
-    setSplitRatio: (ratio: number) => {
-      set((state) => {
-        state.splitRatio = Math.max(0.1, Math.min(0.9, ratio));
-      });
-    },
-
-    toggleSyncScroll: () => {
-      set((state) => {
-        state.syncScroll = !state.syncScroll;
-      });
-    },
-
+    // 设置 actions
     updateEditorSettings: (settings: Partial<EditorSettings>) => {
       set((state) => {
         Object.assign(state.editorSettings, settings);
       });
     },
 
-    updatePreviewSettings: (settings: Partial<PreviewSettings>) => {
+    updateFeatureSettings: (settings: Partial<FeatureSettings>) => {
       set((state) => {
-        Object.assign(state.previewSettings, settings);
+        Object.assign(state.featureSettings, settings);
       });
     }
   }))
