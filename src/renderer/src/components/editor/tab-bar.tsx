@@ -1,4 +1,4 @@
-import { X, Plus, Edit3, Eye, Columns2, MoreHorizontal } from "lucide-react";
+import { X, Plus, MoreHorizontal } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@renderer/lib/utils";
@@ -13,54 +13,6 @@ import {
 } from "@renderer/components/ui/dropdown-menu";
 import { useNotesStore, useTabStore } from "@renderer/store";
 import { useEditorStore } from "@renderer/store/editor-store";
-
-const viewModeConfig = [
-  {
-    mode: "edit" as const,
-    icon: Edit3,
-    label: "编辑模式",
-    tooltip: "仅显示编辑器"
-  },
-  {
-    mode: "split" as const,
-    icon: Columns2,
-    label: "分屏模式",
-    tooltip: "编辑器和预览并排显示"
-  },
-  {
-    mode: "preview" as const,
-    icon: Eye,
-    label: "预览模式",
-    tooltip: "仅显示预览"
-  }
-];
-
-function ViewModeButtons() {
-  const { viewMode, setViewMode } = useEditorStore();
-
-  return (
-    <>
-      {viewModeConfig.map(({ mode, icon: Icon, label, tooltip }) => (
-        <Tooltip key={mode}>
-          <TooltipTrigger asChild>
-            <Button
-              variant={viewMode === mode ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode(mode)}
-              className="h-8 w-8 rounded-none p-0"
-            >
-              <Icon className="h-4 w-4" />
-              <span className="sr-only">{label}</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{tooltip}</p>
-          </TooltipContent>
-        </Tooltip>
-      ))}
-    </>
-  );
-}
 
 export function TabBar() {
   const { openTabs, activeTabId, closeTab, closeAllTabs, closeOtherTabs, setActiveTab } = useTabStore();
@@ -258,9 +210,6 @@ export function TabBar() {
             </TooltipContent>
           </Tooltip>
         )}
-
-        {/* 视图模式切换 - 只在笔记 tab 时显示 */}
-        {isNoteTab && <ViewModeButtons />}
 
         {/* 更多操作 - 只在笔记 tab 时显示 */}
         {isNoteTab && (
