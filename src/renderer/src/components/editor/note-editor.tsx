@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNotesStore } from "@renderer/store";
 import { useTabStore } from "@renderer/store/tab-store";
 import { useEditorStore } from "@renderer/store/editor-store";
-// TODO: 在这里导入你选择的编辑器组件
+import { TipTapEditor } from "./tiptap-editor";
 
 interface NoteEditorProps {
   noteId: string;
@@ -11,12 +11,12 @@ interface NoteEditorProps {
 export function NoteEditor({ noteId }: NoteEditorProps) {
   const { notes } = useNotesStore();
   const { openTab } = useTabStore();
-  const { startEditing, getEditingContent } = useEditorStore();
+  const { startEditing, getEditingContent, updateContent } = useEditorStore();
 
   const note = notes.find((n) => n.id === noteId);
 
   // 获取编辑内容，如果没有则使用笔记原始内容
-  // const editingContent = getEditingContent(noteId) || note?.content || "";
+  const editingContent = getEditingContent(noteId) || note?.content || "";
 
   // 当页面加载时，确保标签是打开的并初始化编辑状态
   useEffect(() => {
@@ -30,17 +30,10 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
     }
   }, [noteId, note, openTab, startEditing, getEditingContent]);
 
-  // TODO: 待编辑器完善后添加内容变化和保存处理
-  // const handleContentChange = (newContent: string) => {
-  //   updateContent(noteId, newContent);
-  // };
-
-  // const handleSave = () => {
-  //   if (note) {
-  //     updateNote(noteId, { content: editingContent });
-  //     saveNote(noteId);
-  //   }
-  // };
+  // 处理内容变化
+  const handleContentChange = (newContent: string) => {
+    updateContent(noteId, newContent);
+  };
 
   if (!note) {
     return (
@@ -54,15 +47,8 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
   }
 
   return (
-    <div className="h-full w-full overflow-auto p-6">
-      {/* TODO: 在这里添加你选择的编辑器组件 */}
-      <div className="prose prose-neutral dark:prose-invert max-w-none">
-        <h2>编辑器区域</h2>
-        <p>请选择并集成你想要的编辑器组件。</p>
-        <p>
-          当前笔记: <strong>{note.title}</strong>
-        </p>
-      </div>
+    <div className="h-full w-full overflow-auto">
+      <TipTapEditor content={editingContent} onChange={handleContentChange} className="min-h-full" />
     </div>
   );
 }
