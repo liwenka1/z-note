@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { Bot, User, Copy, RotateCcw, Trash } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -16,7 +15,7 @@ interface MessageItemProps {
 
 export function MessageItem({ message }: MessageItemProps) {
   const { theme } = useThemeStore();
-  const { updateMessage, deleteMessage, getCurrentSession } = useChatStore();
+  const { deleteMessage, getCurrentSession } = useChatStore();
   const currentSession = getCurrentSession();
 
   const handleCopy = async () => {
@@ -92,15 +91,16 @@ export function MessageItem({ message }: MessageItemProps) {
               <div className="prose prose-sm dark:prose-invert max-w-none text-sm">
                 <ReactMarkdown
                   components={{
-                    code: ({ node, inline, className, children, ...props }) => {
+                    code: ({ className, children, ...props }) => {
                       const match = /language-(\w+)/.exec(className || "");
-                      return !inline && match ? (
+                      const isCodeBlock = match && String(children).includes("\n");
+
+                      return isCodeBlock ? (
                         <SyntaxHighlighter
                           style={theme === "dark" ? oneDark : oneLight}
                           language={match[1]}
                           PreTag="div"
                           className="!mt-2 !mb-2 rounded-md"
-                          {...props}
                         >
                           {String(children).replace(/\n$/, "")}
                         </SyntaxHighlighter>
