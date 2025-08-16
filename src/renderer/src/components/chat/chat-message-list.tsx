@@ -21,6 +21,8 @@ export function ChatMessageList() {
 
       return () => clearTimeout(timeoutId);
     }
+
+    return;
   }, [messages.length]);
 
   return (
