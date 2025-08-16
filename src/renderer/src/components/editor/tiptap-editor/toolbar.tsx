@@ -49,7 +49,7 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
   };
 
   return (
-    <div className={cn("border-border flex flex-wrap items-center gap-1 border-b p-2", className)}>
+    <div className={cn("flex flex-wrap items-center justify-center gap-1 border-b p-1", className)}>
       {/* 撤销/重做 */}
       <div className="flex items-center gap-1">
         <Tooltip>
