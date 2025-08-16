@@ -13,7 +13,6 @@ interface TipTapEditorProps {
   editable?: boolean;
   className?: string;
   placeholder?: string;
-  showToolbar?: boolean;
 }
 
 export function TipTapEditor({
@@ -21,8 +20,7 @@ export function TipTapEditor({
   onChange,
   editable = true,
   className,
-  placeholder = "开始写作...",
-  showToolbar = true
+  placeholder = "开始写作..."
 }: TipTapEditorProps) {
   const editor = useEditor({
     extensions: [
@@ -46,10 +44,7 @@ export function TipTapEditor({
     },
     editorProps: {
       attributes: {
-        class: cn(
-          "focus:outline-none prose prose-neutral dark:prose-invert max-w-none",
-          showToolbar ? "min-h-[200px] p-4" : "min-h-[200px] p-4"
-        )
+        class: "focus:outline-none prose prose-neutral dark:prose-invert max-w-none p-6"
       }
     }
   });
@@ -72,7 +67,7 @@ export function TipTapEditor({
 
   return (
     <div className={cn("", className)}>
-      {showToolbar && <EditorToolbar editor={editor} />}
+      <EditorToolbar editor={editor} />
       <EditorContent editor={editor} />
     </div>
   );
