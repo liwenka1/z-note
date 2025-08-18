@@ -1,6 +1,6 @@
 import { createRootRoute } from "@tanstack/react-router";
-import { RootLayout } from "@renderer/components/root-layout";
+import { SimpleRootLayout } from "@renderer/components/simple-root-layout";
 
 export const Route = createRootRoute({
-  component: RootLayout
+  component: SimpleRootLayout
 });
