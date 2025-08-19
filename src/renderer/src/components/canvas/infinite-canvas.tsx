@@ -20,7 +20,18 @@ export interface CardData {
     content?: string;
     noteCount?: number;
     lastModified?: Date;
+    coverImage?: string; // 封面图片URL
+    isExpanded?: boolean; // 知识库是否展开
+    notes?: NoteData[]; // 知识库内的笔记数据
   };
+}
+
+export interface NoteData {
+  id: string;
+  title: string;
+  content: string;
+  thumbnail?: string; // 笔记缩略图
+  lastModified: Date;
 }
 
 // 初始化示例数据
@@ -32,7 +43,36 @@ const initialCards: CardData[] = [
     data: {
       title: "我的第一个知识库",
       description: "开始你的知识管理之旅",
-      noteCount: 5
+      noteCount: 5,
+      coverImage:
+        "data:image/svg+xml;charset=utf-8,%3Csvg width='300' height='200' viewBox='0 0 300 200' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='300' height='200' fill='%236366F1'/%3E%3Ccircle cx='150' cy='100' r='40' fill='white' fill-opacity='0.3'/%3E%3Cpath d='M130 90 L150 110 L170 90 M120 100 L180 100' stroke='white' stroke-width='3' fill='none'/%3E%3C/svg%3E",
+      isExpanded: false,
+      notes: [
+        {
+          id: "note-1-1",
+          title: "React 基础知识",
+          content: "React 是一个用于构建用户界面的 JavaScript 库...",
+          thumbnail:
+            "data:image/svg+xml;charset=utf-8,%3Csvg width='200' height='150' viewBox='0 0 200 150' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='200' height='150' fill='%230DB6F7'/%3E%3Ccircle cx='100' cy='75' r='25' fill='white' fill-opacity='0.3'/%3E%3Cpath d='M85 75 Q100 60 115 75 Q100 90 85 75 M75 75 Q100 50 125 75 Q100 100 75 75' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E",
+          lastModified: new Date("2024-01-01")
+        },
+        {
+          id: "note-1-2",
+          title: "组件生命周期",
+          content: "React 组件的生命周期方法包括...",
+          thumbnail:
+            "data:image/svg+xml;charset=utf-8,%3Csvg width='200' height='150' viewBox='0 0 200 150' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='200' height='150' fill='%2310B981'/%3E%3Cg transform='translate(75,50)'%3E%3Crect width='50' height='50' rx='25' fill='white' fill-opacity='0.3'/%3E%3Cpath d='M15 25 Q25 15 35 25 Q25 35 15 25' stroke='white' stroke-width='2' fill='none'/%3E%3C/g%3E%3C/svg%3E",
+          lastModified: new Date("2024-01-02")
+        },
+        {
+          id: "note-1-3",
+          title: "状态管理",
+          content: "在 React 中管理状态的最佳实践...",
+          thumbnail:
+            "data:image/svg+xml;charset=utf-8,%3Csvg width='200' height='150' viewBox='0 0 200 150' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='200' height='150' fill='%23F59E0B'/%3E%3Cg transform='translate(75,50)'%3E%3Crect width='50' height='50' rx='5' fill='white' fill-opacity='0.3'/%3E%3Cpath d='M15 20 L35 20 M15 25 L30 25 M15 30 L25 30' stroke='white' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E",
+          lastModified: new Date("2024-01-03")
+        }
+      ]
     }
   },
   {
@@ -52,7 +92,28 @@ const initialCards: CardData[] = [
     data: {
       title: "学习资料",
       description: "收集各种学习资源和笔记",
-      noteCount: 12
+      noteCount: 12,
+      coverImage:
+        "data:image/svg+xml;charset=utf-8,%3Csvg width='300' height='200' viewBox='0 0 300 200' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='300' height='200' fill='%238B5CF6'/%3E%3Cg transform='translate(125,75)'%3E%3Crect width='50' height='50' rx='8' fill='white' fill-opacity='0.3'/%3E%3Cpath d='M15 20 L35 20 M15 25 L30 25 M15 30 L25 30' stroke='white' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E",
+      isExpanded: false,
+      notes: [
+        {
+          id: "note-3-1",
+          title: "JavaScript ES6",
+          content: "ES6 的新特性包括箭头函数、解构赋值...",
+          thumbnail:
+            "data:image/svg+xml;charset=utf-8,%3Csvg width='200' height='150' viewBox='0 0 200 150' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='200' height='150' fill='%23FBD38F'/%3E%3Cg transform='translate(75,50)'%3E%3Crect width='50' height='50' rx='10' fill='%23F59E0B'/%3E%3Cpath d='M15 20 L35 30 L15 30 Z M20 25 L30 25' stroke='white' stroke-width='2' fill='none'/%3E%3C/g%3E%3C/svg%3E",
+          lastModified: new Date("2024-01-04")
+        },
+        {
+          id: "note-3-2",
+          title: "TypeScript 入门",
+          content: "TypeScript 是 JavaScript 的一个超集...",
+          thumbnail:
+            "data:image/svg+xml;charset=utf-8,%3Csvg width='200' height='150' viewBox='0 0 200 150' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='200' height='150' fill='%233178F6'/%3E%3Cg transform='translate(75,50)'%3E%3Crect width='50' height='50' rx='5' fill='white'/%3E%3Cpath d='M15 20 L35 20 M15 25 L30 25 M15 30 L25 30 M20 15 L20 35' stroke='%233178F6' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E",
+          lastModified: new Date("2024-01-05")
+        }
+      ]
     }
   }
 ];
@@ -70,6 +131,17 @@ export function InfiniteCanvas() {
   // 删除卡片
   const deleteCard = useCallback((id: string) => {
     setCards((prevCards) => prevCards.filter((card) => card.id !== id));
+  }, []);
+
+  // 切换知识库展开状态
+  const toggleKnowledgeBaseExpansion = useCallback((id: string) => {
+    setCards((prevCards) =>
+      prevCards.map((card) =>
+        card.id === id && card.type === "knowledge-base"
+          ? { ...card, data: { ...card.data, isExpanded: !card.data.isExpanded } }
+          : card
+      )
+    );
   }, []);
 
   // 创建新卡片
@@ -167,7 +239,13 @@ export function InfiniteCanvas() {
         >
           {/* 渲染所有卡片 */}
           {cards.map((card) => (
-            <DraggableCard key={card.id} card={card} onPositionChange={updateCardPosition} onDelete={deleteCard} />
+            <DraggableCard
+              key={card.id}
+              card={card}
+              onPositionChange={updateCardPosition}
+              onDelete={deleteCard}
+              onToggleExpansion={toggleKnowledgeBaseExpansion}
+            />
           ))}
 
           {/* 空状态提示 */}
