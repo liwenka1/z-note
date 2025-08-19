@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger
 } from "@renderer/components/ui/dropdown-menu";
 import { DraggableCard } from "./draggable-card";
+import { ThemeToggleButton } from "../theme-toggle-button";
 
 export interface CardData {
   id: string;
@@ -144,6 +145,8 @@ export function InfiniteCanvas() {
         >
           {isCreating ? "点击画布创建" : "画布创建模式"}
         </Button>
+
+        <ThemeToggleButton />
       </div>
 
       {/* 无限滚动画布 */}
@@ -176,11 +179,6 @@ export function InfiniteCanvas() {
             </div>
           )}
         </div>
-      </div>
-
-      {/* 滚动提示 */}
-      <div className="text-muted-foreground bg-background/80 border-border absolute right-4 bottom-4 rounded border px-2 py-1 text-xs backdrop-blur-sm">
-        可无限滚动的画布空间
       </div>
     </div>
   );
