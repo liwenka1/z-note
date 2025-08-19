@@ -44,7 +44,7 @@ export const DraggableCard = memo(function DraggableCard({ card, onPositionChang
   }, [card.id, onDelete]);
 
   return (
-    <Draggable nodeRef={nodeRef} position={card.position} onDrag={handleDrag} handle=".drag-handle" bounds="parent">
+    <Draggable nodeRef={nodeRef} position={card.position} onDrag={handleDrag} bounds="parent">
       <div ref={nodeRef} className="absolute">
         {card.type === "knowledge-base" ? (
           <KnowledgeBaseCard card={card} onEdit={handleEdit} onOpen={handleOpen} onDelete={handleDelete} />
@@ -77,8 +77,8 @@ const KnowledgeBaseCard = memo(function KnowledgeBaseCard({
         "cursor-move"
       )}
     >
-      {/* 标题栏 - 可拖拽区域 */}
-      <div className="drag-handle border-border flex cursor-grab items-center justify-between border-b p-3 active:cursor-grabbing">
+      {/* 标题栏 */}
+      <div className="border-border flex cursor-grab items-center justify-between border-b p-3 active:cursor-grabbing">
         <div className="flex items-center gap-2">
           <div className="bg-primary/10 rounded-md p-1.5">
             <Database className="text-primary h-4 w-4" />
@@ -88,17 +88,40 @@ const KnowledgeBaseCard = memo(function KnowledgeBaseCard({
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 cursor-pointer p-0"
+              onClick={(e) => e.stopPropagation()}
+            >
               <MoreHorizontal className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem onClick={onOpen}>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpen();
+              }}
+            >
               <FileText className="mr-2 h-3 w-3" />
               打开
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onEdit}>编辑</DropdownMenuItem>
-            <DropdownMenuItem onClick={onDelete} className="text-destructive">
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+            >
+              编辑
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="text-destructive"
+            >
               删除
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -139,8 +162,8 @@ const NoteCard = memo(function NoteCard({ card, onEdit, onOpen, onDelete }: { ca
       )}
       onDoubleClick={onOpen}
     >
-      {/* 标题栏 - 可拖拽区域 */}
-      <div className="drag-handle border-border flex cursor-grab items-center justify-between border-b p-3 active:cursor-grabbing">
+      {/* 标题栏 */}
+      <div className="border-border flex cursor-grab items-center justify-between border-b p-3 active:cursor-grabbing">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <FileText className="text-muted-foreground h-4 w-4 flex-shrink-0" />
           <h3 className="truncate text-sm font-medium">{card.data.title}</h3>
@@ -148,14 +171,39 @@ const NoteCard = memo(function NoteCard({ card, onEdit, onOpen, onDelete }: { ca
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-6 w-6 flex-shrink-0 p-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 flex-shrink-0 cursor-pointer p-0"
+              onClick={(e) => e.stopPropagation()}
+            >
               <MoreHorizontal className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem onClick={onOpen}>打开</DropdownMenuItem>
-            <DropdownMenuItem onClick={onEdit}>编辑</DropdownMenuItem>
-            <DropdownMenuItem onClick={onDelete} className="text-destructive">
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpen();
+              }}
+            >
+              打开
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+            >
+              编辑
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="text-destructive"
+            >
               删除
             </DropdownMenuItem>
           </DropdownMenuContent>
