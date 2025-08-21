@@ -133,7 +133,7 @@ export function TabBar() {
   }
 
   return (
-    <div className="bg-background border-border flex h-9 shrink-0 items-center border-b">
+    <div className="bg-background flex h-9 shrink-0">
       {/* 左滚动按钮 */}
       {canScrollLeft && (
         <Button
@@ -163,8 +163,10 @@ export function TabBar() {
                 ref={isActive ? activeTabRef : null}
                 className={cn(
                   "group relative flex h-full max-w-[200px] min-w-[120px] cursor-pointer items-center px-3",
-                  "border-border/50 border-r last:border-r-0",
-                  isActive ? "bg-background text-foreground" : "bg-background hover:bg-muted/20 text-muted-foreground"
+                  "border-border/30 border-r last:border-r-0",
+                  isActive
+                    ? "bg-background text-foreground border-t-2 border-t-transparent"
+                    : "bg-background hover:bg-muted/20 text-muted-foreground border-t-border/20 border-t"
                 )}
                 onClick={() => handleTabClick(tab.id)}
               >
@@ -212,7 +214,7 @@ export function TabBar() {
       )}
 
       {/* 右侧操作按钮 */}
-      <div className="border-border border-l-border/50 bg-background flex border-l">
+      <div className="border-border/30 bg-background flex border-l">
         {/* 新建笔记 - 只在笔记 tab 时显示 */}
         {isNoteTab && (
           <Tooltip>
