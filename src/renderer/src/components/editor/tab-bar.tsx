@@ -133,10 +133,15 @@ export function TabBar() {
   }
 
   return (
-    <div className="bg-background border-border flex h-9 items-center border-b">
+    <div className="bg-background border-border flex h-9 shrink-0 items-center border-b">
       {/* 左滚动按钮 */}
       {canScrollLeft && (
-        <Button variant="ghost" size="sm" className="h-8 w-6 rounded-none p-0" onClick={() => handleScroll("left")}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="hover:bg-muted/40 text-muted-foreground hover:text-foreground h-full w-6 rounded-none p-0"
+          onClick={() => handleScroll("left")}
+        >
           <span className="text-xs">‹</span>
         </Button>
       )}
@@ -157,19 +162,20 @@ export function TabBar() {
                 key={tab.id}
                 ref={isActive ? activeTabRef : null}
                 className={cn(
-                  "border-border hover:bg-secondary/50 group flex h-full max-w-[200px] min-w-[120px] cursor-pointer items-center border-r px-3 transition-colors",
-                  isActive && "bg-background relative border-b-transparent"
+                  "group relative flex h-full max-w-[200px] min-w-[120px] cursor-pointer items-center px-3",
+                  "border-border/50 border-r last:border-r-0",
+                  isActive ? "bg-background text-foreground" : "bg-background hover:bg-muted/20 text-muted-foreground"
                 )}
                 onClick={() => handleTabClick(tab.id)}
               >
-                {/* 活跃标签的底部指示器 */}
-                {isActive && <div className="bg-primary absolute bottom-0 left-0 h-0.5 w-full"></div>}
+                {/* VSCode 风格的顶部指示条 */}
+                {isActive && <div className="bg-primary absolute top-0 right-0 left-0 h-[2px]"></div>}
 
                 {/* 标签内容 */}
                 <div className="flex min-w-0 flex-1 items-center gap-2">
-                  <span className="truncate text-sm">{tab.title}</span>
+                  <span className="truncate text-sm font-medium">{tab.title}</span>
                   {tab.type === "note" && isNoteModified(tab.id) && (
-                    <div className="bg-muted-foreground h-1 w-1 rounded-full"></div>
+                    <div className="bg-primary h-1.5 w-1.5 rounded-full"></div>
                   )}
                 </div>
 
@@ -177,7 +183,12 @@ export function TabBar() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-muted-foreground hover:bg-secondary hover:text-foreground ml-1 h-4 w-4 p-0 opacity-0 transition-opacity group-hover:opacity-100"
+                  className={cn(
+                    "ml-1 h-4 w-4 p-0",
+                    "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+                    "opacity-0 group-hover:opacity-100",
+                    isActive && "opacity-60 hover:opacity-100"
+                  )}
                   onClick={(e) => handleTabClose(e, tab.id)}
                 >
                   <X className="h-3 w-3" />
@@ -190,18 +201,28 @@ export function TabBar() {
 
       {/* 右滚动按钮 */}
       {canScrollRight && (
-        <Button variant="ghost" size="sm" className="h-8 w-6 rounded-none p-0" onClick={() => handleScroll("right")}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="hover:bg-muted/40 text-muted-foreground hover:text-foreground h-full w-6 rounded-none p-0"
+          onClick={() => handleScroll("right")}
+        >
           <span className="text-xs">›</span>
         </Button>
       )}
 
       {/* 右侧操作按钮 */}
-      <div className="border-border flex border-l">
+      <div className="border-border border-l-border/50 bg-background flex border-l">
         {/* 新建笔记 - 只在笔记 tab 时显示 */}
         {isNoteTab && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 rounded-none p-0" onClick={handleNewNote}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hover:bg-muted/40 text-muted-foreground hover:text-foreground h-full w-8 rounded-none p-0"
+                onClick={handleNewNote}
+              >
                 <Plus className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
@@ -217,7 +238,11 @@ export function TabBar() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 rounded-none p-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="hover:bg-muted/40 text-muted-foreground hover:text-foreground h-full w-8 rounded-none p-0"
+                  >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
