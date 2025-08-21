@@ -37,7 +37,7 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
 
   if (!note) {
     return (
-      <div className="flex h-full flex-col">
+      <div className="bg-background flex h-full flex-col">
         <div className="border-border bg-background border-b p-4">
           <h2 className="text-lg font-semibold">笔记未找到</h2>
           <p className="text-muted-foreground">无法找到ID为 {noteId} 的笔记。</p>
@@ -47,8 +47,8 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
   }
 
   return (
-    <div className="h-full w-full overflow-auto">
-      <TipTapEditor content={editingContent} onChange={handleContentChange} className="min-h-full" />
+    <div className="bg-background h-full w-full overflow-auto">
+      <TipTapEditor content={editingContent} onChange={handleContentChange} className="bg-background min-h-full" />
     </div>
   );
 }
