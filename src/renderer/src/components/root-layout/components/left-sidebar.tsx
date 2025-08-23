@@ -1,0 +1,15 @@
+import { FilesPanel } from "@renderer/components/files/files-panel";
+import { TrashPanel } from "@renderer/components/trash/trash-panel";
+
+interface LeftSidebarProps {
+  activePanel: string | null;
+}
+
+export function LeftSidebar({ activePanel }: LeftSidebarProps) {
+  return (
+    <div className="bg-secondary/20 border-border/50 h-full border-r">
+      {activePanel === "files" && <FilesPanel />}
+      {activePanel === "trash" && <TrashPanel />}
+    </div>
+  );
+}
