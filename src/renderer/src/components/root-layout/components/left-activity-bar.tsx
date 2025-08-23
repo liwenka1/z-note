@@ -12,7 +12,7 @@ interface LeftActivityBarProps {
 
 export function LeftActivityBar({ activePanel, onToggleLeftSidebar, onSettingsClick }: LeftActivityBarProps) {
   return (
-    <div className="bg-secondary/30 flex w-10 flex-col border-r">
+    <div className="bg-secondary/30 flex h-full w-10 flex-col border-r">
       {/* 上半部分：主要功能按钮 */}
       <div className="flex flex-1 flex-col items-center gap-1 py-2">
         {leftActivityButtons.map((button) => (

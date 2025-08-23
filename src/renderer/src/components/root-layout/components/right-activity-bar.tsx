@@ -11,7 +11,7 @@ interface RightActivityBarProps {
 
 export function RightActivityBar({ rightActivePanel, onToggleRightSidebar, sessionsLength }: RightActivityBarProps) {
   return (
-    <div className="bg-secondary/30 flex w-10 flex-col border-l">
+    <div className="bg-secondary/30 flex h-full w-10 flex-col border-l">
       <div className="flex flex-1 flex-col items-center gap-1 py-2">
         {rightActivityButtons.map((button) => (
           <Tooltip key={button.id}>
