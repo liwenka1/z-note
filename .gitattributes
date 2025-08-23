@@ -1,0 +1,33 @@
+# 把文本文件在仓库中标准化为 LF
+* text=auto eol=lf
+
+# 对于需要保留 CRLF 的脚本（Windows 批处理等），显式设置
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# 二进制文件不要被当作文本处理
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.icns binary
+*.zip binary
+*.gz binary
+*.jar binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+
+# Node.js 和前端相关的二进制文件
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.otf binary
+
+# 其他常见二进制格式
+*.pdf binary
+*.doc binary
+*.docx binary
