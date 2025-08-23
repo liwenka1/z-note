@@ -29,12 +29,12 @@ export function EditorLayout() {
   };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-background">
+    <div className="bg-background flex h-full flex-col overflow-hidden">
       {/* 标签栏 - 只有打开标签时才显示 */}
       {openTabs.length > 0 && <TabBar />}
 
       {/* 主内容区域 - 无缝连接 */}
-      <div className="flex-1 overflow-hidden bg-background">{renderContent()}</div>
+      <div className="bg-background flex-1 overflow-hidden">{renderContent()}</div>
     </div>
   );
 }
