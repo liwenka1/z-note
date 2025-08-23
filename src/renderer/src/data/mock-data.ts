@@ -185,33 +185,36 @@ export const mockNotes: Note[] = [
   // Z-Note 项目相关笔记
   createNoteData({
     title: "Z-Note 项目规划",
-    content: `# Z-Note 项目规划
-
-## 项目概述
-Z-Note 是一个现代化的笔记应用，基于 Electron + React + TypeScript 构建。
-
-## 核心功能
-- ✅ Notion 风格的左侧导航
-- ✅ 主题切换功能
-- ✅ 全局搜索
-- 🚧 笔记编辑器
-- 🚧 文件夹管理
-- 📋 标签系统
-
-## 技术栈
-- **前端**: React 18 + TypeScript
-- **路由**: TanStack Router
-- **状态管理**: Zustand
-- **UI库**: shadcn/ui + Tailwind CSS
-- **桌面端**: Electron
-
-## 开发计划
-1. 完成前端静态页面开发
-2. 实现笔记编辑和管理功能
-3. 开发后端 API
-4. 数据同步和备份功能
-
-项目预计开发周期：4-6周`,
+    content: `
+<h2>
+  Hi there,
+</h2>
+<p>
+  this is a <em>basic</em> example of <strong>Tiptap</strong>. Sure, there are all kind of basic text styles you’d probably expect from a text editor. But wait until you see the lists:
+</p>
+<ul>
+  <li>
+    That’s a bullet list with one …
+  </li>
+  <li>
+    … or two list items.
+  </li>
+</ul>
+<p>
+  Isn’t that great? And all of that is editable. But wait, there’s more. Let’s try a code block:
+</p>
+<pre><code class="language-css">body {
+  display: none;
+}</code></pre>
+<p>
+  I know, I know, this is impressive. It’s only the tip of the iceberg though. Give it a try and click a little bit around. Don’t forget to check the other examples too.
+</p>
+<blockquote>
+  Wow, that’s amazing. Good work, boy! 👏
+  <br />
+  — Mom
+</blockquote>
+`,
     folderId: "folder-1-1",
     tags: ["tag-5", "tag-3"]
   }),
