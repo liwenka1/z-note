@@ -119,11 +119,7 @@ export function FolderItem({
 
         {/* 文件夹图标 */}
         <div className="mr-2">
-          {folder.isExpanded ? (
-            <FolderOpen className="h-4 w-4 text-blue-500" />
-          ) : (
-            <FolderIcon className="h-4 w-4 text-blue-500" />
-          )}
+          {folder.isExpanded ? <FolderOpen className="h-4 w-4" /> : <FolderIcon className="h-4 w-4" />}
         </div>
 
         {/* 文件夹名称 */}

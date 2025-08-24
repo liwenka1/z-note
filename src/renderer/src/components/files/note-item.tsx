@@ -64,7 +64,7 @@ export function NoteItem({ note, level }: NoteItemProps) {
       style={{ paddingLeft: `${(level + 1) * 12 + 8}px` }}
     >
       <div className="mr-2">
-        <NotebookPen className="h-4 w-4 text-blue-500" />
+        <NotebookPen className="h-4 w-4" />
       </div>
 
       {/* 笔记标题 */}
