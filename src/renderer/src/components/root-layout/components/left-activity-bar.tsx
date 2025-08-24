@@ -1,6 +1,6 @@
 import { Button } from "@renderer/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@renderer/components/ui/tooltip";
-import { ThemeToggleButton } from "@renderer/components/theme-toggle-button";
+import { ThemeToggleButton } from "@renderer/components/theme-toggle";
 import { leftActivityButtons, leftBottomButtons } from "../constants/activity-buttons";
 import { cn } from "@renderer/lib/utils";
 
