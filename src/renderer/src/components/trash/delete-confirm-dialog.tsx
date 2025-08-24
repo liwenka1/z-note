@@ -6,31 +6,25 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
+  AlertDialogTitle
 } from "@renderer/components/ui/alert-dialog";
-import { Button } from "@renderer/components/ui/button";
-import { Trash2 } from "lucide-react";
 
 interface DeleteConfirmDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   itemName: string;
   itemType: "文件夹" | "笔记";
   onConfirm: () => void;
 }
 
-export function DeleteConfirmDialog({ itemName, itemType, onConfirm }: DeleteConfirmDialogProps) {
+export function DeleteConfirmDialog({ open, onOpenChange, itemName, itemType, onConfirm }: DeleteConfirmDialogProps) {
+  const handleConfirm = () => {
+    onConfirm();
+    onOpenChange(false);
+  };
+
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button
-          size="sm"
-          variant="ghost"
-          className="text-destructive hover:text-destructive h-6 w-6 p-0"
-          title="永久删除"
-        >
-          <Trash2 size={12} />
-        </Button>
-      </AlertDialogTrigger>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>确认永久删除</AlertDialogTitle>
@@ -44,7 +38,7 @@ export function DeleteConfirmDialog({ itemName, itemType, onConfirm }: DeleteCon
         <AlertDialogFooter>
           <AlertDialogCancel>取消</AlertDialogCancel>
           <AlertDialogAction
-            onClick={onConfirm}
+            onClick={handleConfirm}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             永久删除
