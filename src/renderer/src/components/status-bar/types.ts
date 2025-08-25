@@ -1,4 +1,2 @@
-export interface StatusBarProps {
-  onToggleDock?: () => void;
-  isDockVisible?: boolean;
-}
+// StatusBar 不再需要 props，所有状态和逻辑都在内部管理
+// 保留此文件以备将来可能的类型定义需求

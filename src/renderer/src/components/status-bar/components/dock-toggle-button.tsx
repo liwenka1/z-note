@@ -7,7 +7,10 @@ interface DockToggleButtonProps {
   isDockVisible?: boolean;
 }
 
-export function DockToggleButton({ onToggleDock, isDockVisible = false }: DockToggleButtonProps) {
+export function DockToggleButton({
+  onToggleDock = () => {}, // 提供默认空函数，确保类型安全
+  isDockVisible = false
+}: DockToggleButtonProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
