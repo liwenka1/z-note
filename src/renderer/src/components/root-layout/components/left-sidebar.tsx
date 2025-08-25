@@ -1,5 +1,5 @@
-import { FilesPanel } from "@renderer/components/files/files-panel";
-import { TrashPanel } from "@renderer/components/trash/trash-panel";
+import { FilesPanel } from "@renderer/components/files";
+import { TrashPanel } from "@renderer/components/trash";
 
 interface LeftSidebarProps {
   activePanel: string | null;
