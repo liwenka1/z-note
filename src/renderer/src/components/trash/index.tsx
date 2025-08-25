@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNotesStore } from "@renderer/store";
-import { RestoreDialog } from "./restore-dialog";
-import { TrashItem } from "./trash-item";
-import { EmptyTrash } from "./empty-trash";
+import { RestoreDialog } from "./components/restore-dialog";
+import { TrashItem } from "./components/trash-item";
+import { EmptyTrash } from "./components/empty-trash";
 import { filterNotesByDeleted } from "@renderer/utils/data-utils";
 import type { Note } from "@renderer/types";
 
