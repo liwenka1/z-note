@@ -7,6 +7,7 @@ import { StatusBar } from "@renderer/components/status-bar";
 import { EditorLayout } from "@renderer/components/editor/editor-layout";
 import { useNotesStore } from "@renderer/store";
 import { useChatStore } from "@renderer/store/chat-store";
+import { LAYOUT_CONSTANTS, LAYOUT_CLASSES, ACTIVITY_BAR_CONFIG } from "./constants/layout";
 
 import { LeftActivityBar } from "./components/left-activity-bar";
 import { RightActivityBar } from "./components/right-activity-bar";
@@ -33,17 +34,13 @@ export function RootLayout() {
     initializeData();
   }, [initializeData]);
 
-  const toggleDock = () => {
-    // 保留空函数以兼容 StatusBar
-  };
-
   return (
     <div className="bg-background flex h-screen w-screen flex-col overflow-hidden">
       {/* 主要布局区域 - 使用 Allotment，预留 StatusBar 空间 */}
-      <div className="h-[calc(100vh-24px)]">
+      <div className={LAYOUT_CLASSES.MAIN_CONTENT_HEIGHT}>
         <Allotment proportionalLayout={false}>
-          {/* 左侧活动栏 - 固定 40px */}
-          <Allotment.Pane minSize={40} maxSize={40}>
+          {/* 左侧活动栏 - 固定宽度 */}
+          <Allotment.Pane minSize={ACTIVITY_BAR_CONFIG.minSize} maxSize={ACTIVITY_BAR_CONFIG.maxSize}>
             <LeftActivityBar
               activePanel={activePanel}
               onToggleLeftSidebar={toggleLeftSidebar}
@@ -52,7 +49,12 @@ export function RootLayout() {
           </Allotment.Pane>
 
           {/* 左侧面板 - 可收起 */}
-          <Allotment.Pane preferredSize={300} priority={LayoutPriority.Low} snap visible={leftSidebarOpen}>
+          <Allotment.Pane
+            preferredSize={LAYOUT_CONSTANTS.LEFT_SIDEBAR_DEFAULT_WIDTH}
+            priority={LayoutPriority.Low}
+            snap
+            visible={leftSidebarOpen}
+          >
             <LeftSidebar activePanel={activePanel} />
           </Allotment.Pane>
 
@@ -62,12 +64,17 @@ export function RootLayout() {
           </Allotment.Pane>
 
           {/* 右侧面板 - 可收起 */}
-          <Allotment.Pane preferredSize={350} priority={LayoutPriority.Low} snap visible={rightSidebarOpen}>
+          <Allotment.Pane
+            preferredSize={LAYOUT_CONSTANTS.RIGHT_SIDEBAR_DEFAULT_WIDTH}
+            priority={LayoutPriority.Low}
+            snap
+            visible={rightSidebarOpen}
+          >
             <RightSidebar rightActivePanel={rightActivePanel} />
           </Allotment.Pane>
 
-          {/* 右侧活动栏 - 固定 40px */}
-          <Allotment.Pane minSize={40} maxSize={40}>
+          {/* 右侧活动栏 - 固定宽度 */}
+          <Allotment.Pane minSize={ACTIVITY_BAR_CONFIG.minSize} maxSize={ACTIVITY_BAR_CONFIG.maxSize}>
             <RightActivityBar
               rightActivePanel={rightActivePanel}
               onToggleRightSidebar={toggleRightSidebar}
@@ -78,7 +85,7 @@ export function RootLayout() {
       </div>
 
       {/* StatusBar 保持在外层 */}
-      <StatusBar onToggleDock={toggleDock} isDockVisible={true} />
+      <StatusBar />
 
       {/* SearchCommand 全局弹窗 */}
       <SearchCommand />
