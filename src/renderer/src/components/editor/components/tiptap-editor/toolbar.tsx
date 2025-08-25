@@ -4,6 +4,7 @@ import { Button } from "@renderer/components/ui/button";
 import { Separator } from "@renderer/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@renderer/components/ui/tooltip";
 import { cn } from "@renderer/lib/utils";
+import { TOOLBAR_CONFIG, EDITOR_CONSTANTS } from "../../constants/editor";
 
 interface EditorToolbarProps {
   editor: Editor;
@@ -49,13 +50,19 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
   };
 
   return (
-    <div className={cn("flex flex-wrap items-center justify-center gap-1 border-b p-1", className)}>
+    <div className={cn(TOOLBAR_CONFIG.CONTAINER_CLASS, className)}>
       {/* 撤销/重做 */}
       <div className="flex items-center gap-1">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="sm" onClick={undo} disabled={!editor.can().undo()} className="h-8 w-8 p-0">
-              <Undo className="h-4 w-4" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={undo}
+              disabled={!editor.can().undo()}
+              className={TOOLBAR_CONFIG.BUTTON_SIZE}
+            >
+              <Undo className={EDITOR_CONSTANTS.ICON_SIZE} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>撤销 (Ctrl+Z)</TooltipContent>
@@ -63,15 +70,21 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="sm" onClick={redo} disabled={!editor.can().redo()} className="h-8 w-8 p-0">
-              <Redo className="h-4 w-4" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={redo}
+              disabled={!editor.can().redo()}
+              className={TOOLBAR_CONFIG.BUTTON_SIZE}
+            >
+              <Redo className={EDITOR_CONSTANTS.ICON_SIZE} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>重做 (Ctrl+Y)</TooltipContent>
         </Tooltip>
       </div>
 
-      <Separator orientation="vertical" className="h-6" />
+      <Separator orientation="vertical" className={TOOLBAR_CONFIG.SEPARATOR_HEIGHT} />
 
       {/* 标题 */}
       <div className="flex items-center gap-1">
@@ -82,7 +95,11 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setHeading(level as 1 | 2 | 3 | 4 | 5 | 6)}
-                className={cn("h-8 px-2 text-xs font-medium", editor.isActive("heading", { level }) && "bg-secondary")}
+                className={cn(
+                  TOOLBAR_CONFIG.HEADING_BUTTON_SIZE,
+                  "text-xs font-medium",
+                  editor.isActive("heading", { level }) && "bg-secondary"
+                )}
               >
                 H{level}
               </Button>
@@ -92,7 +109,7 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
         ))}
       </div>
 
-      <Separator orientation="vertical" className="h-6" />
+      <Separator orientation="vertical" className={TOOLBAR_CONFIG.SEPARATOR_HEIGHT} />
 
       {/* 文本格式 */}
       <div className="flex items-center gap-1">
@@ -102,9 +119,9 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
               variant="ghost"
               size="sm"
               onClick={toggleBold}
-              className={cn("h-8 w-8 p-0", editor.isActive("bold") && "bg-secondary")}
+              className={cn(TOOLBAR_CONFIG.BUTTON_SIZE, editor.isActive("bold") && "bg-secondary")}
             >
-              <Bold className="h-4 w-4" />
+              <Bold className={EDITOR_CONSTANTS.ICON_SIZE} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>粗体 (Ctrl+B)</TooltipContent>
@@ -116,9 +133,9 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
               variant="ghost"
               size="sm"
               onClick={toggleItalic}
-              className={cn("h-8 w-8 p-0", editor.isActive("italic") && "bg-secondary")}
+              className={cn(TOOLBAR_CONFIG.BUTTON_SIZE, editor.isActive("italic") && "bg-secondary")}
             >
-              <Italic className="h-4 w-4" />
+              <Italic className={EDITOR_CONSTANTS.ICON_SIZE} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>斜体 (Ctrl+I)</TooltipContent>
@@ -130,9 +147,9 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
               variant="ghost"
               size="sm"
               onClick={toggleStrike}
-              className={cn("h-8 w-8 p-0", editor.isActive("strike") && "bg-secondary")}
+              className={cn(TOOLBAR_CONFIG.BUTTON_SIZE, editor.isActive("strike") && "bg-secondary")}
             >
-              <Strikethrough className="h-4 w-4" />
+              <Strikethrough className={EDITOR_CONSTANTS.ICON_SIZE} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>删除线</TooltipContent>
@@ -144,16 +161,16 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
               variant="ghost"
               size="sm"
               onClick={toggleCode}
-              className={cn("h-8 w-8 p-0", editor.isActive("code") && "bg-secondary")}
+              className={cn(TOOLBAR_CONFIG.BUTTON_SIZE, editor.isActive("code") && "bg-secondary")}
             >
-              <Code className="h-4 w-4" />
+              <Code className={EDITOR_CONSTANTS.ICON_SIZE} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>行内代码</TooltipContent>
         </Tooltip>
       </div>
 
-      <Separator orientation="vertical" className="h-6" />
+      <Separator orientation="vertical" className={TOOLBAR_CONFIG.SEPARATOR_HEIGHT} />
 
       {/* 列表和引用 */}
       <div className="flex items-center gap-1">
@@ -163,9 +180,9 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
               variant="ghost"
               size="sm"
               onClick={toggleBulletList}
-              className={cn("h-8 w-8 p-0", editor.isActive("bulletList") && "bg-secondary")}
+              className={cn(TOOLBAR_CONFIG.BUTTON_SIZE, editor.isActive("bulletList") && "bg-secondary")}
             >
-              <List className="h-4 w-4" />
+              <List className={EDITOR_CONSTANTS.ICON_SIZE} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>无序列表</TooltipContent>
@@ -177,9 +194,9 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
               variant="ghost"
               size="sm"
               onClick={toggleOrderedList}
-              className={cn("h-8 w-8 p-0", editor.isActive("orderedList") && "bg-secondary")}
+              className={cn(TOOLBAR_CONFIG.BUTTON_SIZE, editor.isActive("orderedList") && "bg-secondary")}
             >
-              <ListOrdered className="h-4 w-4" />
+              <ListOrdered className={EDITOR_CONSTANTS.ICON_SIZE} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>有序列表</TooltipContent>
@@ -191,9 +208,9 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
               variant="ghost"
               size="sm"
               onClick={toggleBlockquote}
-              className={cn("h-8 w-8 p-0", editor.isActive("blockquote") && "bg-secondary")}
+              className={cn(TOOLBAR_CONFIG.BUTTON_SIZE, editor.isActive("blockquote") && "bg-secondary")}
             >
-              <Quote className="h-4 w-4" />
+              <Quote className={EDITOR_CONSTANTS.ICON_SIZE} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>引用</TooltipContent>
@@ -205,9 +222,9 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
               variant="ghost"
               size="sm"
               onClick={setLink}
-              className={cn("h-8 w-8 p-0", editor.isActive("link") && "bg-secondary")}
+              className={cn(TOOLBAR_CONFIG.BUTTON_SIZE, editor.isActive("link") && "bg-secondary")}
             >
-              <Link2 className="h-4 w-4" />
+              <Link2 className={EDITOR_CONSTANTS.ICON_SIZE} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>链接</TooltipContent>

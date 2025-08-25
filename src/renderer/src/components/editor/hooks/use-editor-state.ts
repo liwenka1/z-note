@@ -2,13 +2,13 @@ import { useEffect } from "react";
 import { useNotesStore } from "@renderer/store";
 import { useTabStore } from "@renderer/store/tab-store";
 import { useEditorStore } from "@renderer/store/editor-store";
-import { TipTapEditor } from "./tiptap-editor";
 
-interface NoteEditorProps {
-  noteId: string;
-}
-
-export function NoteEditor({ noteId }: NoteEditorProps) {
+/**
+ * Editor 状态管理 Hook
+ * 封装编辑器相关的状态和逻辑
+ * 参考 chat 的 use-chat-state.ts
+ */
+export function useEditorState(noteId: string) {
   const { notes } = useNotesStore();
   const { openTab } = useTabStore();
   const { startEditing, getEditingContent, updateContent } = useEditorStore();
@@ -35,20 +35,12 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
     updateContent(noteId, newContent);
   };
 
-  if (!note) {
-    return (
-      <div className="bg-background flex h-full flex-col">
-        <div className="border-border bg-background border-b p-4">
-          <h2 className="text-lg font-semibold">笔记未找到</h2>
-          <p className="text-muted-foreground">无法找到ID为 {noteId} 的笔记。</p>
-        </div>
-      </div>
-    );
-  }
+  return {
+    // 状态
+    note,
+    editingContent,
 
-  return (
-    <div className="bg-background h-full w-full overflow-auto">
-      <TipTapEditor content={editingContent} onChange={handleContentChange} className="bg-background min-h-full" />
-    </div>
-  );
+    // 操作函数
+    handleContentChange
+  };
 }

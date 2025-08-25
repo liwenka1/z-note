@@ -6,6 +6,7 @@ import Typography from "@tiptap/extension-typography";
 import { useEffect } from "react";
 import { cn } from "@renderer/lib/utils";
 import { EditorToolbar } from "./toolbar";
+import { TIPTAP_CONFIG } from "../../constants/editor";
 
 interface TipTapEditorProps {
   content: string;
@@ -20,7 +21,7 @@ export function TipTapEditor({
   onChange,
   editable = true,
   className,
-  placeholder = "开始写作..."
+  placeholder = TIPTAP_CONFIG.DEFAULT_PLACEHOLDER
 }: TipTapEditorProps) {
   const editor = useEditor({
     extensions: [
@@ -28,7 +29,7 @@ export function TipTapEditor({
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: "text-primary underline-offset-4 hover:underline"
+          class: TIPTAP_CONFIG.LINK_CLASS
         }
       }),
       Placeholder.configure({
@@ -44,7 +45,7 @@ export function TipTapEditor({
     },
     editorProps: {
       attributes: {
-        class: "focus:outline-none prose prose-neutral dark:prose-invert max-w-none p-6"
+        class: TIPTAP_CONFIG.EDITOR_PROPS_CLASS
       }
     }
   });
