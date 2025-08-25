@@ -1,6 +1,6 @@
 import { Button } from "@renderer/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@renderer/components/ui/tooltip";
-import { ThemeToggleButton } from "@renderer/components/theme-toggle";
+import { ThemeToggle } from "@renderer/components/theme-toggle";
 import { leftActivityButtons, leftBottomButtons } from "../constants/activity-buttons";
 import { cn } from "@renderer/lib/utils";
 
@@ -39,7 +39,7 @@ export function LeftActivityBar({ activePanel, onToggleLeftSidebar, onSettingsCl
 
       {/* 下半部分：主题切换和设置 */}
       <div className="flex flex-col items-center gap-1 pb-2">
-        <ThemeToggleButton />
+        <ThemeToggle />
         {leftBottomButtons.map((button) => (
           <Tooltip key={button.id}>
             <TooltipTrigger asChild>

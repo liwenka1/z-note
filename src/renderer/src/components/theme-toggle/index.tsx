@@ -3,7 +3,7 @@ import { Button } from "@renderer/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@renderer/components/ui/tooltip";
 import { useThemeStore } from "@renderer/store";
 
-export function ThemeToggleButton() {
+export function ThemeToggle() {
   const { theme, setTheme } = useThemeStore();
 
   const toggleTheme = () => {
