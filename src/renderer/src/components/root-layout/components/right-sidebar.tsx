@@ -1,4 +1,4 @@
-import { ChatPanel } from "@renderer/components/chat/chat-panel";
+import { ChatPanel } from "@renderer/components/chat";
 
 interface RightSidebarProps {
   rightActivePanel: string | null;

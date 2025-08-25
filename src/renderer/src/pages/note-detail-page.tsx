@@ -1,4 +1,4 @@
-import { NoteEditor } from "@renderer/components/editor/note-editor";
+import { NoteEditor } from "@renderer/components/editor";
 
 interface NoteDetailPageProps {
   noteId: string;
