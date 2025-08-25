@@ -4,7 +4,7 @@ import "allotment/dist/style.css";
 
 import { SearchCommand } from "@renderer/components/search-command";
 import { StatusBar } from "@renderer/components/status-bar";
-import { EditorLayout } from "@renderer/components/editor/editor-layout";
+import { EditorLayout } from "@renderer/components/root-layout/components/editor-layout";
 import { useNotesStore } from "@renderer/store";
 import { useChatStore } from "@renderer/store/chat-store";
 import { LAYOUT_CONSTANTS, LAYOUT_CLASSES, ACTIVITY_BAR_CONFIG } from "./constants/layout";
