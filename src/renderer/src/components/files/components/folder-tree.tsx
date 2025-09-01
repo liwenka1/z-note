@@ -1,12 +1,16 @@
-import { useNotesStore } from "@renderer/store";
 import { useNavigate } from "@tanstack/react-router";
-import type { Folder } from "@renderer/types";
+import { useFolders, useNotes, useCreateFolder, useCreateNote } from "@renderer/hooks";
+import { useFilesUIStore } from "@renderer/store/ui";
+import type { Folder } from "@renderer/types/entities";
 import { FolderItem } from "./folder-item";
 import { NoteItem } from "./note-item";
 
 export function FolderTree() {
-  const { folders, notes, selectedFolderId, setSelectedFolder, toggleFolderExpanded, createFolder, createNote } =
-    useNotesStore();
+  const { data: folders = [] } = useFolders();
+  const { data: notes = [] } = useNotes();
+  const { mutate: createFolder } = useCreateFolder();
+  const { mutate: createNote } = useCreateNote();
+  const { selectedFolderId, setSelectedFolder, toggleFolderExpanded, expandedFolderIds } = useFilesUIStore();
   const navigate = useNavigate();
 
   // 过滤活跃的文件夹和笔记
@@ -29,24 +33,25 @@ export function FolderTree() {
     createFolder({
       name: newFolderName,
       parentId,
-      description: "",
       color: "#6b7280",
-      icon: "📁",
-      isDeleted: false,
-      sortOrder: 0
+      icon: "📁"
     });
   };
 
   const handleCreateNoteInFolder = (folderId: string) => {
-    const newNoteId = createNote({
-      title: `新笔记 ${Date.now()}`,
-      content: "",
-      folderId,
-      tags: [],
-      isFavorite: false,
-      isDeleted: false
-    });
-    navigate({ to: "/notes/$noteId", params: { noteId: newNoteId } });
+    createNote(
+      {
+        title: `新笔记 ${Date.now()}`,
+        content: "",
+        folderId,
+        tagIds: []
+      },
+      {
+        onSuccess: (newNote) => {
+          navigate({ to: "/notes/$noteId", params: { noteId: newNote.id } });
+        }
+      }
+    );
   };
 
   return (
@@ -54,13 +59,14 @@ export function FolderTree() {
       <div className="space-y-1">
         {/* 根级别文件夹 */}
         {rootFolders
-          .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
+          .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0) || a.name.localeCompare(b.name))
           .map((folder) => (
             <FolderItem
               key={folder.id}
               folder={folder}
               level={0}
               isSelected={selectedFolderId === folder.id}
+              isExpanded={expandedFolderIds.has(folder.id)}
               onSelect={setSelectedFolder}
               onToggleExpand={toggleFolderExpanded}
               onCreateSubfolder={handleCreateSubfolder}
@@ -73,7 +79,7 @@ export function FolderTree() {
         {rootNotes
           .sort((a, b) => a.title.localeCompare(b.title))
           .map((note) => (
-            <NoteItem key={note.id} note={note} level={-1} />
+            <NoteItem key={note.id} note={note} level={0} />
           ))}
       </div>
     </div>

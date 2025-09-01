@@ -60,7 +60,7 @@ export function useLayoutState() {
         setRightActivePanel("outline");
       }
     }
-    // 其他右侧按钮（tags、stats）暂时无行为
+    // 右侧按钮都已实现相应功能
   };
 
   return {

@@ -11,12 +11,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@renderer/components/ui/dropdown-menu";
-import { useNotesStore, useTabStore } from "@renderer/store";
+import { useTabStore } from "@renderer/store";
+import { useCreateNote } from "@renderer/hooks";
 import { useEditorStore } from "@renderer/store/editor-store";
 
 export function TabBar() {
-  const { openTabs, activeTabId, closeTab, closeAllTabs, closeOtherTabs, setActiveTab } = useTabStore();
-  const { createNote } = useNotesStore();
+  const { openTabs, activeTabId, closeTab, closeAllTabs, closeOtherTabs, setActiveTab, addTab } = useTabStore();
+  const { mutate: createNote } = useCreateNote();
   const { isNoteModified, stopEditing } = useEditorStore();
   const navigate = useNavigate();
   const [scrollLeft, setScrollLeft] = useState(0);
@@ -118,14 +119,25 @@ export function TabBar() {
   };
 
   const handleNewNote = () => {
-    const newNoteId = createNote({
-      title: `新笔记 ${new Date().toLocaleString()}`,
+    const noteData = {
+      title: "新建笔记",
       content: "",
-      tags: [],
-      isFavorite: false,
-      isDeleted: false
+      folderId: undefined,
+      tagIds: []
+    };
+
+    createNote(noteData, {
+      onSuccess: (newNote) => {
+        // 添加到标签页并激活
+        addTab({ id: newNote.id, title: newNote.title, type: "note" });
+        setActiveTab(newNote.id);
+        // 导航到新笔记
+        navigate({ to: "/notes/$noteId", params: { noteId: newNote.id } });
+      },
+      onError: (error) => {
+        console.error("创建笔记失败:", error);
+      }
     });
-    navigate({ to: "/notes/$noteId", params: { noteId: newNoteId } });
   };
 
   if (openTabs.length === 0) {

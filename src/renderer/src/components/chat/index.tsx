@@ -11,7 +11,7 @@ import { CHAT_ANIMATION, CHAT_CLASSES } from "./constants/chat";
  * 参考 root-layout 的模式，组合所有子组件
  */
 export function ChatPanel() {
-  const { currentSession, hasMessages } = useChatState();
+  const { hasMessages } = useChatState();
 
   return (
     <motion.div {...CHAT_ANIMATION} className={CHAT_CLASSES.PANEL}>

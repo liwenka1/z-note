@@ -1,19 +1,17 @@
 import { useEffect } from "react";
-import { useNotesStore } from "@renderer/store";
+import { useNote, useUpdateNote } from "@renderer/hooks";
 import { useTabStore } from "@renderer/store/tab-store";
 import { useEditorStore } from "@renderer/store/editor-store";
 
 /**
  * Editor 状态管理 Hook
- * 封装编辑器相关的状态和逻辑
- * 参考 chat 的 use-chat-state.ts
+ * 使用 React Query 进行数据管理
  */
 export function useEditorState(noteId: string) {
-  const { notes } = useNotesStore();
+  const { data: note, isLoading } = useNote(noteId, !!noteId);
+  const { mutate: updateNote } = useUpdateNote();
   const { openTab } = useTabStore();
-  const { startEditing, getEditingContent, updateContent } = useEditorStore();
-
-  const note = notes.find((n) => n.id === noteId);
+  const { startEditing, getEditingContent, updateContent, saveNote } = useEditorStore();
 
   // 获取编辑内容，如果没有则使用笔记原始内容
   const editingContent = getEditingContent(noteId) || note?.content || "";
@@ -35,12 +33,35 @@ export function useEditorState(noteId: string) {
     updateContent(noteId, newContent);
   };
 
+  // 保存笔记
+  const handleSave = () => {
+    if (note) {
+      const content = getEditingContent(noteId);
+      if (content !== undefined && content !== note.content) {
+        updateNote(
+          {
+            id: noteId,
+            data: { content }
+          },
+          {
+            onSuccess: () => {
+              // 保存成功后，更新编辑器的原始内容状态
+              saveNote(noteId);
+            }
+          }
+        );
+      }
+    }
+  };
+
   return {
     // 状态
     note,
     editingContent,
+    isLoading,
 
     // 操作函数
-    handleContentChange
+    handleContentChange,
+    handleSave
   };
 }

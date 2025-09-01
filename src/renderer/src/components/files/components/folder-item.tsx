@@ -20,15 +20,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@renderer/components/ui/dropdown-menu";
-import { useNotesStore } from "@renderer/store";
+import { useFolders, useNotes, useUpdateFolder, useDeleteFolder } from "@renderer/hooks";
+import { useFilesUIStore } from "@renderer/store/ui";
 import { cn } from "@renderer/lib/utils";
-import type { Folder } from "@renderer/types";
+import type { Folder } from "@renderer/types/entities";
 import { NoteItem } from "./note-item";
 
 interface FolderItemProps {
   folder: Folder;
   level: number;
   isSelected: boolean;
+  isExpanded: boolean;
   onSelect: (folderId: string) => void;
   onToggleExpand: (folderId: string) => void;
   onCreateSubfolder: (parentId: string) => void;
@@ -40,13 +42,18 @@ export function FolderItem({
   folder,
   level,
   isSelected,
+  isExpanded,
   onSelect,
   onToggleExpand,
   onCreateSubfolder,
   onCreateNote,
   folderNotes
 }: FolderItemProps) {
-  const { folders, notes, updateFolder, deleteFolder } = useNotesStore();
+  const { data: folders = [] } = useFolders();
+  const { data: notes = [] } = useNotes();
+  const { mutate: updateFolder } = useUpdateFolder();
+  const { mutate: deleteFolder } = useDeleteFolder();
+  const { expandedFolderIds } = useFilesUIStore();
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(folder.name);
 
@@ -74,7 +81,10 @@ export function FolderItem({
 
   const handleSave = () => {
     if (editName.trim() && editName !== folder.name) {
-      updateFolder(folder.id, { name: editName.trim() });
+      updateFolder({
+        id: folder.id,
+        data: { name: editName.trim() }
+      });
     }
     setIsEditing(false);
     setEditName(folder.name);
@@ -114,12 +124,12 @@ export function FolderItem({
           className="text-muted-foreground hover:text-foreground mr-2 h-4 w-4 p-0"
           onClick={handleToggleExpand}
         >
-          {folder.isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+          {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
         </Button>
 
         {/* 文件夹图标 */}
         <div className="mr-2">
-          {folder.isExpanded ? <FolderOpen className="h-4 w-4" /> : <FolderIcon className="h-4 w-4" />}
+          {isExpanded ? <FolderOpen className="h-4 w-4" /> : <FolderIcon className="h-4 w-4" />}
         </div>
 
         {/* 文件夹名称 */}
@@ -221,18 +231,19 @@ export function FolderItem({
       </div>
 
       {/* 子文件夹和笔记 */}
-      {folder.isExpanded && (
+      {isExpanded && (
         <div>
           {/* 子文件夹 */}
           {hasChildren &&
             children
-              .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
+              .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0) || a.name.localeCompare(b.name))
               .map((child) => (
                 <FolderItem
                   key={child.id}
                   folder={child}
                   level={level + 1}
                   isSelected={isSelected}
+                  isExpanded={expandedFolderIds.has(child.id)}
                   onSelect={onSelect}
                   onToggleExpand={onToggleExpand}
                   onCreateSubfolder={onCreateSubfolder}

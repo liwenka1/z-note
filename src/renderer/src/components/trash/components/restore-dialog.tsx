@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@renderer/components/ui/dialog";
 import { Button } from "@renderer/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@renderer/components/ui/select";
-import { useNotesStore } from "@renderer/store";
+import { useFolders, useRestoreNote, useUpdateNote } from "@renderer/hooks";
 import type { Note } from "@renderer/types";
 
 interface RestoreDialogProps {
@@ -12,7 +12,9 @@ interface RestoreDialogProps {
 }
 
 export function RestoreDialog({ open, onOpenChange, item }: RestoreDialogProps) {
-  const { folders, restoreNote, moveNoteToFolder } = useNotesStore();
+  const { data: folders = [] } = useFolders();
+  const { mutate: restoreNote } = useRestoreNote();
+  const { mutate: updateNote } = useUpdateNote();
   const [selectedFolderId, setSelectedFolderId] = useState<string>("root");
 
   if (!item) return null;
@@ -27,15 +29,36 @@ export function RestoreDialog({ open, onOpenChange, item }: RestoreDialogProps) 
   const handleRestore = () => {
     if (originalFolderExists) {
       // 原始位置存在，直接恢复
-      restoreNote(item.id);
+      restoreNote(item.id, {
+        onSuccess: () => {
+          onOpenChange(false);
+        }
+      });
     } else {
-      // 原始位置不存在，根据用户选择恢复
-      restoreNote(item.id);
-      if (selectedFolderId && selectedFolderId !== "root") {
-        moveNoteToFolder(item.id, selectedFolderId);
-      }
+      // 原始位置不存在，根据用户选择恢复并移动到新位置
+      const targetFolderId = selectedFolderId === "root" ? null : selectedFolderId;
+
+      restoreNote(item.id, {
+        onSuccess: (restoredNote) => {
+          // 如果需要移动到新位置
+          if (restoredNote.folderId !== targetFolderId) {
+            updateNote(
+              {
+                id: item.id,
+                data: { folderId: targetFolderId || undefined }
+              },
+              {
+                onSuccess: () => {
+                  onOpenChange(false);
+                }
+              }
+            );
+          } else {
+            onOpenChange(false);
+          }
+        }
+      });
     }
-    onOpenChange(false);
   };
 
   return (

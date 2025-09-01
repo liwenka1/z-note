@@ -1,11 +1,9 @@
-import { useEffect } from "react";
 import { Allotment, LayoutPriority } from "allotment";
 import "allotment/dist/style.css";
 
 import { SearchCommand } from "@renderer/components/search-command";
 import { StatusBar } from "@renderer/components/status-bar";
 import { EditorLayout } from "@renderer/components/root-layout/components/editor-layout";
-import { useNotesStore } from "@renderer/store";
 import { useChatStore } from "@renderer/store/chat-store";
 import { LAYOUT_CONSTANTS, LAYOUT_CLASSES, ACTIVITY_BAR_CONFIG } from "./constants/layout";
 
@@ -16,7 +14,6 @@ import { RightSidebar } from "./components/right-sidebar";
 import { useLayoutState } from "./hooks/use-layout-state";
 
 export function RootLayout() {
-  const { initializeData } = useNotesStore();
   const { sessions } = useChatStore();
 
   const {
@@ -28,11 +25,6 @@ export function RootLayout() {
     toggleRightSidebar,
     handleSettingsClick
   } = useLayoutState();
-
-  // 初始化数据
-  useEffect(() => {
-    initializeData();
-  }, [initializeData]);
 
   return (
     <div className="bg-background flex h-screen w-screen flex-col overflow-hidden">

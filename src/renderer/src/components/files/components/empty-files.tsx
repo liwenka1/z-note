@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { FileText, FolderPlus } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
-import { useNotesStore } from "@renderer/store";
+import { useCreateNote, useCreateFolder } from "@renderer/hooks";
 import { useNavigate } from "@tanstack/react-router";
 
 const suggestions = [
@@ -18,30 +18,32 @@ const suggestions = [
 ];
 
 export function EmptyFiles() {
-  const { createNote, createFolder } = useNotesStore();
+  const { mutate: createNote } = useCreateNote();
+  const { mutate: createFolder } = useCreateFolder();
   const navigate = useNavigate();
 
   const handleCreateNote = () => {
-    const newNoteId = createNote({
-      title: `新笔记 ${Date.now()}`,
-      content: "",
-      folderId: undefined,
-      tags: [],
-      isFavorite: false,
-      isDeleted: false
-    });
-    navigate({ to: "/notes/$noteId", params: { noteId: newNoteId } });
+    createNote(
+      {
+        title: `新笔记 ${Date.now()}`,
+        content: "",
+        folderId: undefined,
+        tagIds: []
+      },
+      {
+        onSuccess: (newNote) => {
+          navigate({ to: "/notes/$noteId", params: { noteId: newNote.id } });
+        }
+      }
+    );
   };
 
   const handleCreateFolder = () => {
     createFolder({
       name: `新文件夹 ${Date.now()}`,
-      description: "",
       parentId: undefined,
       color: "#6b7280",
-      icon: "📁",
-      isDeleted: false,
-      sortOrder: 0
+      icon: "📁"
     });
   };
 

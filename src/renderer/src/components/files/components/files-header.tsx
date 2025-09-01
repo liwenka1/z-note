@@ -1,34 +1,58 @@
 import { FileText, Plus } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
-import { useNotesStore } from "@renderer/store";
 import { useNavigate } from "@tanstack/react-router";
+import { useCreateNote, useCreateFolder } from "@renderer/hooks";
+import { useTabStore } from "@renderer/store";
+import { generateId } from "@renderer/types";
 import { FILES_CLASSES, FILES_CONSTANTS } from "../constants/files";
 
 export function FilesHeader() {
-  const { createNote, createFolder } = useNotesStore();
   const navigate = useNavigate();
+  const { addTab, setActiveTab } = useTabStore();
+  const { mutate: createNote } = useCreateNote();
+  const { mutate: createFolder } = useCreateFolder();
 
   const handleCreateNote = () => {
-    const newNoteId = createNote({
-      title: `新笔记 ${Date.now()}`,
+    const noteId = generateId();
+    const noteData = {
+      title: "新建笔记",
       content: "",
-      folderId: undefined,
-      tags: [],
-      isFavorite: false,
-      isDeleted: false
-    });
-    navigate({ to: "/notes/$noteId", params: { noteId: newNoteId } });
+      folderId: null,
+      tagIds: []
+    };
+
+    createNote(
+      { id: noteId, ...noteData },
+      {
+        onSuccess: (newNote) => {
+          // 添加到标签页并激活
+          addTab({ id: newNote.id, title: newNote.title, type: "note" });
+          setActiveTab(newNote.id);
+          // 导航到新笔记
+          navigate({ to: "/notes/$noteId", params: { noteId: newNote.id } });
+        },
+        onError: (error) => {
+          console.error("创建笔记失败:", error);
+        }
+      }
+    );
   };
 
   const handleCreateFolder = () => {
-    createFolder({
-      name: `新文件夹 ${Date.now()}`,
-      description: "",
-      parentId: undefined,
-      color: "#6b7280",
-      icon: "📁",
-      isDeleted: false,
-      sortOrder: 0
+    const folderData = {
+      name: "新建文件夹",
+      parentId: null,
+      color: "#3b82f6",
+      icon: "📁"
+    };
+
+    createFolder(folderData, {
+      onSuccess: (newFolder) => {
+        console.log("文件夹创建成功:", newFolder);
+      },
+      onError: (error) => {
+        console.error("创建文件夹失败:", error);
+      }
     });
   };
 

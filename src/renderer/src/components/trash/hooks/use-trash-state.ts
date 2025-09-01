@@ -1,25 +1,37 @@
 import { useState } from "react";
-import { useNotesStore } from "@renderer/store";
-import { filterNotesByDeleted } from "@renderer/utils/data-utils";
-import type { Note } from "@renderer/types";
+import {
+  useNotes,
+  useFolders,
+  useRestoreNote,
+  useRestoreFolder,
+  usePermanentDeleteNote,
+  usePermanentDeleteFolder
+} from "@renderer/hooks";
+import type { Note, Folder } from "@renderer/types";
 
 /**
  * Trash 状态管理 Hook
- * 封装与 useNotesStore 的交互，提供简化的接口
- * 参考 chat 的 use-chat-state.ts
+ * 管理垃圾箱的状态和操作
  */
 export function useTrashState() {
-  const notes = useNotesStore((state) => state.notes);
-  const folders = useNotesStore((state) => state.folders);
-  const restoreNote = useNotesStore((state) => state.restoreNote);
-  const permanentDeleteNote = useNotesStore((state) => state.permanentDeleteNote);
+  // 获取所有数据（包括已删除的）
+  const { data: allNotes = [] } = useNotes({ includeDeleted: true });
+  const { data: allFolders = [] } = useFolders();
+
+  // Mutation hooks
+  const { mutate: restoreNote } = useRestoreNote();
+  const { mutate: restoreFolder } = useRestoreFolder();
+  const { mutate: permanentDeleteNote } = usePermanentDeleteNote();
+  const { mutate: permanentDeleteFolder } = usePermanentDeleteFolder();
 
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 
-  // 获取已删除的笔记
-  const deletedNotes = filterNotesByDeleted(notes, true);
-  const hasDeletedNotes = deletedNotes.length > 0;
+  // 过滤已删除的数据
+  const deletedNotes = allNotes.filter((note) => note.isDeleted);
+  const deletedFolders = allFolders.filter((folder) => folder.isDeleted);
+
+  const hasDeletedItems = deletedNotes.length > 0 || deletedFolders.length > 0;
 
   // 处理恢复对话框
   const openRestoreDialog = (note: Note) => {
@@ -32,18 +44,74 @@ export function useTrashState() {
     setSelectedNote(null);
   };
 
+  // 恢复笔记
+  const handleRestoreNote = (note: Note) => {
+    restoreNote(note.id, {
+      onSuccess: (restoredNote) => {
+        console.log("笔记恢复成功:", restoredNote.title);
+        closeRestoreDialog();
+      },
+      onError: (error) => {
+        console.error("笔记恢复失败:", error);
+      }
+    });
+  };
+
+  // 恢复文件夹
+  const handleRestoreFolder = (folder: Folder) => {
+    restoreFolder(folder.id, {
+      onSuccess: (restoredFolder) => {
+        console.log("文件夹恢复成功:", restoredFolder.name);
+      },
+      onError: (error) => {
+        console.error("文件夹恢复失败:", error);
+      }
+    });
+  };
+
+  // 永久删除笔记
+  const handlePermanentDeleteNote = (note: Note) => {
+    if (confirm(`确定要永久删除笔记"${note.title}"吗？此操作无法撤销。`)) {
+      permanentDeleteNote(note.id, {
+        onSuccess: () => {
+          console.log("笔记已永久删除");
+        },
+        onError: (error) => {
+          console.error("永久删除失败:", error);
+        }
+      });
+    }
+  };
+
+  // 永久删除文件夹
+  const handlePermanentDeleteFolder = (folder: Folder) => {
+    if (confirm(`确定要永久删除文件夹"${folder.name}"吗？此操作无法撤销。`)) {
+      permanentDeleteFolder(folder.id, {
+        onSuccess: () => {
+          console.log("文件夹已永久删除");
+        },
+        onError: (error) => {
+          console.error("永久删除失败:", error);
+        }
+      });
+    }
+  };
+
   return {
     // 状态
-    notes,
-    folders,
+    allNotes,
+    allFolders,
     deletedNotes,
-    hasDeletedNotes,
+    deletedFolders,
+    hasDeletedItems,
     restoreDialogOpen,
     selectedNote,
 
     // 操作函数
-    restoreNote,
-    permanentDeleteNote,
+    handleRestoreNote,
+    handleRestoreFolder,
+    handlePermanentDeleteNote,
+    handlePermanentDeleteFolder,
     openRestoreDialog,
     closeRestoreDialog
   };

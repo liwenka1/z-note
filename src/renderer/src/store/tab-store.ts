@@ -16,6 +16,7 @@ interface TabState {
 
 interface TabActions {
   openTab: (noteId: string, title: string, type?: "note" | "settings") => void;
+  addTab: (tab: { id: string; title: string; type: "note" | "settings" }) => void;
   openSettingsTab: () => void;
   closeTab: (tabId: string) => void;
   closeAllTabs: () => void;
@@ -57,6 +58,31 @@ export const useTabStore = create<TabStore>()(
 
         // Set as active tab
         state.activeTabId = noteId;
+      });
+    },
+
+    addTab: (tab: { id: string; title: string; type: "note" | "settings" }) => {
+      set((state) => {
+        // Check if tab already exists
+        const existingTab = state.openTabs.find((t) => t.id === tab.id);
+
+        if (!existingTab) {
+          // Add new tab
+          state.openTabs.push({
+            id: tab.id,
+            title: tab.title,
+            type: tab.type,
+            isModified: false,
+            isDirty: false
+          });
+        } else {
+          // Update existing tab
+          existingTab.title = tab.title;
+          existingTab.type = tab.type;
+        }
+
+        // Set as active tab
+        state.activeTabId = tab.id;
       });
     },
 

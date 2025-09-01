@@ -1,16 +1,23 @@
-import { useState } from "react";
+import { useLayoutState } from "@renderer/components/root-layout/hooks/use-layout-state";
 import { DockToggleButton } from "./components/dock-toggle-button";
 import { NoteStatusInfo } from "./components/note-status-info";
 import { HelpButton } from "./components/help-button";
 
 export function StatusBar() {
-  // 内部状态管理
-  const [isDockVisible, setIsDockVisible] = useState(false);
+  const { leftSidebarVisible, rightSidebarVisible, toggleLeftSidebar, toggleRightSidebar } = useLayoutState();
 
-  // 占位函数，保持逻辑结构
+  // Dock 可见性：任一侧边栏可见即为可见
+  const isDockVisible = leftSidebarVisible || rightSidebarVisible;
+
   const handleToggleDock = () => {
-    // TODO: 实现 dock 切换逻辑
-    setIsDockVisible((prev) => !prev);
+    // 如果都隐藏，则显示左侧边栏
+    // 如果有任一可见，则全部隐藏
+    if (!isDockVisible) {
+      toggleLeftSidebar();
+    } else {
+      if (leftSidebarVisible) toggleLeftSidebar();
+      if (rightSidebarVisible) toggleRightSidebar();
+    }
   };
   return (
     <div className="border-border bg-secondary/30 text-foreground fixed right-0 bottom-0 left-0 z-50 flex h-6 w-full items-center justify-between border-t px-2 text-xs">

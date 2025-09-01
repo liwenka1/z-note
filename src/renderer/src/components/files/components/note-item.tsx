@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@renderer/components/ui/dropdown-menu";
-import { useNotesStore } from "@renderer/store";
+import { useUpdateNote, useDeleteNote } from "@renderer/hooks";
 import { useTabStore } from "@renderer/store/tab-store";
 
 interface NoteItemProps {
@@ -17,7 +17,8 @@ interface NoteItemProps {
 }
 
 export function NoteItem({ note, level }: NoteItemProps) {
-  const { updateNote, deleteNote } = useNotesStore();
+  const { mutate: updateNote } = useUpdateNote();
+  const { mutate: deleteNote } = useDeleteNote();
   const { openTab } = useTabStore();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
@@ -35,7 +36,10 @@ export function NoteItem({ note, level }: NoteItemProps) {
 
   const handleSave = () => {
     if (editTitle.trim() && editTitle !== note.title) {
-      updateNote(note.id, { title: editTitle.trim() });
+      updateNote({
+        id: note.id,
+        data: { title: editTitle.trim() }
+      });
     }
     setIsEditing(false);
     setEditTitle(note.title);
@@ -61,7 +65,7 @@ export function NoteItem({ note, level }: NoteItemProps) {
   return (
     <div
       className="group hover:bg-secondary/60 flex cursor-pointer items-center rounded-md py-1.5 pr-2 text-sm transition-colors"
-      style={{ paddingLeft: `${(level + 1) * 12 + 8}px` }}
+      style={{ paddingLeft: `${(level + 1) * 12 + 18}px` }}
     >
       <div className="mr-2">
         <NotebookPen className="h-4 w-4" />
