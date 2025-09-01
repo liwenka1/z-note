@@ -1,6 +1,5 @@
 /**
  * Trash 相关常量配置
- * 参考 chat 的 constants 模式
  */
 
 // 动画配置

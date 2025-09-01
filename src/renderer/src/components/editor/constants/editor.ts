@@ -1,6 +1,5 @@
 /**
  * Editor 相关常量配置
- * 参考 chat 的 constants 模式
  */
 
 // 样式类名
