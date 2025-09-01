@@ -3,6 +3,13 @@ import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import icon from "../../resources/icon.png?asset";
 
+// 导入数据库和IPC处理器
+import { getDatabase } from "./database/db";
+import { seedDatabase } from "./database/seed";
+import { registerNotesHandlers } from "./ipc/notes";
+import { registerFoldersHandlers } from "./ipc/folders";
+import { registerTagsHandlers } from "./ipc/tags";
+
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -39,10 +46,39 @@ function createWindow(): void {
   }
 }
 
+// 初始化数据库和IPC处理器
+async function initializeBackend() {
+  try {
+    console.log("🚀 初始化后端服务...");
+
+    // 初始化数据库连接
+    const db = getDatabase();
+    console.log("✅ 数据库连接成功");
+
+    // 检查是否需要插入初始数据
+    const { folders } = await import("./database/schema");
+
+    const existingData = await db.select().from(folders).limit(1);
+    if (existingData.length === 0) {
+      console.log("📥 插入初始数据...");
+      await seedDatabase();
+    }
+
+    // 注册IPC处理器
+    registerNotesHandlers();
+    registerFoldersHandlers();
+    registerTagsHandlers();
+
+    console.log("🎉 后端服务初始化完成");
+  } catch (error) {
+    console.error("❌ 后端服务初始化失败:", error);
+  }
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId("com.electron");
 
@@ -52,6 +88,9 @@ app.whenReady().then(() => {
   app.on("browser-window-created", (_, window) => {
     optimizer.watchWindowShortcuts(window);
   });
+
+  // 初始化后端服务
+  await initializeBackend();
 
   // IPC test
   ipcMain.on("ping", () => console.log("pong"));
