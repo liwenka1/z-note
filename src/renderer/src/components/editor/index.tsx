@@ -12,7 +12,7 @@ interface NoteEditorProps {
  * 参考 chat 的模式，组合所有子组件
  */
 export function NoteEditor({ noteId }: NoteEditorProps) {
-  const { note, editingContent, handleContentChange } = useEditorState(noteId);
+  const { note, editingContent, handleContentChange, handleSave } = useEditorState(noteId);
 
   if (!note) {
     return <NoteNotFound noteId={noteId} />;
@@ -23,6 +23,7 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
       <TipTapEditor
         content={editingContent}
         onChange={handleContentChange}
+        onSave={handleSave}
         className={EDITOR_CLASSES.TIPTAP_CONTAINER}
       />
     </div>

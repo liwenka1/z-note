@@ -11,6 +11,7 @@ import { TIPTAP_CONFIG } from "../../constants/editor";
 interface TipTapEditorProps {
   content: string;
   onChange: (content: string) => void;
+  onSave?: () => void; // 添加保存回调
   editable?: boolean;
   className?: string;
   placeholder?: string;
@@ -19,6 +20,7 @@ interface TipTapEditorProps {
 export function TipTapEditor({
   content,
   onChange,
+  onSave,
   editable = true,
   className,
   placeholder = TIPTAP_CONFIG.DEFAULT_PLACEHOLDER
@@ -46,6 +48,15 @@ export function TipTapEditor({
     editorProps: {
       attributes: {
         class: TIPTAP_CONFIG.EDITOR_PROPS_CLASS
+      },
+      handleKeyDown: (_view, event) => {
+        // 检测 Ctrl+S (Windows/Linux) 或 Cmd+S (macOS)
+        if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+          event.preventDefault();
+          onSave?.(); // 调用保存回调
+          return true; // 表示事件已处理
+        }
+        return false; // 让其他按键正常处理
       }
     }
   });
