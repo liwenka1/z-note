@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { notesApi } from "@renderer/api";
 import { queryKeys } from "@renderer/lib/query-client";
+import { ErrorHandler } from "@renderer/lib/error-handler";
 import type { Note, NoteFormData } from "@renderer/types/entities";
 
 /**
@@ -20,10 +21,8 @@ export function useCreateNote() {
       // 可选：直接更新缓存
       queryClient.setQueryData(queryKeys.notes.detail(newNote.id), newNote);
 
-      console.log("✅ 笔记创建成功:", newNote.title);
-    },
-    onError: (error) => {
-      console.error("❌ 笔记创建失败:", error);
+      // 显示成功提示
+      ErrorHandler.success("笔记创建成功", `"${newNote.title}" 已创建`);
     }
   });
 }
@@ -43,11 +42,10 @@ export function useUpdateNote() {
       // 使列表查询失效
       queryClient.invalidateQueries({ queryKey: queryKeys.notes.lists() });
 
-      console.log("✅ 笔记更新成功:", updatedNote.title);
-    },
-    onError: (error) => {
-      console.error("❌ 笔记更新失败:", error);
+      // 显示成功提示
+      ErrorHandler.success("笔记更新成功", `"${updatedNote.title}" 已保存`);
     }
+    // 移除 onError，使用全局错误处理
   });
 }
 
