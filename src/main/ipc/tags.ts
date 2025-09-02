@@ -1,146 +1,79 @@
-import { eq, sql } from "drizzle-orm";
-import { getDatabase } from "../database/db";
-import { tags, noteTags } from "../database/schema";
-import { generateId } from "../utils/helpers";
 import { registerHandler } from "./registry";
+import { TagsService } from "../services/tags-service";
 import type { TagFormData } from "../../renderer/src/types/entities";
+
+// 创建服务实例
+const tagsService = new TagsService();
 
 // 获取标签列表
 async function getTags() {
-  const db = getDatabase();
-
-  const result = await db
-    .select({
-      id: tags.id,
-      name: tags.name,
-      color: tags.color,
-      createdAt: tags.createdAt,
-      updatedAt: tags.updatedAt,
-      noteCount: sql<number>`COUNT(${noteTags.noteId})`.as("noteCount")
-    })
-    .from(tags)
-    .leftJoin(noteTags, eq(tags.id, noteTags.tagId))
-    .groupBy(tags.id)
-    .orderBy(tags.name);
-
-  return result;
+  return tagsService.getTags();
 }
 
 // 获取单个标签
 async function getTag(id: string) {
-  const db = getDatabase();
-
-  const result = await db.select().from(tags).where(eq(tags.id, id)).limit(1);
-
-  if (result.length === 0) {
-    throw new Error("标签不存在");
-  }
-
-  return result[0];
+  return tagsService.getTag(id);
 }
 
 // 创建标签
 async function createTag(data: TagFormData) {
-  const db = getDatabase();
-  const now = new Date();
-  const id = generateId();
-
-  // 检查标签名是否已存在
-  const existing = await db.select().from(tags).where(eq(tags.name, data.name)).limit(1);
-
-  if (existing.length > 0) {
-    throw new Error("标签名已存在");
-  }
-
-  await db.insert(tags).values({
-    id,
-    name: data.name,
-    color: data.color,
-    createdAt: now,
-    updatedAt: now
-  });
-
-  return await getTag(id);
+  return tagsService.createTag(data);
 }
 
 // 更新标签
 async function updateTag(id: string, data: Partial<TagFormData>) {
-  const db = getDatabase();
-  const now = new Date();
-
-  // 检查标签是否存在
-  await getTag(id);
-
-  // 如果要更新名称，检查新名称是否已存在
-  if (data.name) {
-    const existing = await db.select().from(tags).where(eq(tags.name, data.name)).limit(1);
-
-    if (existing.length > 0 && existing[0].id !== id) {
-      throw new Error("标签名已存在");
-    }
-  }
-
-  const updateData: Partial<typeof tags.$inferInsert> = {
-    updatedAt: now
-  };
-
-  if (data.name !== undefined) updateData.name = data.name;
-  if (data.color !== undefined) updateData.color = data.color;
-
-  await db.update(tags).set(updateData).where(eq(tags.id, id));
-
-  return await getTag(id);
+  return tagsService.updateTag(id, data);
 }
 
 // 删除标签
 async function deleteTag(id: string) {
-  const db = getDatabase();
-
-  // 检查是否有笔记在使用这个标签
-  const usage = await db.select().from(noteTags).where(eq(noteTags.tagId, id)).limit(1);
-
-  if (usage.length > 0) {
-    throw new Error("不能删除正在使用的标签，请先从相关笔记中移除该标签");
-  }
-
-  await db.delete(tags).where(eq(tags.id, id));
-
-  return { id };
+  return tagsService.deleteTag(id);
 }
 
-// 获取标签的使用统计
-async function getTagStats(id: string) {
-  const db = getDatabase();
+// 搜索标签
+async function searchTags(query: string) {
+  return tagsService.searchTags(query);
+}
 
-  const result = await db
-    .select({
-      tagId: tags.id,
-      tagName: tags.name,
-      noteCount: sql<number>`COUNT(${noteTags.noteId})`.as("noteCount")
-    })
-    .from(tags)
-    .leftJoin(noteTags, eq(tags.id, noteTags.tagId))
-    .where(eq(tags.id, id))
-    .groupBy(tags.id);
+// 获取未使用的标签
+async function getUnusedTags() {
+  return tagsService.getUnusedTags();
+}
 
-  if (result.length === 0) {
-    throw new Error("标签不存在");
-  }
+// 获取最常用的标签
+async function getMostUsedTags(limit: number = 10) {
+  return tagsService.getMostUsedTags(limit);
+}
 
-  return result[0];
+// 批量删除标签
+async function batchDeleteTags(ids: string[]) {
+  return tagsService.batchDeleteTags(ids);
+}
+
+// 清理未使用的标签
+async function cleanupUnusedTags() {
+  return tagsService.cleanupUnusedTags();
 }
 
 // 注册IPC处理器
 export function registerTagsHandlers() {
-  registerHandler("tags:list", getTags);
+  registerHandler("tags:list", () => getTags());
 
-  registerHandler("tags:get", getTag);
+  registerHandler("tags:get", (_event: unknown, id: string) => getTag(id));
 
-  registerHandler("tags:create", createTag);
+  registerHandler("tags:create", (_event: unknown, data: TagFormData) => createTag(data));
 
-  registerHandler("tags:update", updateTag);
+  registerHandler("tags:update", (_event: unknown, id: string, data: Partial<TagFormData>) => updateTag(id, data));
 
-  registerHandler("tags:delete", deleteTag);
+  registerHandler("tags:delete", (_event: unknown, id: string) => deleteTag(id));
 
-  registerHandler("tags:stats", getTagStats);
+  registerHandler("tags:search", (_event: unknown, query: string) => searchTags(query));
+
+  registerHandler("tags:unused", () => getUnusedTags());
+
+  registerHandler("tags:most-used", (_event: unknown, limit?: number) => getMostUsedTags(limit));
+
+  registerHandler("tags:batch-delete", (_event: unknown, ids: string[]) => batchDeleteTags(ids));
+
+  registerHandler("tags:cleanup-unused", () => cleanupUnusedTags());
 }
