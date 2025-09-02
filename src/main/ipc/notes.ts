@@ -1,9 +1,9 @@
-import { ipcMain } from "electron";
-import { eq, and, like, or, sql } from "drizzle-orm";
-import type { SQL } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { getDatabase } from "../database/db";
 import { notes, noteTags } from "../database/schema";
-import { generateId, withErrorHandling } from "../utils/helpers";
+import { generateId } from "../utils/helpers";
+import { registerHandler } from "./registry";
+import { NotesQueryHelper } from "../database/query-builder";
 import type { NoteFormData } from "../../renderer/src/types/entities";
 import type { GetNotesRequest } from "../../renderer/src/types/api";
 
@@ -11,26 +11,8 @@ import type { GetNotesRequest } from "../../renderer/src/types/api";
 async function getNotes(params: GetNotesRequest = {}) {
   const db = getDatabase();
 
-  // 构建查询条件
-  const conditions: SQL<unknown>[] = [];
-
-  // 根据是否包含已删除笔记筛选
-  if (!params.includeDeleted) {
-    conditions.push(eq(notes.isDeleted, false));
-  }
-
-  // 根据文件夹过滤
-  if (params.folderId) {
-    conditions.push(eq(notes.folderId, params.folderId));
-  }
-
-  // 搜索功能
-  if (params.search) {
-    const searchCondition = or(like(notes.title, `%${params.search}%`), like(notes.content, `%${params.search}%`));
-    if (searchCondition) {
-      conditions.push(searchCondition);
-    }
-  }
+  // 使用查询构建器构建条件
+  const whereCondition = NotesQueryHelper.buildListQuery(params);
 
   const query = db
     .select({
@@ -53,10 +35,10 @@ async function getNotes(params: GetNotesRequest = {}) {
     })
     .from(notes)
     .leftJoin(noteTags, eq(notes.id, noteTags.noteId))
-    .where(conditions.length > 0 ? (conditions.length > 1 ? and(...conditions) : conditions[0]) : undefined)
     .groupBy(notes.id);
 
-  const result = await query;
+  // 应用条件
+  const result = whereCondition ? await query.where(whereCondition) : await query;
 
   // 解析 tagIds JSON 字符串为数组
   const notesWithTags = result.map((note) => ({
@@ -254,38 +236,19 @@ async function permanentDeleteNote(id: string) {
 
 // 注册IPC处理器
 export function registerNotesHandlers() {
-  ipcMain.handle(
-    "notes:list",
-    withErrorHandling((_event, params?: GetNotesRequest) => getNotes(params))
-  );
-  ipcMain.handle(
-    "notes:get",
-    withErrorHandling((_event, id: string) => getNote(id))
-  );
-  ipcMain.handle(
-    "notes:create",
-    withErrorHandling((_event, data: NoteFormData) => createNote(data))
-  );
-  ipcMain.handle(
-    "notes:update",
-    withErrorHandling((_event, id: string, data: Partial<NoteFormData>) => updateNote(id, data))
-  );
-  ipcMain.handle(
-    "notes:delete",
-    withErrorHandling((_event, id: string) => deleteNote(id))
-  );
-  ipcMain.handle(
-    "notes:toggle-favorite",
-    withErrorHandling((_event, id: string) => toggleFavorite(id))
-  );
-  ipcMain.handle(
-    "notes:restore",
-    withErrorHandling((_event, id: string) => restoreNote(id))
-  );
-  ipcMain.handle(
-    "notes:permanent-delete",
-    withErrorHandling((_event, id: string) => permanentDeleteNote(id))
-  );
+  registerHandler("notes:list", (_event: unknown, params?: GetNotesRequest) => getNotes(params));
 
-  console.log("✅ 笔记 IPC 处理器注册完成");
+  registerHandler("notes:get", (_event: unknown, id: string) => getNote(id));
+
+  registerHandler("notes:create", (_event: unknown, data: NoteFormData) => createNote(data));
+
+  registerHandler("notes:update", (_event: unknown, id: string, data: Partial<NoteFormData>) => updateNote(id, data));
+
+  registerHandler("notes:delete", (_event: unknown, id: string) => deleteNote(id));
+
+  registerHandler("notes:toggle-favorite", (_event: unknown, id: string) => toggleFavorite(id));
+
+  registerHandler("notes:restore", (_event: unknown, id: string) => restoreNote(id));
+
+  registerHandler("notes:permanent-delete", (_event: unknown, id: string) => permanentDeleteNote(id));
 }

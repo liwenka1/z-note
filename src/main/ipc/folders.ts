@@ -1,8 +1,8 @@
-import { ipcMain } from "electron";
 import { eq, and, sql } from "drizzle-orm";
 import { getDatabase } from "../database/db";
 import { folders, notes } from "../database/schema";
-import { generateId, withErrorHandling } from "../utils/helpers";
+import { generateId } from "../utils/helpers";
+import { registerHandler } from "./registry";
 import type { FolderFormData } from "../../renderer/src/types/entities";
 
 // 获取文件夹列表（包含层级关系）
@@ -286,34 +286,17 @@ async function permanentDeleteFolder(id: string) {
 
 // 注册IPC处理器
 export function registerFoldersHandlers() {
-  ipcMain.handle(
-    "folders:list",
-    withErrorHandling(() => getFolders())
-  );
-  ipcMain.handle(
-    "folders:get",
-    withErrorHandling((_event, id: string) => getFolder(id))
-  );
-  ipcMain.handle(
-    "folders:create",
-    withErrorHandling((_event, data: FolderFormData) => createFolder(data))
-  );
-  ipcMain.handle(
-    "folders:update",
-    withErrorHandling((_event, id: string, data: Partial<FolderFormData>) => updateFolder(id, data))
-  );
-  ipcMain.handle(
-    "folders:delete",
-    withErrorHandling((_event, id: string) => deleteFolder(id))
-  );
-  ipcMain.handle(
-    "folders:restore",
-    withErrorHandling((_event, id: string) => restoreFolder(id))
-  );
-  ipcMain.handle(
-    "folders:permanent-delete",
-    withErrorHandling((_event, id: string) => permanentDeleteFolder(id))
-  );
+  registerHandler("folders:list", getFolders);
 
-  console.log("✅ 文件夹 IPC 处理器注册完成");
+  registerHandler("folders:get", getFolder);
+
+  registerHandler("folders:create", createFolder);
+
+  registerHandler("folders:update", updateFolder);
+
+  registerHandler("folders:delete", deleteFolder);
+
+  registerHandler("folders:restore", restoreFolder);
+
+  registerHandler("folders:permanent-delete", permanentDeleteFolder);
 }

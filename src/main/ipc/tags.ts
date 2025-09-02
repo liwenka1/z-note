@@ -1,8 +1,8 @@
-import { ipcMain } from "electron";
 import { eq, sql } from "drizzle-orm";
 import { getDatabase } from "../database/db";
 import { tags, noteTags } from "../database/schema";
-import { generateId, withErrorHandling } from "../utils/helpers";
+import { generateId } from "../utils/helpers";
+import { registerHandler } from "./registry";
 import type { TagFormData } from "../../renderer/src/types/entities";
 
 // 获取标签列表
@@ -132,30 +132,15 @@ async function getTagStats(id: string) {
 
 // 注册IPC处理器
 export function registerTagsHandlers() {
-  ipcMain.handle(
-    "tags:list",
-    withErrorHandling(() => getTags())
-  );
-  ipcMain.handle(
-    "tags:get",
-    withErrorHandling((_event, id: string) => getTag(id))
-  );
-  ipcMain.handle(
-    "tags:create",
-    withErrorHandling((_event, data: TagFormData) => createTag(data))
-  );
-  ipcMain.handle(
-    "tags:update",
-    withErrorHandling((_event, id: string, data: Partial<TagFormData>) => updateTag(id, data))
-  );
-  ipcMain.handle(
-    "tags:delete",
-    withErrorHandling((_event, id: string) => deleteTag(id))
-  );
-  ipcMain.handle(
-    "tags:stats",
-    withErrorHandling((_event, id: string) => getTagStats(id))
-  );
+  registerHandler("tags:list", getTags);
 
-  console.log("✅ 标签 IPC 处理器注册完成");
+  registerHandler("tags:get", getTag);
+
+  registerHandler("tags:create", createTag);
+
+  registerHandler("tags:update", updateTag);
+
+  registerHandler("tags:delete", deleteTag);
+
+  registerHandler("tags:stats", getTagStats);
 }
