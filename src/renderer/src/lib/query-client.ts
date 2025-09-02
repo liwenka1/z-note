@@ -1,6 +1,7 @@
 // ==================== React Query 客户端配置 ====================
 
 import { QueryClient } from "@tanstack/react-query";
+import { ErrorHandler } from "./error-handler";
 
 /**
  * 创建 QueryClient 实例
@@ -29,6 +30,13 @@ export const queryClient = new QueryClient({
       // 变更失败重试
       retry: 1
     }
+  }
+});
+
+// 全局错误处理器
+queryClient.setMutationDefaults(["mutation"], {
+  onError: (error) => {
+    ErrorHandler.handle(error, "Mutation");
   }
 });
 
