@@ -7,6 +7,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { enableMapSet } from "immer";
 
+import { Toaster } from "@renderer/components/ui/sonner";
+
 // 启用 Immer 的 MapSet 插件
 enableMapSet();
 
@@ -33,6 +35,7 @@ if (!rootElement.innerHTML) {
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
         <ReactQueryDevtools initialIsOpen={false} />
+        <Toaster />
       </QueryClientProvider>
     </StrictMode>
   );
