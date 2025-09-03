@@ -1,41 +1,22 @@
+import { FieldValidator, BatchValidator } from "../validators";
+
 /**
  * 基础Service抽象类
  * 提供通用的业务逻辑方法
  */
 export abstract class BaseService {
   /**
-   * 验证必填字段
+   * 创建字段验证器
    */
-  protected validateRequired(value: unknown, fieldName: string): void {
-    if (value === undefined || value === null || value === "") {
-      throw new Error(`${fieldName}是必填项`);
-    }
+  protected createValidator(fieldName: string, value: unknown): FieldValidator {
+    return FieldValidator.create(fieldName, value);
   }
 
   /**
-   * 验证字符串长度
+   * 创建批量验证器
    */
-  protected validateStringLength(value: string, fieldName: string, minLength?: number, maxLength?: number): void {
-    if (minLength !== undefined && value.length < minLength) {
-      throw new Error(`${fieldName}长度不能少于${minLength}个字符`);
-    }
-
-    if (maxLength !== undefined && value.length > maxLength) {
-      throw new Error(`${fieldName}长度不能超过${maxLength}个字符`);
-    }
-  }
-
-  /**
-   * 验证数组长度
-   */
-  protected validateArrayLength(value: unknown[], fieldName: string, minLength?: number, maxLength?: number): void {
-    if (minLength !== undefined && value.length < minLength) {
-      throw new Error(`${fieldName}数量不能少于${minLength}个`);
-    }
-
-    if (maxLength !== undefined && value.length > maxLength) {
-      throw new Error(`${fieldName}数量不能超过${maxLength}个`);
-    }
+  protected createBatchValidator(): BatchValidator {
+    return new BatchValidator();
   }
 
   /**
