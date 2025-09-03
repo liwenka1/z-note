@@ -6,9 +6,7 @@ import icon from "../../resources/icon.png?asset";
 // 导入数据库和IPC处理器
 import { getDatabase } from "./database/db";
 import { seedDatabase } from "./database/seed";
-import { registerNotesHandlers } from "./ipc/notes";
-import { registerFoldersHandlers } from "./ipc/folders";
-import { registerTagsHandlers } from "./ipc/tags";
+import { IPCRegistry } from "./ipc/ipc-registry";
 
 function createWindow(): void {
   // Create the browser window.
@@ -65,9 +63,7 @@ async function initializeBackend() {
     }
 
     // 注册IPC处理器
-    registerNotesHandlers();
-    registerFoldersHandlers();
-    registerTagsHandlers();
+    IPCRegistry.registerAll();
 
     console.log("🎉 后端服务初始化完成");
   } catch (error) {
