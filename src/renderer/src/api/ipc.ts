@@ -35,20 +35,6 @@ class IpcClient {
       } as ReturnType<IpcMethods[T]>;
     }
   }
-
-  /**
-   * 监听 IPC 事件（暂不支持，仅用于调用）
-   */
-  // on<T extends keyof IpcMethods>(channel: T, callback: (...args: any[]) => void): void {
-  //   this.electronAPI.on(channel, callback);
-  // }
-
-  /**
-   * 移除事件监听器（暂不支持，仅用于调用）
-   */
-  // removeAllListeners(channel: keyof IpcMethods): void {
-  //   this.electronAPI.removeAllListeners(channel);
-  // }
 }
 
 // 导出单例实例
