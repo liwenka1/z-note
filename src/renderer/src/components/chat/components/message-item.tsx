@@ -7,14 +7,14 @@ import { Avatar, AvatarFallback } from "@renderer/components/ui/avatar";
 import { Button } from "@renderer/components/ui/button";
 import { TypingIndicator } from "./typing-indicator";
 import { useChatStore, type Message } from "@renderer/store/chat-store";
-import { useThemeStore } from "@renderer/store/theme-store";
+import { useTheme } from "next-themes";
 
 interface MessageItemProps {
   message: Message;
 }
 
 export function MessageItem({ message }: MessageItemProps) {
-  const { theme } = useThemeStore();
+  const { theme } = useTheme();
   const { deleteMessage, getCurrentSession } = useChatStore();
   const currentSession = getCurrentSession();
 
