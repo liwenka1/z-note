@@ -1,24 +1,8 @@
-import { FieldValidator, BatchValidator } from "../validators";
-
 /**
  * 基础Service抽象类
  * 提供通用的业务逻辑方法
  */
 export abstract class BaseService {
-  /**
-   * 创建字段验证器
-   */
-  protected createValidator(fieldName: string, value: unknown): FieldValidator {
-    return FieldValidator.create(fieldName, value);
-  }
-
-  /**
-   * 创建批量验证器
-   */
-  protected createBatchValidator(): BatchValidator {
-    return new BatchValidator();
-  }
-
   /**
    * 清理HTML标签
    */
