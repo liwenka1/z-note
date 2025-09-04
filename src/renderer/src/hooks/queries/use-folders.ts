@@ -3,8 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { foldersApi } from "@renderer/api";
 import { queryKeys } from "@renderer/lib/query-client";
-import type { Folder } from "@renderer/types/entities";
-import type { FolderTreeItem } from "@renderer/types/ui";
+import type { Folder, FolderTreeItem } from "@renderer/types";
 
 /**
  * 获取文件夹列表

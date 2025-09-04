@@ -3,7 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { tagsApi } from "@renderer/api";
 import { queryKeys } from "@renderer/lib/query-client";
-// import type { Tag } from "@renderer/types/entities"; // 将来扩展时使用
 
 /**
  * 获取标签列表

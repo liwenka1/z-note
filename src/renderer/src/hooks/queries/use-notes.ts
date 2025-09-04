@@ -3,8 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { notesApi } from "@renderer/api";
 import { queryKeys } from "@renderer/lib/query-client";
-import type { Note } from "@renderer/types/entities";
-import type { GetNotesRequest } from "@renderer/types/api";
+import type { Note, GetNotesRequest } from "@renderer/types";
 
 /**
  * 获取笔记列表

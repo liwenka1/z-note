@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { foldersApi } from "@renderer/api";
 import { queryKeys } from "@renderer/lib/query-client";
-import type { Folder, FolderFormData } from "@renderer/types/entities";
+import type { Folder, FolderFormData } from "@renderer/types";
 
 /**
  * 创建文件夹

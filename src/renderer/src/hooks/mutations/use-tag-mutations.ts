@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { tagsApi } from "@renderer/api";
 import { queryKeys } from "@renderer/lib/query-client";
-import type { Tag, TagFormData } from "@renderer/types/entities";
+import type { Tag, TagFormData } from "@renderer/types";
 
 /**
  * 创建标签
