@@ -1,6 +1,6 @@
 import { BaseService } from "./base-service";
 import { NotesRepository, type NoteEntity } from "../repositories/notes-repository";
-import { ValidatorFactory } from "../validators";
+import { NoteSchemas, IdSchema, SearchQuerySchema, BatchIdsSchema } from "../schemas";
 import type { NoteFormData } from "../../renderer/src/types/entities";
 import type { GetNotesRequest } from "../../renderer/src/types/api";
 
@@ -26,7 +26,7 @@ export class NotesService extends BaseService {
    * 获取单个笔记
    */
   async getNote(id: string): Promise<NoteEntity> {
-    this.createValidator("笔记ID", id).required().validateOrThrow();
+    IdSchema.parse(id);
     return this.notesRepository.findByIdOrThrow(id);
   }
 
@@ -44,19 +44,15 @@ export class NotesService extends BaseService {
    * 更新笔记
    */
   async updateNote(id: string, data: Partial<NoteFormData>): Promise<NoteEntity> {
-    this.createValidator("笔记ID", id).required().validateOrThrow();
+    IdSchema.parse(id);
 
     // 验证更新数据
-    if (data.title !== undefined) {
-      this.createValidator("笔记标题", data.title).required().stringLength(1, 200).validateOrThrow();
-    }
-
     if (data.content !== undefined) {
-      this.createValidator("笔记内容", data.content).stringLength(0, 1000000).validateOrThrow(); // 1MB限制
+      NoteSchemas.update.pick({ content: true }).parse({ content: data.content }); // 1MB限制
     }
 
     if (data.tagIds !== undefined) {
-      this.createValidator("标签", data.tagIds).arrayLength(0, 20).validateOrThrow();
+      NoteSchemas.update.pick({ tagIds: true }).parse({ tagIds: data.tagIds });
     }
 
     return this.notesRepository.update(id, data);
@@ -66,7 +62,7 @@ export class NotesService extends BaseService {
    * 删除笔记
    */
   async deleteNote(id: string): Promise<{ id: string }> {
-    this.createValidator("笔记ID", id).required().validateOrThrow();
+    IdSchema.parse(id);
     return this.notesRepository.softDelete(id);
   }
 
@@ -74,7 +70,7 @@ export class NotesService extends BaseService {
    * 切换收藏状态
    */
   async toggleFavorite(id: string): Promise<NoteEntity> {
-    this.createValidator("笔记ID", id).required().validateOrThrow();
+    IdSchema.parse(id);
     return this.notesRepository.toggleFavorite(id);
   }
 
@@ -82,7 +78,7 @@ export class NotesService extends BaseService {
    * 恢复笔记
    */
   async restoreNote(id: string): Promise<NoteEntity> {
-    this.createValidator("笔记ID", id).required().validateOrThrow();
+    IdSchema.parse(id);
     return this.notesRepository.restore(id);
   }
 
@@ -90,7 +86,7 @@ export class NotesService extends BaseService {
    * 永久删除笔记
    */
   async permanentDeleteNote(id: string): Promise<{ id: string }> {
-    this.createValidator("笔记ID", id).required().validateOrThrow();
+    IdSchema.parse(id);
     return this.notesRepository.permanentDelete(id);
   }
 
@@ -98,7 +94,7 @@ export class NotesService extends BaseService {
    * 批量删除笔记
    */
   async batchDeleteNotes(ids: string[]): Promise<{ successful: number; failed: number }> {
-    this.createValidator("笔记ID列表", ids).required().arrayLength(1, 100).validateOrThrow();
+    BatchIdsSchema.parse(ids);
 
     const results = await Promise.allSettled(ids.map((id) => this.notesRepository.softDelete(id)));
 
@@ -112,7 +108,7 @@ export class NotesService extends BaseService {
    * 批量恢复笔记
    */
   async batchRestoreNotes(ids: string[]): Promise<{ successful: number; failed: number }> {
-    this.createValidator("笔记ID列表", ids).required().arrayLength(1, 100).validateOrThrow();
+    BatchIdsSchema.parse(ids);
 
     const results = await Promise.allSettled(ids.map((id) => this.notesRepository.restore(id)));
 
@@ -126,7 +122,7 @@ export class NotesService extends BaseService {
    * 搜索笔记
    */
   async searchNotes(query: string, folderId?: string): Promise<NoteEntity[]> {
-    this.createValidator("搜索关键词", query).required().stringLength(1, 100).validateOrThrow();
+    SearchQuerySchema.parse(query);
 
     return this.notesRepository.findMany({
       search: query.trim(),
@@ -139,7 +135,7 @@ export class NotesService extends BaseService {
    * 获取文件夹下的笔记
    */
   async getNotesByFolder(folderId: string): Promise<NoteEntity[]> {
-    this.createValidator("文件夹ID", folderId).required().validateOrThrow();
+    IdSchema.parse(folderId);
 
     return this.notesRepository.findMany({
       folderId,
@@ -168,13 +164,6 @@ export class NotesService extends BaseService {
    * 验证笔记数据
    */
   private validateNoteData(data: NoteFormData): void {
-    const validators = ValidatorFactory.createNoteValidator({
-      title: data.title,
-      content: data.content,
-      folderId: data.folderId ? Number(data.folderId) : undefined,
-      tags: data.tagIds
-    });
-
-    this.createBatchValidator().add(validators.title).add(validators.content).add(validators.tags).validateOrThrow();
+    NoteSchemas.create.parse(data);
   }
 }
