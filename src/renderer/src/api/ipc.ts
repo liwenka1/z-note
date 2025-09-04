@@ -1,7 +1,6 @@
 // ==================== IPC 通信基础封装 ====================
 
-import type { IpcMethods } from "@renderer/types/api";
-import type { BaseResponse } from "@renderer/types/common";
+import type { IpcMethods, BaseResponse } from "@renderer/types";
 
 /**
  * 类型安全的 IPC 调用封装

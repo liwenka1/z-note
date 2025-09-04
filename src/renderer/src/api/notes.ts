@@ -1,8 +1,7 @@
 // ==================== 笔记 API 封装 ====================
 
 import { ipcClient, handleResponse } from "./ipc";
-import type { Note, NoteFormData } from "@renderer/types/entities";
-import type { GetNotesRequest } from "@renderer/types/api";
+import type { Note, NoteFormData, GetNotesRequest } from "@renderer/types";
 
 export const notesApi = {
   /**

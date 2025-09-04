@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useFolders, useNotes, useCreateFolder, useCreateNote } from "@renderer/hooks";
 import { useFilesUIStore } from "@renderer/store";
-import type { Folder } from "@renderer/types/entities";
+import type { Folder } from "@renderer/types";
 import { FolderItem } from "./folder-item";
 import { NoteItem } from "./note-item";
 

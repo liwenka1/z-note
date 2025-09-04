@@ -1,7 +1,7 @@
 // ==================== 文件夹 API 封装 ====================
 
 import { ipcClient, handleResponse } from "./ipc";
-import type { Folder, FolderFormData } from "@renderer/types/entities";
+import type { Folder, FolderFormData } from "@renderer/types";
 
 export const foldersApi = {
   /**

@@ -23,7 +23,7 @@ import {
 import { useFolders, useNotes, useUpdateFolder, useDeleteFolder } from "@renderer/hooks";
 import { useFilesUIStore } from "@renderer/store";
 import { cn } from "@renderer/lib/utils";
-import type { Folder } from "@renderer/types/entities";
+import type { Folder } from "@renderer/types";
 import { NoteItem } from "./note-item";
 
 interface FolderItemProps {
