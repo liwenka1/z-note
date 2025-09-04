@@ -4,7 +4,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { useCreateNote, useCreateFolder } from "@renderer/hooks";
 import { useTabStore } from "@renderer/store";
 import { FolderFormData, NoteFormData } from "@renderer/types";
-import { FILES_CLASSES, FILES_CONSTANTS } from "../constants/files";
 
 export function FilesHeader() {
   const navigate = useNavigate();
@@ -61,23 +60,11 @@ export function FilesHeader() {
       <div className="flex items-center justify-between px-4 py-3">
         <h2 className="text-foreground text-sm font-medium">笔记</h2>
         <div className="flex gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCreateNote}
-            className={FILES_CLASSES.BUTTON_ICON}
-            title="新建笔记"
-          >
-            <FileText className={FILES_CONSTANTS.ICON_SIZE} />
+          <Button variant="ghost" size="sm" onClick={handleCreateNote} className="h-7 w-7 p-0" title="新建笔记">
+            <FileText className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCreateFolder}
-            className={FILES_CLASSES.BUTTON_ICON}
-            title="新建文件夹"
-          >
-            <Plus className={FILES_CONSTANTS.ICON_SIZE} />
+          <Button variant="ghost" size="sm" onClick={handleCreateFolder} className="h-7 w-7 p-0" title="新建文件夹">
+            <Plus className="h-4 w-4" />
           </Button>
         </div>
       </div>

@@ -3,7 +3,6 @@ import { FilesHeader } from "./components/files-header";
 import { FolderTree } from "./components/folder-tree";
 import { EmptyFiles } from "./components/empty-files";
 import { useFilesState } from "./hooks/use-files-state";
-import { FILES_ANIMATION, FILES_CLASSES } from "./constants/files";
 
 /**
  * Files 主组件
@@ -13,10 +12,16 @@ export function FilesPanel() {
   const { hasContent } = useFilesState();
 
   return (
-    <motion.div {...FILES_ANIMATION} className={FILES_CLASSES.PANEL}>
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.2 }}
+      className="bg-background flex h-full flex-col"
+    >
       <FilesHeader />
 
-      <div className={FILES_CLASSES.CONTENT}>{hasContent ? <FolderTree /> : <EmptyFiles />}</div>
+      <div className="flex-1 overflow-hidden">{hasContent ? <FolderTree /> : <EmptyFiles />}</div>
     </motion.div>
   );
 }
