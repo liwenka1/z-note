@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { Bot, Sparkles, Code, FileText } from "lucide-react";
 import { useChatStore } from "@renderer/store/chat-store";
-import { CHAT_CONSTANTS } from "../constants/chat";
 
 const suggestions = [
   {
@@ -62,7 +61,7 @@ export function EmptyChat() {
         transition={{ delay: 0.3 }}
         className="mb-8"
       >
-        <h3 className="mb-2 text-lg font-semibold">开始与 {CHAT_CONSTANTS.AI_ASSISTANT_NAME} 对话</h3>
+        <h3 className="mb-2 text-lg font-semibold">开始与 AI 助手 对话</h3>
         <p className="text-muted-foreground max-w-md text-sm">
           我可以帮助您解答问题、编写代码、分析文档内容等。 让我们开始一段智能对话吧！
         </p>
@@ -87,7 +86,7 @@ export function EmptyChat() {
             onClick={() => handleSuggestionClick(suggestion.text)}
           >
             <div className="bg-primary/10 rounded-md p-2">
-              <suggestion.icon className={`text-primary ${CHAT_CONSTANTS.ICON_SIZE}`} />
+              <suggestion.icon className="text-primary h-4 w-4" />
             </div>
             <div className="flex-1">
               <div className="text-sm font-medium">{suggestion.text}</div>

@@ -4,7 +4,6 @@ import { Send, Paperclip } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import { Textarea } from "@renderer/components/ui/textarea";
 import { useChatStore } from "@renderer/store/chat-store";
-import { CHAT_CONSTANTS } from "../constants/chat";
 
 export function ChatInput() {
   const [input, setInput] = useState("");
@@ -67,7 +66,7 @@ export function ChatInput() {
       <div className="flex items-end gap-2">
         {/* 附件按钮（预留） */}
         <Button variant="ghost" size="sm" className="h-10 w-10 flex-shrink-0 p-0" disabled title="附件功能（开发中）">
-          <Paperclip className={CHAT_CONSTANTS.ICON_SIZE} />
+          <Paperclip className="h-4 w-4" />
         </Button>
 
         {/* 输入框 */}
@@ -101,10 +100,10 @@ export function ChatInput() {
         >
           {isTyping ? (
             <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
-              <Send className={CHAT_CONSTANTS.ICON_SIZE} />
+              <Send className="h-4 w-4" />
             </motion.div>
           ) : (
-            <Send className={CHAT_CONSTANTS.ICON_SIZE} />
+            <Send className="h-4 w-4" />
           )}
         </Button>
       </div>

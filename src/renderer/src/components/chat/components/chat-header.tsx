@@ -2,7 +2,6 @@ import { Plus, Trash2, Settings } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import { SessionSelector } from "./session-selector";
 import { useChatStore } from "@renderer/store/chat-store";
-import { CHAT_CLASSES, CHAT_CONSTANTS } from "../constants/chat";
 
 export function ChatHeader() {
   const { createSession, clearSession, getCurrentSession } = useChatStore();
@@ -19,11 +18,11 @@ export function ChatHeader() {
   };
 
   return (
-    <div className={CHAT_CLASSES.HEADER}>
+    <div className="border-border/50 bg-secondary/30 flex h-11 items-center justify-between border-b px-4">
       {/* 左侧：会话信息 */}
       <div className="flex items-center gap-2">
-        <h3 className="text-sm font-medium">{CHAT_CONSTANTS.AI_ASSISTANT_NAME}</h3>
-        <div className={`${CHAT_CONSTANTS.STATUS_INDICATOR_SIZE} rounded-full bg-green-500`} title="在线" />
+        <h3 className="text-sm font-medium">AI 助手</h3>
+        <div className="h-2 w-2 rounded-full bg-green-500" title="在线" />
       </div>
 
       {/* 中间：会话选择器 */}
@@ -33,29 +32,23 @@ export function ChatHeader() {
 
       {/* 右侧：操作按钮 */}
       <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          className={CHAT_CLASSES.BUTTON_ICON}
-          onClick={handleNewSession}
-          title="新建会话"
-        >
-          <Plus className={CHAT_CONSTANTS.ICON_SIZE} />
+        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleNewSession} title="新建会话">
+          <Plus className="h-4 w-4" />
         </Button>
 
         <Button
           variant="ghost"
           size="sm"
-          className={CHAT_CLASSES.BUTTON_ICON}
+          className="h-7 w-7 p-0"
           onClick={handleClearSession}
           disabled={!currentSession || currentSession.messages.length === 0}
           title="清空当前会话"
         >
-          <Trash2 className={CHAT_CONSTANTS.ICON_SIZE} />
+          <Trash2 className="h-4 w-4" />
         </Button>
 
-        <Button variant="ghost" size="sm" className={CHAT_CLASSES.BUTTON_ICON} title="设置">
-          <Settings className={CHAT_CONSTANTS.ICON_SIZE} />
+        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="设置">
+          <Settings className="h-4 w-4" />
         </Button>
       </div>
     </div>

@@ -8,7 +8,6 @@ import { Button } from "@renderer/components/ui/button";
 import { TypingIndicator } from "./typing-indicator";
 import { useChatStore, type Message } from "@renderer/store/chat-store";
 import { useThemeStore } from "@renderer/store/theme-store";
-import { CHAT_CONSTANTS } from "../constants/chat";
 
 interface MessageItemProps {
   message: Message;
@@ -64,7 +63,7 @@ export function MessageItem({ message }: MessageItemProps) {
           {/* 用户头像 */}
           <Avatar className="mt-1 h-8 w-8">
             <AvatarFallback className="bg-primary text-primary-foreground">
-              <User className={CHAT_CONSTANTS.ICON_SIZE} />
+              <User className="h-4 w-4" />
             </AvatarFallback>
           </Avatar>
         </div>
@@ -79,7 +78,7 @@ export function MessageItem({ message }: MessageItemProps) {
         {/* AI 头像 */}
         <Avatar className="mt-1 h-8 w-8">
           <AvatarFallback className="bg-secondary text-secondary-foreground">
-            <Bot className={CHAT_CONSTANTS.ICON_SIZE} />
+            <Bot className="h-4 w-4" />
           </AvatarFallback>
         </Avatar>
 
