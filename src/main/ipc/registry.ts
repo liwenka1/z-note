@@ -4,7 +4,7 @@ import { ipcMain } from "electron";
  * 错误处理包装器
  */
 export function withErrorHandling<T extends unknown[]>(fn: (...args: T) => Promise<unknown>) {
-  return async (...args: T) => {
+  return async (_event: Electron.IpcMainInvokeEvent, ...args: T) => {
     try {
       const result = await fn(...args);
       return {
