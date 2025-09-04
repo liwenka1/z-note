@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { CommandDialog, CommandInput, CommandList } from "@renderer/components/ui/command";
 import { useSearchStore, useTabStore } from "@renderer/store";
-import { useFilesUIStore } from "@renderer/store/ui";
+import { useFilesUIStore } from "@renderer/store";
 import { useNotes } from "@renderer/hooks";
 import { useSearchHotkeys } from "./hooks/use-search-hotkeys";
 import { SearchEmpty } from "./components/search-empty";
