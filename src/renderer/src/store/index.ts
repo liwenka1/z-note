@@ -4,6 +4,4 @@ export * from "./search-store";
 export * from "./chat-store";
 export * from "./tab-store";
 export * from "./editor-store";
-
-// UI Stores
-export * from "./ui";
+export * from "./files-ui-store";
