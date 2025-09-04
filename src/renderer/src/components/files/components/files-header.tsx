@@ -3,30 +3,29 @@ import { Button } from "@renderer/components/ui/button";
 import { useNavigate } from "@tanstack/react-router";
 import { useCreateNote, useCreateFolder } from "@renderer/hooks";
 import { useTabStore } from "@renderer/store";
-import { generateId } from "@renderer/types";
+import { FolderFormData, NoteFormData } from "@renderer/types";
 import { FILES_CLASSES, FILES_CONSTANTS } from "../constants/files";
 
 export function FilesHeader() {
   const navigate = useNavigate();
-  const { addTab, setActiveTab } = useTabStore();
+  const { openTab, setActiveTab } = useTabStore();
   const { mutate: createNote } = useCreateNote();
   const { mutate: createFolder } = useCreateFolder();
 
   const handleCreateNote = () => {
-    const noteId = generateId();
-    const noteData = {
+    const noteData: NoteFormData = {
       title: "新建笔记",
       content: "",
-      folderId: null,
+      folderId: undefined,
       tagIds: []
     };
 
     createNote(
-      { id: noteId, ...noteData },
+      { ...noteData },
       {
         onSuccess: (newNote) => {
           // 添加到标签页并激活
-          addTab({ id: newNote.id, title: newNote.title, type: "note" });
+          openTab(newNote.id, newNote.title, "note");
           setActiveTab(newNote.id);
           // 导航到新笔记
           navigate({ to: "/notes/$noteId", params: { noteId: newNote.id } });
@@ -39,9 +38,9 @@ export function FilesHeader() {
   };
 
   const handleCreateFolder = () => {
-    const folderData = {
+    const folderData: FolderFormData = {
       name: "新建文件夹",
-      parentId: null,
+      parentId: undefined,
       color: "#3b82f6",
       icon: "📁"
     };

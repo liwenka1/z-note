@@ -11,7 +11,7 @@ import type { SearchItem } from "./types";
 
 export function SearchCommand() {
   const { isOpen, setIsOpen, closeSearch } = useSearchStore();
-  const { addTab, setActiveTab } = useTabStore();
+  const { openTab, setActiveTab } = useTabStore();
   const { setSelectedFolder } = useFilesUIStore();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -70,7 +70,7 @@ export function SearchCommand() {
       navigate({ to: item.path });
     } else if (item.type === "note") {
       // 打开笔记
-      addTab({ id: item.id, title: item.title, type: "note" });
+      openTab(item.id, item.title, "note");
       setActiveTab(item.id);
       navigate({ to: "/notes/$noteId", params: { noteId: item.id } });
     } else if (item.type === "folder") {

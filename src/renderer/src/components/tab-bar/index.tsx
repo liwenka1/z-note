@@ -16,7 +16,7 @@ import { useCreateNote } from "@renderer/hooks";
 import { useEditorStore } from "@renderer/store/editor-store";
 
 export function TabBar() {
-  const { openTabs, activeTabId, closeTab, closeAllTabs, closeOtherTabs, setActiveTab, addTab } = useTabStore();
+  const { openTabs, activeTabId, closeTab, closeAllTabs, closeOtherTabs, setActiveTab, openTab } = useTabStore();
   const { mutate: createNote } = useCreateNote();
   const { isNoteModified, stopEditing } = useEditorStore();
   const navigate = useNavigate();
@@ -129,7 +129,7 @@ export function TabBar() {
     createNote(noteData, {
       onSuccess: (newNote) => {
         // 添加到标签页并激活
-        addTab({ id: newNote.id, title: newNote.title, type: "note" });
+        openTab(newNote.id, newNote.title, "note");
         setActiveTab(newNote.id);
         // 导航到新笔记
         navigate({ to: "/notes/$noteId", params: { noteId: newNote.id } });

@@ -1,35 +1,12 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
-// 编辑器主题
-type EditorTheme = "dark" | "light";
-
-// 编辑器设置
-interface EditorSettings {
-  fontSize: number;
-  wordWrap: boolean;
-  theme: EditorTheme;
-}
-
-// 功能设置
-interface FeatureSettings {
-  mathSupport: boolean;
-  mermaidSupport: boolean;
-  codeHighlight: boolean;
-}
-
 // 编辑器状态接口
 interface EditorState {
   // 当前正在编辑的笔记内容（按noteId存储）
   editingContent: Record<string, string>;
   // 原始内容（用于对比是否修改）
   originalContent: Record<string, string>;
-  // 自动保存定时器
-  autoSaveTimers: Record<string, NodeJS.Timeout>;
-
-  // 设置
-  editorSettings: EditorSettings;
-  featureSettings: FeatureSettings;
 }
 
 interface EditorActions {
@@ -47,10 +24,6 @@ interface EditorActions {
   getEditingContent: (noteId: string) => string | undefined;
   // 重置笔记到原始状态
   resetNote: (noteId: string) => void;
-
-  // 设置相关 actions
-  updateEditorSettings: (settings: Partial<EditorSettings>) => void;
-  updateFeatureSettings: (settings: Partial<FeatureSettings>) => void;
 }
 
 type EditorStore = EditorState & EditorActions;
@@ -60,19 +33,6 @@ export const useEditorStore = create<EditorStore>()(
     // Initial state
     editingContent: {},
     originalContent: {},
-    autoSaveTimers: {},
-
-    // 默认设置
-    editorSettings: {
-      fontSize: 14,
-      wordWrap: true,
-      theme: "dark" as EditorTheme
-    },
-    featureSettings: {
-      mathSupport: true,
-      mermaidSupport: true,
-      codeHighlight: true
-    },
 
     // Actions
     startEditing: (noteId: string, content: string) => {
@@ -105,11 +65,6 @@ export const useEditorStore = create<EditorStore>()(
         // 删除编辑状态
         delete state.editingContent[noteId];
         delete state.originalContent[noteId];
-        // 清除自动保存定时器（如果有的话）
-        if (state.autoSaveTimers[noteId]) {
-          clearTimeout(state.autoSaveTimers[noteId]);
-          delete state.autoSaveTimers[noteId];
-        }
       });
     },
 
@@ -137,25 +92,6 @@ export const useEditorStore = create<EditorStore>()(
         if (original !== undefined) {
           state.editingContent[noteId] = original;
         }
-
-        // 清除自动保存定时器
-        if (state.autoSaveTimers[noteId]) {
-          clearTimeout(state.autoSaveTimers[noteId]);
-          delete state.autoSaveTimers[noteId];
-        }
-      });
-    },
-
-    // 设置 actions
-    updateEditorSettings: (settings: Partial<EditorSettings>) => {
-      set((state) => {
-        Object.assign(state.editorSettings, settings);
-      });
-    },
-
-    updateFeatureSettings: (settings: Partial<FeatureSettings>) => {
-      set((state) => {
-        Object.assign(state.featureSettings, settings);
       });
     }
   }))
