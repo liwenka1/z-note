@@ -19,3 +19,5 @@ storage/
 # Development phase: ignore migrations until schema is stable
 # TODO: Remove this when ready for production
 src/main/database/migrations/
+
+docs/
