@@ -5,7 +5,6 @@ export interface Tab {
   id: string;
   title: string;
   type: "note" | "settings";
-  isModified?: boolean;
 }
 
 interface TabState {
@@ -43,8 +42,7 @@ export const useTabStore = create<TabStore>()(
           state.openTabs.push({
             id: noteId,
             title,
-            type,
-            isModified: false
+            type
           });
         } else {
           // Update existing tab title if needed
@@ -67,8 +65,7 @@ export const useTabStore = create<TabStore>()(
           state.openTabs.push({
             id: settingsTabId,
             title: "设置",
-            type: "settings",
-            isModified: false
+            type: "settings"
           });
         }
 
