@@ -1,6 +1,6 @@
 import { FoldersRepository } from "../repositories/folders-repository";
 import { BaseService } from "./base-service";
-import { ValidatorFactory } from "../validators";
+import { FolderSchemas, IdSchema } from "../schemas";
 import { generateId } from "../utils/helpers";
 import type { FolderFormData } from "../../renderer/src/types/entities";
 
@@ -41,7 +41,7 @@ export class FoldersService extends BaseService {
    * 获取单个文件夹
    */
   async getFolder(id: string) {
-    this.createValidator("文件夹ID", id).required().validateOrThrow();
+    IdSchema.parse(id);
 
     try {
       const folder = await this.foldersRepository.findById(id);
@@ -58,20 +58,15 @@ export class FoldersService extends BaseService {
    * 创建文件夹
    */
   async createFolder(data: FolderFormData) {
-    // 使用验证器工厂验证文件夹数据
-    const validators = ValidatorFactory.createFolderValidator({
-      name: data.name,
-      parentId: data.parentId ? Number(data.parentId) : undefined
-    });
-
-    this.createBatchValidator().add(validators.name).add(validators.parentId).validateOrThrow();
+    // 使用 Zod 验证文件夹数据
+    FolderSchemas.create.parse(data);
 
     if (data.color) {
-      this.createValidator("颜色", data.color).stringLength(1, 20).validateOrThrow();
+      FolderSchemas.create.pick({ color: true }).parse({ color: data.color });
     }
 
     if (data.icon) {
-      this.createValidator("图标", data.icon).stringLength(1, 10).validateOrThrow();
+      FolderSchemas.create.pick({ icon: true }).parse({ icon: data.icon });
     }
 
     // 验证父文件夹
@@ -94,22 +89,20 @@ export class FoldersService extends BaseService {
    * 更新文件夹
    */
   async updateFolder(id: string, data: Partial<FolderFormData>) {
-    this.createValidator("文件夹ID", id).required().validateOrThrow();
-
-    // 检查文件夹是否存在
+    // 检查文件夹是否存在 (getFolder内部会验证ID)
     await this.getFolder(id);
 
-    // 验证字段长度
+    // 验证字段
     if (data.name !== undefined) {
-      this.createValidator("文件夹名称", data.name).stringLength(1, 100).validateOrThrow();
+      FolderSchemas.update.pick({ name: true }).parse({ name: data.name });
     }
 
     if (data.color !== undefined) {
-      this.createValidator("颜色", data.color).stringLength(1, 20).validateOrThrow();
+      FolderSchemas.update.pick({ color: true }).parse({ color: data.color });
     }
 
     if (data.icon !== undefined) {
-      this.createValidator("图标", data.icon).stringLength(1, 10).validateOrThrow();
+      FolderSchemas.update.pick({ icon: true }).parse({ icon: data.icon });
     }
 
     // 验证父文件夹移动
@@ -140,9 +133,7 @@ export class FoldersService extends BaseService {
    * 删除文件夹（软删除）
    */
   async deleteFolder(id: string) {
-    this.createValidator("文件夹ID", id).required().validateOrThrow();
-
-    // 检查文件夹是否存在
+    // 检查文件夹是否存在 (getFolder内部会验证ID)
     await this.getFolder(id);
 
     // 检查是否有子文件夹
@@ -168,7 +159,7 @@ export class FoldersService extends BaseService {
    * 恢复文件夹
    */
   async restoreFolder(id: string) {
-    this.createValidator("文件夹ID", id).required().validateOrThrow();
+    IdSchema.parse(id);
 
     try {
       const folder = await this.foldersRepository.findById(id);
@@ -199,7 +190,7 @@ export class FoldersService extends BaseService {
    * 永久删除文件夹
    */
   async permanentDeleteFolder(id: string) {
-    this.createValidator("文件夹ID", id).required().validateOrThrow();
+    IdSchema.parse(id);
 
     try {
       const folder = await this.foldersRepository.findById(id);
@@ -229,9 +220,7 @@ export class FoldersService extends BaseService {
    * 移动文件夹
    */
   async moveFolder(id: string, newParentId?: string) {
-    this.createValidator("文件夹ID", id).required().validateOrThrow();
-
-    // 检查文件夹是否存在
+    // 检查文件夹是否存在 (getFolder内部会验证ID)
     await this.getFolder(id);
 
     // 如果有新的父文件夹，验证其存在性
@@ -259,7 +248,7 @@ export class FoldersService extends BaseService {
    * 获取文件夹的祖先路径
    */
   async getFolderPath(id: string) {
-    this.createValidator("文件夹ID", id).required().validateOrThrow();
+    IdSchema.parse(id);
 
     try {
       const ancestorIds = await this.foldersRepository.getAncestorIds(id);
