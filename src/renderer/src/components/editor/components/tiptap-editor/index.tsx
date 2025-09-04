@@ -6,7 +6,6 @@ import Typography from "@tiptap/extension-typography";
 import { useEffect } from "react";
 import { cn } from "@renderer/lib/utils";
 import { EditorToolbar } from "./toolbar";
-import { TIPTAP_CONFIG } from "../../constants/editor";
 
 interface TipTapEditorProps {
   content: string;
@@ -23,7 +22,7 @@ export function TipTapEditor({
   onSave,
   editable = true,
   className,
-  placeholder = TIPTAP_CONFIG.DEFAULT_PLACEHOLDER
+  placeholder = "开始写作..."
 }: TipTapEditorProps) {
   const editor = useEditor({
     extensions: [
@@ -31,7 +30,7 @@ export function TipTapEditor({
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: TIPTAP_CONFIG.LINK_CLASS
+          class: "text-primary underline-offset-4 hover:underline"
         }
       }),
       Placeholder.configure({
@@ -47,7 +46,7 @@ export function TipTapEditor({
     },
     editorProps: {
       attributes: {
-        class: TIPTAP_CONFIG.EDITOR_PROPS_CLASS
+        class: "focus:outline-none prose prose-neutral dark:prose-invert max-w-none p-6"
       },
       handleKeyDown: (_view, event) => {
         // 检测 Ctrl+S (Windows/Linux) 或 Cmd+S (macOS)

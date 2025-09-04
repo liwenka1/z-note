@@ -1,7 +1,6 @@
 import { TipTapEditor } from "./components/tiptap-editor";
 import { NoteNotFound } from "./components/note-not-found";
 import { useEditorState } from "./hooks/use-editor-state";
-import { EDITOR_CLASSES } from "./constants/editor";
 
 interface NoteEditorProps {
   noteId: string;
@@ -19,12 +18,12 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
   }
 
   return (
-    <div className={EDITOR_CLASSES.CONTAINER}>
+    <div className="bg-background h-full w-full overflow-auto">
       <TipTapEditor
         content={editingContent}
         onChange={handleContentChange}
         onSave={handleSave}
-        className={EDITOR_CLASSES.TIPTAP_CONTAINER}
+        className="bg-background min-h-full"
       />
     </div>
   );
