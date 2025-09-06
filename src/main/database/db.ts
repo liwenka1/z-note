@@ -35,45 +35,64 @@ export function getDatabase() {
 
       // 直接创建表结构
       sqlite.exec(`
-        CREATE TABLE IF NOT EXISTS folders (
-          id text PRIMARY KEY NOT NULL,
-          name text NOT NULL,
-          parent_id text,
-          color text,
-          icon text,
-          is_deleted integer DEFAULT false NOT NULL,
-          sort_order integer DEFAULT 0 NOT NULL,
-          created_at integer NOT NULL,
-          updated_at integer NOT NULL,
-          FOREIGN KEY (parent_id) REFERENCES folders(id) ON DELETE cascade
-        );
-
         CREATE TABLE IF NOT EXISTS tags (
-          id text PRIMARY KEY NOT NULL,
-          name text NOT NULL UNIQUE,
-          color text NOT NULL,
-          created_at integer NOT NULL,
-          updated_at integer NOT NULL
+          id integer PRIMARY KEY AUTOINCREMENT,
+          name text NOT NULL,
+          isLocked integer DEFAULT 0 NOT NULL,
+          isPin integer DEFAULT 0 NOT NULL
         );
 
         CREATE TABLE IF NOT EXISTS notes (
-          id text PRIMARY KEY NOT NULL,
-          title text NOT NULL,
-          content text NOT NULL,
-          folder_id text,
-          is_favorite integer DEFAULT false NOT NULL,
-          is_deleted integer DEFAULT false NOT NULL,
-          created_at integer NOT NULL,
-          updated_at integer NOT NULL,
-          FOREIGN KEY (folder_id) REFERENCES folders(id) ON DELETE set null
+          id integer PRIMARY KEY AUTOINCREMENT,
+          tagId integer NOT NULL,
+          content text DEFAULT NULL,
+          locale text NOT NULL,
+          count text NOT NULL,
+          createdAt integer NOT NULL,
+          FOREIGN KEY (tagId) REFERENCES tags(id)
         );
 
-        CREATE TABLE IF NOT EXISTS note_tags (
-          note_id text NOT NULL,
-          tag_id text NOT NULL,
-          FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE cascade,
-          FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE cascade
+        CREATE TABLE IF NOT EXISTS chats (
+          id integer PRIMARY KEY AUTOINCREMENT,
+          tagId integer NOT NULL,
+          content text DEFAULT NULL,
+          role text NOT NULL,
+          type text NOT NULL,
+          image text DEFAULT NULL,
+          inserted integer DEFAULT 0 NOT NULL,
+          createdAt integer NOT NULL,
+          FOREIGN KEY (tagId) REFERENCES tags(id)
         );
+
+        CREATE TABLE IF NOT EXISTS marks (
+          id integer PRIMARY KEY AUTOINCREMENT,
+          tagId integer NOT NULL,
+          type text NOT NULL,
+          content text DEFAULT NULL,
+          url text DEFAULT NULL,
+          desc text DEFAULT NULL,
+          deleted integer DEFAULT 0 NOT NULL,
+          createdAt integer,
+          FOREIGN KEY (tagId) REFERENCES tags(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS vector_documents (
+          id integer PRIMARY KEY AUTOINCREMENT,
+          filename text NOT NULL,
+          chunk_id integer NOT NULL,
+          content text NOT NULL,
+          embedding text NOT NULL,
+          updated_at integer NOT NULL,
+          UNIQUE(filename, chunk_id)
+        );
+
+        -- 创建向量文档索引
+        CREATE INDEX IF NOT EXISTS idx_vector_documents_filename 
+        ON vector_documents(filename);
+
+        -- 插入默认的 "Idea" 标签
+        INSERT OR IGNORE INTO tags (id, name, isLocked, isPin) 
+        VALUES (1, 'Idea', 1, 1);
       `);
     } catch (error) {
       console.error("❌ 数据库初始化失败:", error);

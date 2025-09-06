@@ -1,5 +1,5 @@
 import { getDatabase } from "./db";
-import { folders, tags, notes, noteTags } from "./schema";
+import { tags, notes, chats, marks } from "./schema";
 
 // 初始数据
 export async function seedDatabase() {
@@ -9,110 +9,48 @@ export async function seedDatabase() {
 
   try {
     // 清空现有数据（开发阶段）
-    await db.delete(noteTags);
+    await db.delete(marks);
+    await db.delete(chats);
     await db.delete(notes);
     await db.delete(tags);
-    await db.delete(folders);
 
-    // 插入文件夹数据
-    const folderData = [
-      {
-        id: "folder-1",
-        name: "工作项目",
-        parentId: null,
-        color: "#3b82f6",
-        icon: "💼",
-        isDeleted: false,
-        sortOrder: 1,
-        createdAt: new Date("2024-01-10"),
-        updatedAt: new Date("2024-01-15")
-      },
-      {
-        id: "folder-2",
-        name: "学习资料",
-        parentId: null,
-        color: "#22c55e",
-        icon: "📚",
-        isDeleted: false,
-        sortOrder: 2,
-        createdAt: new Date("2024-01-12"),
-        updatedAt: new Date("2024-01-18")
-      },
-      {
-        id: "folder-3",
-        name: "个人笔记",
-        parentId: null,
-        color: "#ec4899",
-        icon: "✨",
-        isDeleted: false,
-        sortOrder: 3,
-        createdAt: new Date("2024-01-14"),
-        updatedAt: new Date("2024-01-20")
-      },
-      // 子文件夹
-      {
-        id: "folder-1-1",
-        name: "Z-Note 项目",
-        parentId: "folder-1",
-        color: "#8b5cf6",
-        icon: "📝",
-        isDeleted: false,
-        sortOrder: 1,
-        createdAt: new Date("2024-01-16"),
-        updatedAt: new Date("2024-01-22")
-      },
-      {
-        id: "folder-2-1",
-        name: "TypeScript",
-        parentId: "folder-2",
-        color: "#3b82f6",
-        icon: "📘",
-        isDeleted: false,
-        sortOrder: 1,
-        createdAt: new Date("2024-01-20"),
-        updatedAt: new Date("2024-01-25")
-      }
-    ];
-
-    await db.insert(folders).values(folderData);
-    console.log("✅ 文件夹数据插入成功");
-
-    // 插入标签数据
+    // 插入标签数据（包含默认的 Idea 标签）
     const tagData = [
       {
-        id: "tag-1",
+        id: 1,
+        name: "Idea",
+        isLocked: true,
+        isPin: true
+      },
+      {
+        id: 2,
         name: "开发",
-        color: "#3b82f6",
-        createdAt: new Date("2024-01-10"),
-        updatedAt: new Date("2024-01-10")
+        isLocked: false,
+        isPin: false
       },
       {
-        id: "tag-2",
+        id: 3,
         name: "TypeScript",
-        color: "#0ea5e9",
-        createdAt: new Date("2024-01-10"),
-        updatedAt: new Date("2024-01-10")
+        isLocked: false,
+        isPin: false
       },
       {
-        id: "tag-3",
+        id: 4,
         name: "Electron",
-        color: "#22c55e",
-        createdAt: new Date("2024-01-10"),
-        updatedAt: new Date("2024-01-10")
+        isLocked: false,
+        isPin: false
       },
       {
-        id: "tag-4",
+        id: 5,
         name: "学习",
-        color: "#f59e0b",
-        createdAt: new Date("2024-01-10"),
-        updatedAt: new Date("2024-01-10")
+        isLocked: false,
+        isPin: true
       },
       {
-        id: "tag-5",
+        id: 6,
         name: "重要",
-        color: "#ef4444",
-        createdAt: new Date("2024-01-10"),
-        updatedAt: new Date("2024-01-10")
+        isLocked: false,
+        isPin: false
       }
     ];
 
@@ -122,8 +60,8 @@ export async function seedDatabase() {
     // 插入笔记数据
     const noteData = [
       {
-        id: "note-1",
-        title: "Z-Note 项目规划",
+        id: 1,
+        tagId: 1,
         content: `# Z-Note 项目规划
 
 ## 项目概述
@@ -137,19 +75,16 @@ Z-Note 是一个基于 Electron 的现代化笔记应用，支持丰富的文本
 
 ## 核心功能
 1. 笔记管理
-2. 文件夹组织
-3. 标签系统
-4. 富文本编辑
-5. 搜索功能`,
-        folderId: "folder-1-1",
-        isFavorite: true,
-        isDeleted: false,
-        createdAt: new Date("2024-01-16"),
-        updatedAt: new Date("2024-01-28")
+2. 标签系统
+3. 富文本编辑
+4. 搜索功能`,
+        locale: "zh-CN",
+        count: "300",
+        createdAt: Date.now()
       },
       {
-        id: "note-2",
-        title: "TypeScript 学习笔记",
+        id: 2,
+        tagId: 3,
         content: `# TypeScript 学习笔记
 
 ## 基础类型
@@ -169,15 +104,13 @@ Z-Note 是一个基于 Electron 的现代化笔记应用，支持丰富的文本
 - Required<T>
 - Pick<T, K>
 - Omit<T, K>`,
-        folderId: "folder-2-1",
-        isFavorite: false,
-        isDeleted: false,
-        createdAt: new Date("2024-01-20"),
-        updatedAt: new Date("2024-01-25")
+        locale: "zh-CN",
+        count: "250",
+        createdAt: Date.now()
       },
       {
-        id: "note-3",
-        title: "今日想法",
+        id: 3,
+        tagId: 5,
         content: `# 今日想法
 
 今天学习了 Drizzle ORM，感觉这个工具真的很棒！
@@ -190,29 +123,91 @@ Z-Note 是一个基于 Electron 的现代化笔记应用，支持丰富的文本
 
 ## 对比其他 ORM
 相比 TypeORM 和 Prisma，Drizzle 更轻量，启动速度更快。`,
-        folderId: "folder-3",
-        isFavorite: false,
-        isDeleted: false,
-        createdAt: new Date("2024-01-22"),
-        updatedAt: new Date("2024-01-22")
+        locale: "zh-CN",
+        count: "120",
+        createdAt: Date.now()
       }
     ];
 
     await db.insert(notes).values(noteData);
     console.log("✅ 笔记数据插入成功");
 
-    // 插入笔记标签关联数据
-    const noteTagData = [
-      { noteId: "note-1", tagId: "tag-1" },
-      { noteId: "note-1", tagId: "tag-3" },
-      { noteId: "note-1", tagId: "tag-5" },
-      { noteId: "note-2", tagId: "tag-2" },
-      { noteId: "note-2", tagId: "tag-4" },
-      { noteId: "note-3", tagId: "tag-4" }
+    // 插入聊天数据
+    const chatData = [
+      {
+        id: 1,
+        tagId: 1,
+        content: "你好，我想了解一下这个项目的进展",
+        role: "user" as const,
+        type: "chat" as const,
+        inserted: false,
+        createdAt: Date.now()
+      },
+      {
+        id: 2,
+        tagId: 1,
+        content: "项目目前进展顺利，已经完成了基础架构的搭建",
+        role: "system" as const,
+        type: "chat" as const,
+        inserted: false,
+        createdAt: Date.now()
+      },
+      {
+        id: 3,
+        tagId: 2,
+        content: "可以帮我生成一个 TypeScript 接口吗？",
+        role: "user" as const,
+        type: "note" as const,
+        inserted: true,
+        createdAt: Date.now()
+      }
     ];
 
-    await db.insert(noteTags).values(noteTagData);
-    console.log("✅ 笔记标签关联数据插入成功");
+    await db.insert(chats).values(chatData);
+    console.log("✅ 聊天数据插入成功");
+
+    // 插入标记数据
+    const markData = [
+      {
+        id: 1,
+        tagId: 1,
+        type: "text" as const,
+        content: "重要的会议记录",
+        desc: "今天的项目会议记录",
+        deleted: 0,
+        createdAt: Date.now()
+      },
+      {
+        id: 2,
+        tagId: 2,
+        type: "link" as const,
+        url: "https://www.typescriptlang.org/",
+        desc: "TypeScript 官方文档",
+        deleted: 0,
+        createdAt: Date.now()
+      },
+      {
+        id: 3,
+        tagId: 4,
+        type: "file" as const,
+        content: "project-plan.pdf",
+        desc: "项目计划文档",
+        deleted: 0,
+        createdAt: Date.now()
+      },
+      {
+        id: 4,
+        tagId: 1,
+        type: "text" as const,
+        content: "已删除的标记",
+        desc: "这是一个已删除的标记",
+        deleted: 1,
+        createdAt: Date.now()
+      }
+    ];
+
+    await db.insert(marks).values(markData);
+    console.log("✅ 标记数据插入成功");
 
     console.log("🎉 所有初始数据插入完成！");
   } catch (error) {

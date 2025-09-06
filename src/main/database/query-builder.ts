@@ -1,5 +1,5 @@
-import { eq, and, like, or, sql, type SQL } from "drizzle-orm";
-import { notes, folders } from "./schema";
+import { eq, and, like, or, type SQL } from "drizzle-orm";
+import { notes, tags, chats, marks } from "./schema";
 
 /**
  * 搜索字段类型
@@ -26,10 +26,10 @@ export class QueryConditions {
   }
 
   /**
-   * 添加软删除过滤
+   * 添加软删除过滤（适用于 marks 表）
    */
-  withoutDeleted(table: { isDeleted: DatabaseField }) {
-    this.conditions.push(eq(table.isDeleted, false));
+  withoutDeleted(table: { deleted: DatabaseField }) {
+    this.conditions.push(eq(table.deleted, 0));
     return this;
   }
 
@@ -81,8 +81,113 @@ export class QueryConditions {
 export class NotesQueryHelper {
   static buildListQuery(
     params: {
+      tagId?: number;
+      locale?: string;
+      search?: string;
+    } = {}
+  ) {
+    const conditions = new QueryConditions();
+
+    // 标签过滤
+    if (params.tagId) {
+      conditions.whereEquals(notes.tagId, params.tagId);
+    }
+
+    // 语言过滤
+    if (params.locale) {
+      conditions.whereEquals(notes.locale, params.locale);
+    }
+
+    // 搜索过滤
+    if (params.search) {
+      conditions.withSearch(params.search, [notes.content]);
+    }
+
+    return conditions.build();
+  }
+
+  static buildDetailQuery(id: number) {
+    return eq(notes.id, id);
+  }
+}
+
+/**
+ * 标签查询助手
+ */
+export class TagsQueryHelper {
+  static buildListQuery(params: { search?: string } = {}) {
+    const conditions = new QueryConditions();
+
+    // 搜索过滤
+    if (params.search) {
+      conditions.withSearch(params.search, [tags.name]);
+    }
+
+    return conditions.build();
+  }
+
+  static buildDetailQuery(id: number) {
+    return eq(tags.id, id);
+  }
+}
+
+/**
+ * 聊天查询助手
+ */
+export class ChatsQueryHelper {
+  static buildListQuery(
+    params: {
+      tagId?: number;
+      role?: "system" | "user";
+      type?: "chat" | "note" | "clipboard" | "clear";
+      inserted?: boolean;
+      search?: string;
+    } = {}
+  ) {
+    const conditions = new QueryConditions();
+
+    // 标签过滤
+    if (params.tagId) {
+      conditions.whereEquals(chats.tagId, params.tagId);
+    }
+
+    // 角色过滤
+    if (params.role) {
+      conditions.whereEquals(chats.role, params.role);
+    }
+
+    // 类型过滤
+    if (params.type) {
+      conditions.whereEquals(chats.type, params.type);
+    }
+
+    // 插入状态过滤
+    if (params.inserted !== undefined) {
+      conditions.whereEquals(chats.inserted, params.inserted);
+    }
+
+    // 搜索过滤
+    if (params.search) {
+      conditions.withSearch(params.search, [chats.content]);
+    }
+
+    return conditions.build();
+  }
+
+  static buildDetailQuery(id: number) {
+    return eq(chats.id, id);
+  }
+}
+
+/**
+ * 标记查询助手
+ */
+export class MarksQueryHelper {
+  static buildListQuery(
+    params: {
+      tagId?: number;
+      type?: "scan" | "text" | "image" | "link" | "file";
       includeDeleted?: boolean;
-      folderId?: string;
       search?: string;
     } = {}
   ) {
@@ -90,54 +195,28 @@ export class NotesQueryHelper {
 
     // 软删除过滤
     if (!params.includeDeleted) {
-      conditions.withoutDeleted(notes);
+      conditions.withoutDeleted(marks);
     }
 
-    // 文件夹过滤
-    if (params.folderId) {
-      conditions.whereEquals(notes.folderId, params.folderId);
+    // 标签过滤
+    if (params.tagId) {
+      conditions.whereEquals(marks.tagId, params.tagId);
+    }
+
+    // 类型过滤
+    if (params.type) {
+      conditions.whereEquals(marks.type, params.type);
     }
 
     // 搜索过滤
     if (params.search) {
-      conditions.withSearch(params.search, [notes.title, notes.content]);
+      conditions.withSearch(params.search, [marks.content, marks.desc]);
     }
 
     return conditions.build();
   }
 
-  static buildDetailQuery(id: string) {
-    return and(eq(notes.id, id), eq(notes.isDeleted, false));
-  }
-}
-
-/**
- * 文件夹查询助手
- */
-export class FoldersQueryHelper {
-  static buildListQuery(params: { includeDeleted?: boolean } = {}) {
-    const conditions = new QueryConditions();
-
-    if (!params.includeDeleted) {
-      conditions.withoutDeleted(folders);
-    }
-
-    return conditions.build();
-  }
-
-  static buildDetailQuery(id: string) {
-    return and(eq(folders.id, id), eq(folders.isDeleted, false));
-  }
-
-  static buildChildrenQuery(parentId?: string) {
-    const conditions = new QueryConditions().withoutDeleted(folders);
-
-    if (parentId) {
-      conditions.whereEquals(folders.parentId, parentId);
-    } else {
-      conditions.add(sql`${folders.parentId} IS NULL`);
-    }
-
-    return conditions.build();
+  static buildDetailQuery(id: number) {
+    return and(eq(marks.id, id), eq(marks.deleted, 0));
   }
 }
