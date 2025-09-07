@@ -62,22 +62,7 @@ export async function seedDatabase() {
       {
         id: 1,
         tagId: 1,
-        content: `# Z-Note 项目规划
-
-## 项目概述
-Z-Note 是一个基于 Electron 的现代化笔记应用，支持丰富的文本编辑功能。
-
-## 技术栈
-- **前端**: React + TypeScript + TanStack Router
-- **后端**: Electron Main Process + SQLite + Drizzle ORM
-- **编辑器**: TipTap
-- **UI**: Tailwind CSS + shadcn/ui
-
-## 核心功能
-1. 笔记管理
-2. 标签系统
-3. 富文本编辑
-4. 搜索功能`,
+        content: `<h1>Z-Note 项目规划</h1><h2>项目概述</h2><p>Z-Note 是一个基于 Electron 的现代化笔记应用，支持丰富的文本编辑功能。</p><h2>技术栈</h2><ul><li><strong>前端</strong>: React + TypeScript + TanStack Router</li><li><strong>后端</strong>: Electron Main Process + SQLite + Drizzle ORM</li><li><strong>编辑器</strong>: TipTap</li><li><strong>UI</strong>: Tailwind CSS + shadcn/ui</li></ul><h2>核心功能</h2><ol><li>笔记管理</li><li>标签系统</li><li>富文本编辑</li><li>搜索功能</li></ol>`,
         locale: "zh-CN",
         count: "300",
         createdAt: Date.now()
@@ -85,25 +70,7 @@ Z-Note 是一个基于 Electron 的现代化笔记应用，支持丰富的文本
       {
         id: 2,
         tagId: 3,
-        content: `# TypeScript 学习笔记
-
-## 基础类型
-- string, number, boolean
-- Array, Tuple
-- Enum, Any, Unknown
-- Void, Null, Undefined
-
-## 高级类型
-- Union Types
-- Intersection Types
-- Conditional Types
-- Mapped Types
-
-## 工具类型
-- Partial<T>
-- Required<T>
-- Pick<T, K>
-- Omit<T, K>`,
+        content: `<h1>TypeScript 学习笔记</h1><h2>基础类型</h2><ul><li>string, number, boolean</li><li>Array, Tuple</li><li>Enum, Any, Unknown</li><li>Void, Null, Undefined</li></ul><h2>高级类型</h2><ul><li>Union Types</li><li>Intersection Types</li><li>Conditional Types</li><li>Mapped Types</li></ul><h2>工具类型</h2><ul><li><code>Partial&lt;T&gt;</code></li><li><code>Required&lt;T&gt;</code></li><li><code>Pick&lt;T, K&gt;</code></li><li><code>Omit&lt;T, K&gt;</code></li></ul>`,
         locale: "zh-CN",
         count: "250",
         createdAt: Date.now()
@@ -111,18 +78,7 @@ Z-Note 是一个基于 Electron 的现代化笔记应用，支持丰富的文本
       {
         id: 3,
         tagId: 5,
-        content: `# 今日想法
-
-今天学习了 Drizzle ORM，感觉这个工具真的很棒！
-
-## 优点
-- 类型安全
-- 性能优秀
-- API 简洁
-- 迁移方便
-
-## 对比其他 ORM
-相比 TypeORM 和 Prisma，Drizzle 更轻量，启动速度更快。`,
+        content: `<h1>今日想法</h1><p>今天学习了 <strong>Drizzle ORM</strong>，感觉这个工具真的很棒！</p><h2>优点</h2><ul><li>类型安全</li><li>性能优秀</li><li>API 简洁</li><li>迁移方便</li></ul><h2>对比其他 ORM</h2><p>相比 <em>TypeORM</em> 和 <em>Prisma</em>，Drizzle 更轻量，启动速度更快。</p><blockquote><p>推荐在新项目中使用 Drizzle ORM！</p></blockquote>`,
         locale: "zh-CN",
         count: "120",
         createdAt: Date.now()
