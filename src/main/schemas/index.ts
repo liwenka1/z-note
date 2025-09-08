@@ -7,8 +7,10 @@ export * from "./common";
 
 // 实体 schemas
 export * from "./note";
-export * from "./folder";
 export * from "./tag";
+export * from "./chat";
+export * from "./mark";
+export * from "./vector";
 
 // API 参数 schemas
 export * from "./api";

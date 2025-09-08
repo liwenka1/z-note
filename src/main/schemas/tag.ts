@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { IdSchema, createStringSchema, ColorSchema } from "./common";
+import { IdSchema, createStringSchema } from "./common";
 
 /**
  * 标签相关验证 schemas
@@ -9,27 +9,31 @@ import { IdSchema, createStringSchema, ColorSchema } from "./common";
 export const BaseTagSchema = z.object({
   id: IdSchema,
   name: createStringSchema("标签名称", 1, 50),
-  color: ColorSchema,
-  createdAt: z.date(),
-  updatedAt: z.date()
+  isLocked: z.boolean(),
+  isPin: z.boolean(),
+  noteCount: z.number().min(0).optional(),
+  chatCount: z.number().min(0).optional(),
+  markCount: z.number().min(0).optional()
 });
 
 // 标签创建 schema
 export const CreateTagSchema = z.object({
   name: createStringSchema("标签名称", 1, 50),
-  color: ColorSchema
+  isLocked: z.boolean().optional().default(false),
+  isPin: z.boolean().optional().default(false)
 });
 
 // 标签更新 schema
 export const UpdateTagSchema = z.object({
   name: createStringSchema("标签名称", 1, 50).optional(),
-  color: ColorSchema
+  isLocked: z.boolean().optional(),
+  isPin: z.boolean().optional()
 });
 
 // 标签查询参数 schema
 export const GetTagsRequestSchema = z.object({
   search: z.string().optional(),
-  sortBy: z.enum(["name", "createdAt", "updatedAt"]).optional(),
+  sortBy: z.enum(["name", "noteCount", "chatCount", "markCount"]).optional(),
   sortOrder: z.enum(["asc", "desc"]).optional()
 });
 

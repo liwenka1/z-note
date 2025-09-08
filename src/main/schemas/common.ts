@@ -4,11 +4,11 @@ import { z } from "zod";
  * 通用验证 schemas
  */
 
-// ID 验证
-export const IdSchema = z.string().min(1, "ID不能为空");
+// ID 验证 (改为 number 类型)
+export const IdSchema = z.number().int("ID必须为整数").positive("ID必须为正数");
 
 // 可选 ID
-export const OptionalIdSchema = z.string().optional();
+export const OptionalIdSchema = z.number().int("ID必须为整数").positive("ID必须为正数").optional();
 
 // 颜色验证 (十六进制)
 export const ColorSchema = z

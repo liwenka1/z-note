@@ -14,8 +14,8 @@ export const IdParamSchema = z.object({
 export const SearchParamsSchema = z.object({
   query: createStringSchema("搜索关键词", 1, 100),
   includeDeleted: z.boolean().optional().default(false),
-  folderId: z.string().optional(),
-  tagIds: z.array(IdSchema).optional()
+  tagId: IdSchema.optional(),
+  locale: createStringSchema("语言设置", 1, 10).optional()
 });
 
 // 批量操作参数
@@ -29,27 +29,21 @@ export const BatchDeleteSchema = BatchOperationSchema;
 // 批量恢复参数
 export const BatchRestoreSchema = BatchOperationSchema;
 
-// 移动到文件夹参数
-export const MoveToFolderSchema = z.object({
+// 移动到标签参数
+export const MoveToTagSchema = z.object({
   noteIds: BatchIdsSchema,
-  folderId: z.string().optional() // null 表示移到根目录
+  tagId: IdSchema
 });
 
-// 添加标签参数
-export const AddTagsSchema = z.object({
+// 批量更新标签参数
+export const BatchUpdateTagSchema = z.object({
   noteIds: BatchIdsSchema,
-  tagIds: z.array(IdSchema).min(1, "至少选择一个标签")
-});
-
-// 移除标签参数
-export const RemoveTagsSchema = z.object({
-  noteIds: BatchIdsSchema,
-  tagIds: z.array(IdSchema).min(1, "至少选择一个标签")
+  tagId: IdSchema
 });
 
 // 排序参数
 export const SortParamsSchema = z.object({
-  sortBy: z.enum(["createdAt", "updatedAt", "title", "name"]),
+  sortBy: z.enum(["createdAt", "count", "name"]),
   sortOrder: z.enum(["asc", "desc"]).default("desc")
 });
 
@@ -60,9 +54,8 @@ export const PaginatedQuerySchema = PaginationSchema.merge(SortParamsSchema.part
 export type IdParam = z.infer<typeof IdParamSchema>;
 export type SearchParams = z.infer<typeof SearchParamsSchema>;
 export type BatchOperation = z.infer<typeof BatchOperationSchema>;
-export type MoveToFolder = z.infer<typeof MoveToFolderSchema>;
-export type AddTags = z.infer<typeof AddTagsSchema>;
-export type RemoveTags = z.infer<typeof RemoveTagsSchema>;
+export type MoveToTag = z.infer<typeof MoveToTagSchema>;
+export type BatchUpdateTag = z.infer<typeof BatchUpdateTagSchema>;
 export type SortParams = z.infer<typeof SortParamsSchema>;
 export type PaginatedQuery = z.infer<typeof PaginatedQuerySchema>;
 
@@ -72,9 +65,8 @@ export const ApiSchemas = {
   search: SearchParamsSchema,
   batchDelete: BatchDeleteSchema,
   batchRestore: BatchRestoreSchema,
-  moveToFolder: MoveToFolderSchema,
-  addTags: AddTagsSchema,
-  removeTags: RemoveTagsSchema,
+  moveToTag: MoveToTagSchema,
+  batchUpdateTag: BatchUpdateTagSchema,
   sort: SortParamsSchema,
   paginatedQuery: PaginatedQuerySchema
 } as const;

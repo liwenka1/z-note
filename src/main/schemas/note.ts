@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { IdSchema, OptionalIdSchema, createStringSchema, createArraySchema } from "./common";
+import { IdSchema, createStringSchema } from "./common";
 
 /**
  * 笔记相关验证 schemas
@@ -8,40 +8,34 @@ import { IdSchema, OptionalIdSchema, createStringSchema, createArraySchema } fro
 // 基础笔记 schema
 export const BaseNoteSchema = z.object({
   id: IdSchema,
-  title: createStringSchema("笔记标题", 1, 200),
-  content: createStringSchema("笔记内容", 0, 1000000), // 1MB限制
-  folderId: OptionalIdSchema,
-  tagIds: createArraySchema(IdSchema, "标签", 0, 20),
-  isFavorite: z.boolean(),
-  isDeleted: z.boolean(),
-  createdAt: z.date(),
-  updatedAt: z.date()
+  tagId: IdSchema,
+  content: createStringSchema("笔记内容", 0, 1000000).optional(), // 1MB限制
+  locale: createStringSchema("语言设置", 1, 10),
+  count: createStringSchema("字符计数", 0, 20),
+  createdAt: z.number().int("创建时间必须为整数")
 });
 
 // 笔记创建 schema
 export const CreateNoteSchema = z.object({
-  title: createStringSchema("笔记标题", 1, 200),
-  content: createStringSchema("笔记内容", 0, 1000000).optional().default(""),
-  folderId: OptionalIdSchema,
-  tagIds: createArraySchema(IdSchema, "标签", 0, 20).optional().default([])
+  tagId: IdSchema,
+  content: createStringSchema("笔记内容", 0, 1000000).optional(),
+  locale: createStringSchema("语言设置", 1, 10),
+  count: createStringSchema("字符计数", 0, 20)
 });
 
 // 笔记更新 schema
 export const UpdateNoteSchema = z.object({
-  title: createStringSchema("笔记标题", 1, 200).optional(),
   content: createStringSchema("笔记内容", 0, 1000000).optional(),
-  folderId: OptionalIdSchema,
-  tagIds: createArraySchema(IdSchema, "标签", 0, 20).optional()
+  locale: createStringSchema("语言设置", 1, 10).optional(),
+  count: createStringSchema("字符计数", 0, 20).optional()
 });
 
 // 笔记查询参数 schema
 export const GetNotesRequestSchema = z.object({
-  folderId: OptionalIdSchema,
-  tagIds: z.array(IdSchema).optional(),
-  includeDeleted: z.boolean().optional(),
-  isFavorite: z.boolean().optional(),
+  tagId: IdSchema.optional(),
+  locale: createStringSchema("语言设置", 1, 10).optional(),
   search: z.string().optional(),
-  sortBy: z.enum(["createdAt", "updatedAt", "title"]).optional(),
+  sortBy: z.enum(["createdAt", "count"]).optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
   limit: z.number().min(1).max(1000).optional(),
   offset: z.number().min(0).optional()
