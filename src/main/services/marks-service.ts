@@ -1,0 +1,69 @@
+import { MarksRepository } from "../repositories/marks-repository";
+import type { MarkFormData, MarkEntity } from "../repositories/types";
+
+/**
+ * 标记服务 - 简化版
+ */
+export class MarksService {
+  private marksRepository: MarksRepository;
+
+  constructor() {
+    this.marksRepository = new MarksRepository();
+  }
+
+  /**
+   * 根据标签获取标记
+   */
+  async getMarksByTag(tagId: number): Promise<MarkEntity[]> {
+    return await this.marksRepository.findByTag(tagId);
+  }
+
+  /**
+   * 获取所有标记（包括回收站）
+   */
+  async getAllMarks(includeDeleted: boolean = false): Promise<MarkEntity[]> {
+    return await this.marksRepository.findAll(includeDeleted);
+  }
+
+  /**
+   * 创建标记
+   */
+  async createMark(data: MarkFormData): Promise<MarkEntity> {
+    return await this.marksRepository.create(data);
+  }
+
+  /**
+   * 更新标记
+   */
+  async updateMark(id: number, data: Partial<MarkFormData>): Promise<MarkEntity> {
+    return await this.marksRepository.update(id, data);
+  }
+
+  /**
+   * 删除标记（移至回收站）
+   */
+  async deleteMark(id: number): Promise<{ id: number }> {
+    return await this.marksRepository.delete(id);
+  }
+
+  /**
+   * 恢复标记
+   */
+  async restoreMark(id: number): Promise<MarkEntity> {
+    return await this.marksRepository.restore(id);
+  }
+
+  /**
+   * 永久删除标记
+   */
+  async deleteMarkForever(id: number): Promise<{ id: number }> {
+    return await this.marksRepository.deleteForever(id);
+  }
+
+  /**
+   * 清空回收站
+   */
+  async clearTrash(): Promise<{ deletedCount: number }> {
+    return await this.marksRepository.clearTrash();
+  }
+}
