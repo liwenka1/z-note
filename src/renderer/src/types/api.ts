@@ -1,7 +1,29 @@
 // ==================== API 类型 ====================
 
-import type { Note, Folder, Tag, NoteFormData, FolderFormData, TagFormData } from "./entities";
+import type { Note, Chat, Mark, Tag, NoteFormData, ChatFormData, MarkFormData, TagFormData } from "./entities";
 import type { BaseResponse } from "./common";
+
+// Vector Documents 类型 (从后端导入)
+export interface VectorDocumentFormData {
+  filename: string;
+  chunkId: number;
+  content: string;
+  embedding: string;
+}
+
+export interface VectorDocumentEntity {
+  id: number;
+  filename: string;
+  chunkId: number;
+  content: string;
+  embedding: string;
+  updatedAt: number;
+}
+
+/**
+ * 引入 IPC 通道常量，与后端保持同步
+ */
+import { IPC_CHANNELS } from "@shared/ipc-channels";
 
 // ==================== 请求类型 ====================
 
@@ -10,64 +32,115 @@ export interface CreateNoteRequest {
 }
 
 export interface UpdateNoteRequest {
-  id: string;
+  id: number;
   data: Partial<NoteFormData>;
 }
 
 export interface GetNotesRequest {
-  folderId?: string;
-  tagIds?: string[];
+  tagId?: number;
+  locale?: string;
   search?: string;
+  sortBy?: "createdAt" | "count";
+  sortOrder?: "asc" | "desc";
+  limit?: number;
+  offset?: number;
+}
+
+export interface GetChatsRequest {
+  tagId?: number;
+  role?: "system" | "user";
+  type?: "chat" | "note" | "clipboard" | "clear";
+  inserted?: boolean;
+  search?: string;
+  sortBy?: "createdAt" | "role" | "type";
+  sortOrder?: "asc" | "desc";
+  limit?: number;
+  offset?: number;
+}
+
+export interface GetMarksRequest {
+  tagId?: number;
+  type?: "scan" | "text" | "image" | "link" | "file";
   includeDeleted?: boolean;
+  search?: string;
+  sortBy?: "createdAt" | "type";
+  sortOrder?: "asc" | "desc";
+  limit?: number;
+  offset?: number;
 }
 
 // ==================== CRUD 操作类型 ====================
 
 export type CreateNoteData = NoteFormData;
 export type UpdateNoteData = Partial<NoteFormData>;
-export type CreateFolderData = FolderFormData;
-export type UpdateFolderData = Partial<FolderFormData>;
+export type CreateChatData = ChatFormData;
+export type UpdateChatData = Partial<ChatFormData>;
+export type CreateMarkData = MarkFormData;
+export type UpdateMarkData = Partial<MarkFormData>;
 export type CreateTagData = TagFormData;
 export type UpdateTagData = Partial<TagFormData>;
 
 // ==================== IPC 方法类型定义 ====================
 
+/**
+ * 类型安全的IPC方法接口，使用通道常量
+ */
 export interface IpcMethods {
-  // 笔记相关
-  "notes:create": (data: CreateNoteData) => Promise<BaseResponse<Note>>;
-  "notes:get": (id: string) => Promise<BaseResponse<Note>>;
-  "notes:list": (params?: GetNotesRequest) => Promise<BaseResponse<Note[]>>;
-  "notes:update": (id: string, data: UpdateNoteData) => Promise<BaseResponse<Note>>;
-  "notes:delete": (id: string) => Promise<BaseResponse<{ id: string }>>;
-  "notes:restore": (id: string) => Promise<BaseResponse<Note>>;
-  "notes:permanent-delete": (id: string) => Promise<BaseResponse<{ id: string }>>;
-  "notes:toggle-favorite": (id: string) => Promise<BaseResponse<Note>>;
+  // 数据库相关
+  [IPC_CHANNELS.DB.INIT]: () => Promise<BaseResponse<{ success: boolean }>>;
 
-  // 文件夹相关
-  "folders:create": (data: CreateFolderData) => Promise<BaseResponse<Folder>>;
-  "folders:get": (id: string) => Promise<BaseResponse<Folder>>;
-  "folders:list": () => Promise<BaseResponse<Folder[]>>;
-  "folders:update": (id: string, data: UpdateFolderData) => Promise<BaseResponse<Folder>>;
-  "folders:delete": (id: string) => Promise<BaseResponse<{ id: string }>>;
-  "folders:restore": (id: string) => Promise<BaseResponse<Folder>>;
-  "folders:permanent-delete": (id: string) => Promise<BaseResponse<{ id: string }>>;
+  // 笔记相关
+  [IPC_CHANNELS.NOTES.CREATE]: (data: CreateNoteData) => Promise<BaseResponse<Note>>;
+  [IPC_CHANNELS.NOTES.GET_BY_ID]: (id: number) => Promise<BaseResponse<Note>>;
+  [IPC_CHANNELS.NOTES.GET_BY_TAG]: (tagId: number) => Promise<BaseResponse<Note[]>>;
+  [IPC_CHANNELS.NOTES.DELETE]: (id: number) => Promise<BaseResponse<{ id: number }>>;
+
+  // 聊天相关
+  [IPC_CHANNELS.CHATS.CREATE]: (data: CreateChatData) => Promise<BaseResponse<Chat>>;
+  [IPC_CHANNELS.CHATS.GET_BY_TAG]: (tagId: number) => Promise<BaseResponse<Chat[]>>;
+  [IPC_CHANNELS.CHATS.UPDATE]: (id: number, data: UpdateChatData) => Promise<BaseResponse<Chat>>;
+  [IPC_CHANNELS.CHATS.DELETE]: (id: number) => Promise<BaseResponse<{ id: number }>>;
+  [IPC_CHANNELS.CHATS.CLEAR_BY_TAG]: (tagId: number) => Promise<BaseResponse<{ deletedCount: number }>>;
+  [IPC_CHANNELS.CHATS.UPDATE_INSERTED]: (id: number, inserted: boolean) => Promise<BaseResponse<Chat>>;
+
+  // 标记相关
+  [IPC_CHANNELS.MARKS.CREATE]: (data: CreateMarkData) => Promise<BaseResponse<Mark>>;
+  [IPC_CHANNELS.MARKS.GET_BY_TAG]: (tagId: number) => Promise<BaseResponse<Mark[]>>;
+  [IPC_CHANNELS.MARKS.GET_ALL]: (includeDeleted?: boolean) => Promise<BaseResponse<Mark[]>>;
+  [IPC_CHANNELS.MARKS.UPDATE]: (id: number, data: UpdateMarkData) => Promise<BaseResponse<Mark>>;
+  [IPC_CHANNELS.MARKS.DELETE]: (id: number) => Promise<BaseResponse<{ id: number }>>;
+  [IPC_CHANNELS.MARKS.RESTORE]: (id: number) => Promise<BaseResponse<Mark>>;
+  [IPC_CHANNELS.MARKS.DELETE_FOREVER]: (id: number) => Promise<BaseResponse<{ id: number }>>;
+  [IPC_CHANNELS.MARKS.CLEAR_TRASH]: () => Promise<BaseResponse<{ deletedCount: number }>>;
 
   // 标签相关
-  "tags:create": (data: CreateTagData) => Promise<BaseResponse<Tag>>;
-  "tags:get": (id: string) => Promise<BaseResponse<Tag>>;
-  "tags:list": () => Promise<BaseResponse<Tag[]>>;
-  "tags:update": (id: string, data: UpdateTagData) => Promise<BaseResponse<Tag>>;
-  "tags:delete": (id: string) => Promise<BaseResponse<{ id: string }>>;
-  "tags:stats": (id: string) => Promise<BaseResponse<{ tagId: string; tagName: string; noteCount: number }>>;
+  [IPC_CHANNELS.TAGS.CREATE]: (data: CreateTagData) => Promise<BaseResponse<Tag>>;
+  [IPC_CHANNELS.TAGS.GET_ALL]: () => Promise<BaseResponse<Tag[]>>;
+  [IPC_CHANNELS.TAGS.UPDATE]: (id: number, data: UpdateTagData) => Promise<BaseResponse<Tag>>;
+  [IPC_CHANNELS.TAGS.DELETE]: (id: number) => Promise<BaseResponse<{ id: number }>>;
+  [IPC_CHANNELS.TAGS.DELETE_ALL]: () => Promise<BaseResponse<{ deletedCount: number }>>;
+
+  // 向量文档相关
+  [IPC_CHANNELS.VECTOR.INIT]: () => Promise<BaseResponse<{ success: boolean }>>;
+  [IPC_CHANNELS.VECTOR.UPSERT]: (data: VectorDocumentFormData) => Promise<BaseResponse<VectorDocumentEntity>>;
+  [IPC_CHANNELS.VECTOR.GET_BY_FILENAME]: (filename: string) => Promise<BaseResponse<VectorDocumentEntity[]>>;
+  [IPC_CHANNELS.VECTOR.DELETE_BY_FILENAME]: (filename: string) => Promise<BaseResponse<{ deletedCount: number }>>;
+  [IPC_CHANNELS.VECTOR.GET_SIMILAR]: (
+    embedding: string,
+    limit?: number
+  ) => Promise<BaseResponse<VectorDocumentEntity[]>>;
+  [IPC_CHANNELS.VECTOR.CLEAR]: () => Promise<BaseResponse<{ deletedCount: number }>>;
 }
 
 // ==================== IPC 事件监听器类型 ====================
 
 export interface IpcEventListeners {
   "note-updated": (note: Note) => void;
-  "note-deleted": (id: string) => void;
-  "folder-updated": (folder: Folder) => void;
-  "folder-deleted": (id: string) => void;
+  "note-deleted": (id: number) => void;
+  "chat-updated": (chat: Chat) => void;
+  "chat-deleted": (id: number) => void;
+  "mark-updated": (mark: Mark) => void;
+  "mark-deleted": (id: number) => void;
   "tag-updated": (tag: Tag) => void;
-  "tag-deleted": (id: string) => void;
+  "tag-deleted": (id: number) => void;
 }

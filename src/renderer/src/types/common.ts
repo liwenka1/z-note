@@ -1,10 +1,5 @@
 // ==================== 基础通用类型 ====================
 
-import { nanoid } from "nanoid";
-
-// ID 生成函数
-export const generateId = (): string => nanoid();
-
 // 基础错误类型
 export interface AppError {
   code: string;

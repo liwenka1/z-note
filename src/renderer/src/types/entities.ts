@@ -3,46 +3,60 @@
 // ==================== 笔记类型 ====================
 
 export interface Note {
-  id: string;
-  title: string;
-  content: string;
-  folderId?: string;
-  tagIds: string[];
-  isFavorite: boolean;
-  isDeleted: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  id: number;
+  tagId: number;
+  content?: string;
+  locale: string;
+  count: string;
+  createdAt: number;
 }
 
 // 笔记表单数据
-export type NoteFormData = Pick<Note, "title" | "content" | "folderId" | "tagIds">;
+export type NoteFormData = Pick<Note, "tagId" | "content" | "locale" | "count">;
 
-// ==================== 文件夹类型 ====================
+// ==================== 聊天类型 ====================
 
-export interface Folder {
-  id: string;
-  name: string;
-  parentId?: string;
-  color?: string;
-  icon?: string;
-  isDeleted: boolean;
-  sortOrder: number;
-  createdAt: Date;
-  updatedAt: Date;
+export interface Chat {
+  id: number;
+  tagId: number;
+  content?: string;
+  role: "system" | "user";
+  type: "chat" | "note" | "clipboard" | "clear";
+  image?: string;
+  inserted: boolean;
+  createdAt: number;
 }
 
-// 文件夹表单数据
-export type FolderFormData = Pick<Folder, "name" | "parentId" | "color" | "icon">;
+// 聊天表单数据
+export type ChatFormData = Pick<Chat, "tagId" | "content" | "role" | "type" | "image" | "inserted">;
 
 // ==================== 标签类型 ====================
 
 export interface Tag {
-  id: string;
+  id: number;
   name: string;
-  color: string;
-  createdAt: Date;
-  updatedAt: Date;
+  isLocked: boolean;
+  isPin: boolean;
+  noteCount?: number;
+  chatCount?: number;
+  markCount?: number;
 }
 
 // 标签表单数据
-export type TagFormData = Pick<Tag, "name" | "color">;
+export type TagFormData = Pick<Tag, "name" | "isLocked" | "isPin">;
+
+// ==================== 标记类型 ====================
+
+export interface Mark {
+  id: number;
+  tagId: number;
+  type: "scan" | "text" | "image" | "link" | "file";
+  content?: string;
+  url?: string;
+  desc?: string;
+  deleted: number;
+  createdAt?: number;
+}
+
+// 标记表单数据
+export type MarkFormData = Pick<Mark, "tagId" | "type" | "content" | "url" | "desc">;
