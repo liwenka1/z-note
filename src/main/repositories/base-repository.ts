@@ -29,16 +29,16 @@ export abstract class BaseRepository {
   }
 
   /**
-   * 创建ID匹配条件
+   * 创建ID匹配条件 (支持数字和字符串ID)
    */
-  protected withId(idField: Column, id: string): SQL<unknown> {
+  protected withId(idField: Column, id: string | number): SQL<unknown> {
     return eq(idField, id);
   }
 
   /**
    * 检查记录是否存在
    */
-  protected async checkExists(table: Table, idField: Column, id: string, errorMessage: string): Promise<void> {
+  protected async checkExists(table: Table, idField: Column, id: string | number, errorMessage: string): Promise<void> {
     const result = await this.db.select().from(table).where(eq(idField, id)).limit(1);
 
     if (result.length === 0) {
@@ -47,9 +47,9 @@ export abstract class BaseRepository {
   }
 
   /**
-   * 生成当前时间
+   * 生成当前时间戳
    */
-  protected now(): Date {
-    return new Date();
+  protected now(): number {
+    return Date.now();
   }
 }
