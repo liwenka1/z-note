@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, index, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 
 // ==================== 标签表 (核心分类表) ====================
@@ -58,6 +58,13 @@ export const vectorDocuments = sqliteTable("vector_documents", {
   embedding: text("embedding").notNull(),
   updatedAt: integer("updated_at").notNull()
 });
+
+// 向量数据库表索引定义
+export const vectorDocumentsFilenameIdx = index("idx_vector_documents_filename").on(vectorDocuments.filename);
+export const vectorDocumentsFilenameChunkIdx = uniqueIndex("idx_vector_documents_filename_chunk").on(
+  vectorDocuments.filename,
+  vectorDocuments.chunkId
+);
 
 // ==================== 关系定义 ====================
 export const tagsRelations = relations(tags, ({ many }) => ({
