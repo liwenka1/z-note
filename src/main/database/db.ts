@@ -115,3 +115,14 @@ export function closeDatabase() {
 app.on("before-quit", () => {
   closeDatabase();
 });
+
+/**
+ * 初始化数据库（创建表结构）
+ */
+export function initialize(): Promise<void> {
+  return new Promise((resolve) => {
+    // 获取数据库连接，这会自动创建表结构
+    getDatabase();
+    resolve();
+  });
+}
