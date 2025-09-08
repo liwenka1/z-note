@@ -212,9 +212,12 @@ export class IpcRegistry {
     });
 
     // 获取相似文档
-    registerHandler(IPC_CHANNELS.VECTOR.GET_SIMILAR, async (embedding: string, limit?: number) => {
-      return await vectorService.getSimilarDocuments(embedding, limit || 10);
-    });
+    registerHandler(
+      IPC_CHANNELS.VECTOR.GET_SIMILAR,
+      async (queryEmbedding: number[], limit?: number, threshold?: number) => {
+        return await vectorService.getSimilarDocuments(queryEmbedding, limit || 5, threshold || 0.7);
+      }
+    );
 
     // 清空所有向量文档
     registerHandler(IPC_CHANNELS.VECTOR.CLEAR, async () => {
