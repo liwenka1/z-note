@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { marks } from "../database/schema";
 import { BaseRepository } from "./base-repository";
 
@@ -41,7 +41,7 @@ export class MarksRepository extends BaseRepository {
         createdAt: marks.createdAt
       })
       .from(marks)
-      .where(sql`${marks.tagId} = ${tagId} AND ${marks.deleted} = 0`)
+      .where(and(eq(marks.tagId, tagId), eq(marks.deleted, 0)))
       .orderBy(marks.createdAt);
 
     return result as MarkEntity[];

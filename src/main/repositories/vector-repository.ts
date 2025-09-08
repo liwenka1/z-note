@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, count } from "drizzle-orm";
 import { vectorDocuments } from "../database/schema";
 import { BaseRepository } from "./base-repository";
 
@@ -168,7 +168,7 @@ export class VectorRepository extends BaseRepository {
    */
   async checkFileExists(filename: string): Promise<boolean> {
     const result = await this.db
-      .select({ count: sql<number>`count(*)` })
+      .select({ count: count() })
       .from(vectorDocuments)
       .where(eq(vectorDocuments.filename, filename));
 
@@ -207,7 +207,7 @@ export class VectorRepository extends BaseRepository {
       // 这里可以添加表完整性检查
 
       // 2. 检查向量数据库是否有数据
-      const documentCount = await this.db.select({ count: sql<number>`count(*)` }).from(vectorDocuments);
+      const documentCount = await this.db.select({ count: count() }).from(vectorDocuments);
 
       const hasExistingData = (documentCount[0]?.count || 0) > 0;
 
