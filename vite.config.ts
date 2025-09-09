@@ -6,10 +6,20 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()]
+    plugins: [externalizeDepsPlugin()],
+    resolve: {
+      alias: {
+        "@shared": resolve("src/shared")
+      }
+    }
   },
   preload: {
-    plugins: [externalizeDepsPlugin()]
+    plugins: [externalizeDepsPlugin()],
+    resolve: {
+      alias: {
+        "@shared": resolve("src/shared")
+      }
+    }
   },
   renderer: {
     resolve: {
