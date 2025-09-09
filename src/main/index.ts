@@ -6,7 +6,7 @@ import icon from "../../resources/icon.png?asset";
 // 导入数据库和IPC处理器
 import { getDatabase } from "./database/db";
 import { seedDatabase } from "./database/seed";
-import { IPCRegistry } from "./ipc/ipc-registry";
+import { IpcRegistry } from "./ipc/ipc-registry";
 
 function createWindow(): void {
   // Create the browser window.
@@ -54,16 +54,16 @@ async function initializeBackend() {
     console.log("✅ 数据库连接成功");
 
     // 检查是否需要插入初始数据
-    const { folders } = await import("./database/schema");
+    const { notes } = await import("./database/schema");
 
-    const existingData = await db.select().from(folders).limit(1);
+    const existingData = await db.select().from(notes).limit(1);
     if (existingData.length === 0) {
       console.log("📥 插入初始数据...");
       await seedDatabase();
     }
 
     // 注册IPC处理器
-    IPCRegistry.registerAll();
+    IpcRegistry.registerAll();
 
     console.log("🎉 后端服务初始化完成");
   } catch (error) {
