@@ -82,17 +82,16 @@ export function getDatabase() {
           chunk_id integer NOT NULL,
           content text NOT NULL,
           embedding text NOT NULL,
-          updated_at integer NOT NULL,
-          UNIQUE(filename, chunk_id)
+          updated_at integer NOT NULL
         );
 
         -- 创建向量文档索引
         CREATE INDEX IF NOT EXISTS idx_vector_documents_filename 
         ON vector_documents(filename);
-
-        -- 插入默认的 "Idea" 标签
-        INSERT OR IGNORE INTO tags (id, name, isLocked, isPin) 
-        VALUES (1, 'Idea', 1, 1);
+        
+        -- 创建唯一索引
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_vector_documents_filename_chunk
+        ON vector_documents(filename, chunk_id);
       `);
     } catch (error) {
       console.error("❌ 数据库初始化失败:", error);
