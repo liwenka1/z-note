@@ -8,12 +8,6 @@ export async function seedDatabase() {
   console.log("开始插入初始数据...");
 
   try {
-    // 清空现有数据（开发阶段）
-    await db.delete(marks);
-    await db.delete(chats);
-    await db.delete(notes);
-    await db.delete(tags);
-
     // 插入标签数据（包含默认的 Idea 标签）
     const tagData = [
       {
