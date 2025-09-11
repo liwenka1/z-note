@@ -53,19 +53,38 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.notes.details(), id] as const
   },
 
-  // 文件夹相关查询键
-  folders: {
-    all: ["folders"] as const,
-    lists: () => [...queryKeys.folders.all, "list"] as const,
-    details: () => [...queryKeys.folders.all, "detail"] as const,
-    detail: (id: string) => [...queryKeys.folders.details(), id] as const
-  },
-
   // 标签相关查询键
   tags: {
     all: ["tags"] as const,
     lists: () => [...queryKeys.tags.all, "list"] as const,
     details: () => [...queryKeys.tags.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.tags.details(), id] as const
+  },
+
+  // 聊天记录相关查询键
+  chats: {
+    all: ["chats"] as const,
+    lists: () => [...queryKeys.chats.all, "list"] as const,
+    list: (params?: Record<string, unknown>) => [...queryKeys.chats.lists(), params] as const,
+    details: () => [...queryKeys.chats.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.chats.details(), id] as const
+  },
+
+  // 标记收藏相关查询键
+  marks: {
+    all: ["marks"] as const,
+    lists: () => [...queryKeys.marks.all, "list"] as const,
+    list: (params?: Record<string, unknown>) => [...queryKeys.marks.lists(), params] as const,
+    details: () => [...queryKeys.marks.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.marks.details(), id] as const
+  },
+
+  // 向量文档相关查询键
+  vector: {
+    all: ["vector"] as const,
+    lists: () => [...queryKeys.vector.all, "list"] as const,
+    list: (params?: Record<string, unknown>) => [...queryKeys.vector.lists(), params] as const,
+    details: () => [...queryKeys.vector.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.vector.details(), id] as const
   }
 } as const;
