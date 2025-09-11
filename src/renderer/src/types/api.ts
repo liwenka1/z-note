@@ -1,24 +1,18 @@
 // ==================== API 类型 ====================
 
-import type { Note, Chat, Mark, Tag, NoteFormData, ChatFormData, MarkFormData, TagFormData } from "./entities";
+import type {
+  Note,
+  Chat,
+  Mark,
+  Tag,
+  VectorDocument,
+  NoteFormData,
+  ChatFormData,
+  MarkFormData,
+  TagFormData,
+  VectorDocumentFormData
+} from "./entities";
 import type { BaseResponse } from "./common";
-
-// Vector Documents 类型 (从后端导入)
-export interface VectorDocumentFormData {
-  filename: string;
-  chunkId: number;
-  content: string;
-  embedding: string;
-}
-
-export interface VectorDocumentEntity {
-  id: number;
-  filename: string;
-  chunkId: number;
-  content: string;
-  embedding: string;
-  updatedAt: number;
-}
 
 /**
  * 引入 IPC 通道常量，与后端保持同步
@@ -79,6 +73,8 @@ export type CreateMarkData = MarkFormData;
 export type UpdateMarkData = Partial<MarkFormData>;
 export type CreateTagData = TagFormData;
 export type UpdateTagData = Partial<TagFormData>;
+export type CreateVectorDocumentData = VectorDocumentFormData;
+export type UpdateVectorDocumentData = Partial<VectorDocumentFormData>;
 
 // ==================== IPC 方法类型定义 ====================
 
@@ -122,13 +118,10 @@ export interface IpcMethods {
 
   // 向量文档相关
   [IPC_CHANNELS.VECTOR.INIT]: () => Promise<BaseResponse<{ success: boolean }>>;
-  [IPC_CHANNELS.VECTOR.UPSERT]: (data: VectorDocumentFormData) => Promise<BaseResponse<VectorDocumentEntity>>;
-  [IPC_CHANNELS.VECTOR.GET_BY_FILENAME]: (filename: string) => Promise<BaseResponse<VectorDocumentEntity[]>>;
+  [IPC_CHANNELS.VECTOR.UPSERT]: (data: VectorDocumentFormData) => Promise<BaseResponse<VectorDocument>>;
+  [IPC_CHANNELS.VECTOR.GET_BY_FILENAME]: (filename: string) => Promise<BaseResponse<VectorDocument[]>>;
   [IPC_CHANNELS.VECTOR.DELETE_BY_FILENAME]: (filename: string) => Promise<BaseResponse<{ deletedCount: number }>>;
-  [IPC_CHANNELS.VECTOR.GET_SIMILAR]: (
-    embedding: string,
-    limit?: number
-  ) => Promise<BaseResponse<VectorDocumentEntity[]>>;
+  [IPC_CHANNELS.VECTOR.GET_SIMILAR]: (embedding: string, limit?: number) => Promise<BaseResponse<VectorDocument[]>>;
   [IPC_CHANNELS.VECTOR.CLEAR]: () => Promise<BaseResponse<{ deletedCount: number }>>;
 }
 

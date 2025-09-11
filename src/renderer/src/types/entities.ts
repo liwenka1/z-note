@@ -60,3 +60,17 @@ export interface Mark {
 
 // 标记表单数据
 export type MarkFormData = Pick<Mark, "tagId" | "type" | "content" | "url" | "desc">;
+
+// ==================== 向量文档类型 ====================
+
+export interface VectorDocument {
+  id: number;
+  filename: string;
+  chunkId: number;
+  content: string;
+  embedding: string;
+  updatedAt: number;
+}
+
+// 向量文档表单数据
+export type VectorDocumentFormData = Pick<VectorDocument, "filename" | "chunkId" | "content" | "embedding">;
