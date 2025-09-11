@@ -2,21 +2,14 @@
 
 import { ipcClient, handleResponse } from "./ipc";
 import type { Tag, TagFormData } from "@renderer/types";
+import { IPC_CHANNELS } from "@shared/ipc-channels";
 
 export const tagsApi = {
   /**
-   * 获取标签列表
+   * 获取所有标签
    */
-  async getList(): Promise<Tag[]> {
-    const response = await ipcClient.invoke("tags:list");
-    return handleResponse(response);
-  },
-
-  /**
-   * 获取单个标签
-   */
-  async getById(id: string): Promise<Tag> {
-    const response = await ipcClient.invoke("tags:get", id);
+  async getAll(): Promise<Tag[]> {
+    const response = await ipcClient.invoke(IPC_CHANNELS.TAGS.GET_ALL);
     return handleResponse(response);
   },
 
@@ -24,23 +17,31 @@ export const tagsApi = {
    * 创建标签
    */
   async create(data: TagFormData): Promise<Tag> {
-    const response = await ipcClient.invoke("tags:create", data);
+    const response = await ipcClient.invoke(IPC_CHANNELS.TAGS.CREATE, data);
     return handleResponse(response);
   },
 
   /**
    * 更新标签
    */
-  async update(id: string, data: Partial<TagFormData>): Promise<Tag> {
-    const response = await ipcClient.invoke("tags:update", id, data);
+  async update(id: number, data: Partial<TagFormData>): Promise<Tag> {
+    const response = await ipcClient.invoke(IPC_CHANNELS.TAGS.UPDATE, id, data);
     return handleResponse(response);
   },
 
   /**
    * 删除标签
    */
-  async delete(id: string): Promise<{ id: string }> {
-    const response = await ipcClient.invoke("tags:delete", id);
+  async delete(id: number): Promise<{ id: number }> {
+    const response = await ipcClient.invoke(IPC_CHANNELS.TAGS.DELETE, id);
+    return handleResponse(response);
+  },
+
+  /**
+   * 删除所有标签
+   */
+  async deleteAll(): Promise<{ deletedCount: number }> {
+    const response = await ipcClient.invoke(IPC_CHANNELS.TAGS.DELETE_ALL);
     return handleResponse(response);
   }
 };
