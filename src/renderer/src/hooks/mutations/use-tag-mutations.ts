@@ -17,9 +17,6 @@ export function useCreateTag() {
       // 使相关查询失效
       queryClient.invalidateQueries({ queryKey: queryKeys.tags.lists() });
 
-      // 直接更新缓存
-      queryClient.setQueryData(queryKeys.tags.detail(newTag.id), newTag);
-
       console.log("✅ 标签创建成功:", newTag.name);
     },
     onError: (error) => {
@@ -35,11 +32,8 @@ export function useUpdateTag() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<TagFormData> }) => tagsApi.update(id, data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<TagFormData> }) => tagsApi.update(id, data),
     onSuccess: (updatedTag: Tag) => {
-      // 更新单个标签缓存
-      queryClient.setQueryData(queryKeys.tags.detail(updatedTag.id), updatedTag);
-
       // 使列表查询失效
       queryClient.invalidateQueries({ queryKey: queryKeys.tags.lists() });
 
@@ -58,11 +52,8 @@ export function useDeleteTag() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => tagsApi.delete(id),
-    onSuccess: (_, deletedId) => {
-      // 移除单个标签缓存
-      queryClient.removeQueries({ queryKey: queryKeys.tags.detail(deletedId) });
-
+    mutationFn: (id: number) => tagsApi.delete(id),
+    onSuccess: () => {
       // 使相关查询失效
       queryClient.invalidateQueries({ queryKey: queryKeys.tags.lists() });
 
@@ -73,6 +64,27 @@ export function useDeleteTag() {
     },
     onError: (error) => {
       console.error("❌ 标签删除失败:", error);
+    }
+  });
+}
+
+/**
+ * 删除所有标签
+ */
+export function useDeleteAllTags() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => tagsApi.deleteAll(),
+    onSuccess: (result) => {
+      // 使相关查询失效
+      queryClient.invalidateQueries({ queryKey: queryKeys.tags.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notes.lists() });
+
+      console.log(`✅ 删除所有标签成功: ${result.deletedCount} 个标签被删除`);
+    },
+    onError: (error) => {
+      console.error("❌ 删除所有标签失败:", error);
     }
   });
 }
