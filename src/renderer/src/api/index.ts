@@ -2,5 +2,7 @@
 
 export * from "./ipc";
 export * from "./notes";
-export * from "./folders";
 export * from "./tags";
+export * from "./chats";
+export * from "./marks";
+export * from "./vector";
