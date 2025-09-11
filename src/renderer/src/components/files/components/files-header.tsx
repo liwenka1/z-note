@@ -2,7 +2,7 @@ import { FileText, Plus } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import { useNavigate } from "@tanstack/react-router";
 import { useCreateNote, useCreateFolder } from "@renderer/hooks";
-import { useTabStore } from "@renderer/store";
+import { useTabStore } from "@renderer/stores";
 import { FolderFormData, NoteFormData } from "@renderer/types";
 
 export function FilesHeader() {

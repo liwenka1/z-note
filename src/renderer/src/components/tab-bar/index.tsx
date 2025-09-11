@@ -11,9 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@renderer/components/ui/dropdown-menu";
-import { useTabStore } from "@renderer/store";
+import { useTabStore } from "@renderer/stores";
 import { useCreateNote } from "@renderer/hooks";
-import { useEditorStore } from "@renderer/store/editor-store";
+import { useEditorStore } from "@renderer/stores/editor-store";
 
 export function TabBar() {
   const { openTabs, activeTabId, closeTab, closeAllTabs, closeOtherTabs, setActiveTab, openTab } = useTabStore();

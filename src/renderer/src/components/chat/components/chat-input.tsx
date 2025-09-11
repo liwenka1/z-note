@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Send, Paperclip } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import { Textarea } from "@renderer/components/ui/textarea";
-import { useChatStore } from "@renderer/store/chat-store";
+import { useChatStore } from "@renderer/stores/chat-store";
 
 export function ChatInput() {
   const [input, setInput] = useState("");

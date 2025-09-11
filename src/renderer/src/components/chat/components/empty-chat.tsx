@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Bot, Sparkles, Code, FileText } from "lucide-react";
-import { useChatStore } from "@renderer/store/chat-store";
+import { useChatStore } from "@renderer/stores/chat-store";
 
 const suggestions = [
   {

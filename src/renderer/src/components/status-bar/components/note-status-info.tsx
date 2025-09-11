@@ -1,5 +1,5 @@
-import { useTabStore } from "@renderer/store/tab-store";
-import { useEditorStore } from "@renderer/store/editor-store";
+import { useTabStore } from "@renderer/stores/tab-store";
+import { useEditorStore } from "@renderer/stores/editor-store";
 import { useNote } from "@renderer/hooks";
 
 export function NoteStatusInfo() {

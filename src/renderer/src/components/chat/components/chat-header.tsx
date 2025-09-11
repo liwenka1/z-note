@@ -1,7 +1,7 @@
 import { Plus, Trash2, Settings } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import { SessionSelector } from "./session-selector";
-import { useChatStore } from "@renderer/store/chat-store";
+import { useChatStore } from "@renderer/stores/chat-store";
 
 export function ChatHeader() {
   const { createSession, clearSession, getCurrentSession } = useChatStore();

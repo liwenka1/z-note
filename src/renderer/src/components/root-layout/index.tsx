@@ -4,7 +4,7 @@ import "allotment/dist/style.css";
 import { SearchCommand } from "@renderer/components/search-command";
 import { StatusBar } from "@renderer/components/status-bar";
 import { EditorLayout } from "@renderer/components/root-layout/components/editor-layout";
-import { useChatStore } from "@renderer/store/chat-store";
+import { useChatStore } from "@renderer/stores/chat-store";
 
 import { LeftActivityBar } from "./components/left-activity-bar";
 import { RightActivityBar } from "./components/right-activity-bar";

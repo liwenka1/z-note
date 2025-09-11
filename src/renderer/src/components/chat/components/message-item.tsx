@@ -6,7 +6,7 @@ import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/pris
 import { Avatar, AvatarFallback } from "@renderer/components/ui/avatar";
 import { Button } from "@renderer/components/ui/button";
 import { TypingIndicator } from "./typing-indicator";
-import { useChatStore, type Message } from "@renderer/store/chat-store";
+import { useChatStore, type Message } from "@renderer/stores/chat-store";
 import { useTheme } from "next-themes";
 
 interface MessageItemProps {

@@ -1,4 +1,4 @@
-import { useChatStore } from "@renderer/store/chat-store";
+import { useChatStore } from "@renderer/stores/chat-store";
 
 /**
  * Chat 状态管理 Hook

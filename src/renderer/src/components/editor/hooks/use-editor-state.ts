@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNote, useUpdateNote } from "@renderer/hooks";
-import { useTabStore } from "@renderer/store/tab-store";
-import { useEditorStore } from "@renderer/store/editor-store";
+import { useTabStore } from "@renderer/stores/tab-store";
+import { useEditorStore } from "@renderer/stores/editor-store";
 
 /**
  * Editor 状态管理 Hook

@@ -1,7 +1,7 @@
 import { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MessageItem } from "./message-item";
-import { useChatStore } from "@renderer/store/chat-store";
+import { useChatStore } from "@renderer/stores/chat-store";
 
 export function ChatMessageList() {
   const { getCurrentSession } = useChatStore();

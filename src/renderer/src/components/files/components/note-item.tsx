@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger
 } from "@renderer/components/ui/dropdown-menu";
 import { useUpdateNote, useDeleteNote } from "@renderer/hooks";
-import { useTabStore } from "@renderer/store/tab-store";
+import { useTabStore } from "@renderer/stores/tab-store";
 
 interface NoteItemProps {
   note: { id: string; title: string; folderId?: string };
