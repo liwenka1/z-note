@@ -4,11 +4,11 @@ import { immer } from "zustand/middleware/immer";
 // ==================== Files UI 状态类型 ====================
 interface FilesUIState {
   // 选中状态
-  selectedFolderId?: string;
-  selectedNoteId?: string;
+  selectedTagId?: number;
+  selectedNoteId?: number;
 
-  // 文件夹展开状态
-  expandedFolderIds: Set<string>;
+  // 标签展开状态
+  expandedTagIds: Set<number>;
 
   // 视图设置
   viewMode: "list" | "grid";
@@ -20,20 +20,20 @@ interface FilesUIState {
 
   // 选择模式（多选）
   isSelectionMode: boolean;
-  selectedItems: Set<string>; // 笔记和文件夹的ID
+  selectedItems: Set<number>; // 笔记的ID
 }
 
 interface FilesUIActions {
   // ==================== 选中状态管理 ====================
-  setSelectedFolder: (folderId?: string) => void;
-  setSelectedNote: (noteId?: string) => void;
+  setSelectedTag: (tagId?: number) => void;
+  setSelectedNote: (noteId?: number) => void;
   clearSelection: () => void;
 
-  // ==================== 文件夹展开状态 ====================
-  toggleFolderExpanded: (folderId: string) => void;
-  expandFolder: (folderId: string) => void;
-  collapseFolder: (folderId: string) => void;
-  collapseAllFolders: () => void;
+  // ==================== 标签展开状态 ====================
+  toggleTagExpanded: (tagId: number) => void;
+  expandTag: (tagId: number) => void;
+  collapseTag: (tagId: number) => void;
+  collapseAllTags: () => void;
 
   // ==================== 视图设置 ====================
   setViewMode: (mode: "list" | "grid") => void;
@@ -46,8 +46,8 @@ interface FilesUIActions {
 
   // ==================== 多选模式 ====================
   toggleSelectionMode: () => void;
-  toggleItemSelection: (itemId: string) => void;
-  selectAllItems: (itemIds: string[]) => void;
+  toggleItemSelection: (itemId: number) => void;
+  selectAllItems: (itemIds: number[]) => void;
   clearItemSelection: () => void;
   exitSelectionMode: () => void;
 }
@@ -55,12 +55,12 @@ interface FilesUIActions {
 type FilesUIStore = FilesUIState & FilesUIActions;
 
 // ==================== Store 实现 ====================
-export const useFilesUIStore = create<FilesUIStore>()(
+export const useFilesStore = create<FilesUIStore>()(
   immer((set) => ({
     // ==================== 初始状态 ====================
-    selectedFolderId: undefined,
+    selectedTagId: undefined,
     selectedNoteId: undefined,
-    expandedFolderIds: new Set(),
+    expandedTagIds: new Set(),
     viewMode: "list",
     sortBy: "updatedAt",
     sortDirection: "desc",
@@ -69,14 +69,14 @@ export const useFilesUIStore = create<FilesUIStore>()(
     selectedItems: new Set(),
 
     // ==================== 选中状态管理 ====================
-    setSelectedFolder: (folderId?: string) => {
+    setSelectedTag: (tagId?: number) => {
       set((state) => {
-        state.selectedFolderId = folderId;
-        state.selectedNoteId = undefined; // 切换文件夹时清除笔记选择
+        state.selectedTagId = tagId;
+        state.selectedNoteId = undefined; // 切换标签时清除笔记选择
       });
     },
 
-    setSelectedNote: (noteId?: string) => {
+    setSelectedNote: (noteId?: number) => {
       set((state) => {
         state.selectedNoteId = noteId;
       });
@@ -84,37 +84,37 @@ export const useFilesUIStore = create<FilesUIStore>()(
 
     clearSelection: () => {
       set((state) => {
-        state.selectedFolderId = undefined;
+        state.selectedTagId = undefined;
         state.selectedNoteId = undefined;
       });
     },
 
-    // ==================== 文件夹展开状态 ====================
-    toggleFolderExpanded: (folderId: string) => {
+    // ==================== 标签展开状态 ====================
+    toggleTagExpanded: (tagId: number) => {
       set((state) => {
-        if (state.expandedFolderIds.has(folderId)) {
-          state.expandedFolderIds.delete(folderId);
+        if (state.expandedTagIds.has(tagId)) {
+          state.expandedTagIds.delete(tagId);
         } else {
-          state.expandedFolderIds.add(folderId);
+          state.expandedTagIds.add(tagId);
         }
       });
     },
 
-    expandFolder: (folderId: string) => {
+    expandTag: (tagId: number) => {
       set((state) => {
-        state.expandedFolderIds.add(folderId);
+        state.expandedTagIds.add(tagId);
       });
     },
 
-    collapseFolder: (folderId: string) => {
+    collapseTag: (tagId: number) => {
       set((state) => {
-        state.expandedFolderIds.delete(folderId);
+        state.expandedTagIds.delete(tagId);
       });
     },
 
-    collapseAllFolders: () => {
+    collapseAllTags: () => {
       set((state) => {
-        state.expandedFolderIds.clear();
+        state.expandedTagIds.clear();
       });
     },
 
@@ -160,7 +160,7 @@ export const useFilesUIStore = create<FilesUIStore>()(
       });
     },
 
-    toggleItemSelection: (itemId: string) => {
+    toggleItemSelection: (itemId: number) => {
       set((state) => {
         if (state.selectedItems.has(itemId)) {
           state.selectedItems.delete(itemId);
@@ -170,7 +170,7 @@ export const useFilesUIStore = create<FilesUIStore>()(
       });
     },
 
-    selectAllItems: (itemIds: string[]) => {
+    selectAllItems: (itemIds: number[]) => {
       set((state) => {
         state.selectedItems = new Set(itemIds);
       });
