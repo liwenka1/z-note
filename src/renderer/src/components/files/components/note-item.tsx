@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { MoreHorizontal, Edit2, Trash2, Check, X, NotebookPen } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { File, MoreVertical, Edit, Trash2, X, Check, FolderOpen } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import {
   DropdownMenu,
@@ -8,147 +7,209 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@renderer/components/ui/dropdown-menu";
-import { useUpdateNote, useDeleteNote } from "@renderer/hooks";
-import { useTabStore } from "@renderer/stores/tab-store";
+import { Input } from "@renderer/components/ui/input";
+import { useFilesState } from "../hooks/use-files-state";
+import { shellApi } from "@renderer/api";
+import type { FileNode } from "@renderer/types/files";
 
 interface NoteItemProps {
-  note: { id: string; title: string; folderId?: string };
+  file: FileNode;
   level: number;
 }
 
-export function NoteItem({ note, level }: NoteItemProps) {
-  const { mutate: updateNote } = useUpdateNote();
-  const { mutate: deleteNote } = useDeleteNote();
-  const { openTab } = useTabStore();
-  const navigate = useNavigate();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(note.title);
+export function NoteItem({ file, level }: NoteItemProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
 
-  const handleNoteClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    openTab(note.id, note.title);
-    navigate({ to: "/notes/$noteId", params: { noteId: note.id } });
-  };
-
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handleSave = () => {
-    if (editTitle.trim() && editTitle !== note.title) {
-      updateNote({
-        id: note.id,
-        data: { title: editTitle.trim() }
-      });
+  // 获取显示用的文件名（去掉.json后缀）
+  const getDisplayName = (fileName: string) => {
+    // 如果是.json文件，去掉后缀
+    if (fileName.endsWith(".json")) {
+      return fileName.slice(0, -5);
     }
-    setIsEditing(false);
-    setEditTitle(note.title);
+    return fileName;
   };
 
-  const handleCancel = () => {
-    setIsEditing(false);
-    setEditTitle(note.title);
+  const [newName, setNewName] = useState(getDisplayName(file.name));
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const { selectedFile, selectFile, renameFile, deleteFile } = useFilesState();
+
+  const displayName = getDisplayName(file.name);
+  const isSelected = selectedFile === file.path;
+
+  useEffect(() => {
+    if (isRenaming && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isRenaming]);
+
+  const handleFileClick = async () => {
+    try {
+      await selectFile(file.path);
+    } catch (error) {
+      console.error("Failed to select file:", error);
+    }
   };
 
-  const handleDelete = () => {
-    deleteNote(note.id);
+  const handleRename = async () => {
+    if (newName.trim() && newName.trim() !== getDisplayName(file.name)) {
+      // 如果原文件是.json，确保新名称也添加.json后缀
+      let actualNewName = newName.trim();
+      if (file.name.endsWith(".json") && !actualNewName.endsWith(".json")) {
+        actualNewName += ".json";
+      }
+
+      const newPath = file.path.replace(file.name, actualNewName);
+      try {
+        await renameFile(file.path, newPath);
+      } catch (error) {
+        console.error("Failed to rename file:", error);
+        setNewName(getDisplayName(file.name)); // Reset on error
+      }
+    }
+    setIsRenaming(false);
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteFile(file.path);
+    } catch (error) {
+      console.error("Failed to delete file:", error);
+    }
+  };
+
+  const handleShowInFolder = async () => {
+    try {
+      // 使用shellApi在文件管理器中显示文件
+      await shellApi.showItemInFolder(file.path);
+    } catch (error) {
+      console.error("查看文件位置失败:", error);
+      // 备用方案：打开文件所在目录
+      try {
+        const dirPath = file.path.substring(0, file.path.lastIndexOf("\\"));
+        await shellApi.openPath(dirPath);
+      } catch (fallbackError) {
+        console.error("打开文件夹失败:", fallbackError);
+      }
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      handleSave();
+      handleRename();
     } else if (e.key === "Escape") {
-      handleCancel();
+      setNewName(getDisplayName(file.name));
+      setIsRenaming(false);
     }
+  };
+
+  const getFileIcon = () => {
+    // 所有文件都使用统一的灰色图标，不区分类型
+    return <File className="text-muted-foreground h-4 w-4" />;
   };
 
   return (
     <div
-      className="group hover:bg-secondary/60 flex cursor-pointer items-center rounded-md py-1.5 pr-2 text-sm transition-colors"
-      style={{ paddingLeft: `${(level + 1) * 12 + 18}px` }}
+      className={`hover:bg-muted/50 group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-sm ${
+        isSelected ? "bg-muted" : ""
+      }`}
+      style={{ paddingLeft: `${level * 16 + 8}px` }}
+      onClick={handleFileClick}
     >
-      <div className="mr-2">
-        <NotebookPen className="h-4 w-4" />
+      {/* 文件图标 */}
+      <div className="shrink-0">{getFileIcon()}</div>
+
+      {/* 文件名 / 重命名输入框 */}
+      <div className="min-w-0 flex-1">
+        {isRenaming ? (
+          <Input
+            ref={inputRef}
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={handleRename}
+            className="h-6 px-1 text-sm"
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : (
+          <span className="block truncate" title={displayName}>
+            {displayName}
+          </span>
+        )}
       </div>
 
-      {/* 笔记标题 */}
-      {isEditing ? (
-        <input
-          type="text"
-          value={editTitle}
-          onChange={(e) => setEditTitle(e.target.value)}
-          onBlur={handleSave}
-          onKeyDown={handleKeyDown}
-          className="bg-background border-border focus:ring-ring mr-2 flex-1 rounded border px-2 py-0.5 text-sm focus:ring-1 focus:outline-none"
-          autoFocus
-        />
-      ) : (
-        <Link
-          to="/notes/$noteId"
-          params={{ noteId: note.id }}
-          className="text-foreground hover:text-foreground flex-1 truncate hover:bg-transparent"
-          onClick={handleNoteClick}
-        >
-          {note.title}
-        </Link>
-      )}
-
-      {/* 更多操作按钮 */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      {/* 操作按钮 */}
+      {isRenaming ? (
+        <div className="flex shrink-0 items-center gap-1">
           <Button
-            variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:bg-secondary hover:text-foreground h-4 w-4 p-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          >
-            <MoreHorizontal className="h-3 w-3" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-              handleEdit();
-            }}
-          >
-            <Edit2 className="mr-2 h-3 w-3" />
-            重命名
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDelete();
-            }}
-          >
-            <Trash2 className="mr-2 h-3 w-3" />
-            删除
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* 编辑模式的保存/取消按钮 */}
-      {isEditing && (
-        <>
-          <Button
             variant="ghost"
-            size="sm"
-            className="ml-1 h-4 w-4 p-0 text-green-600 hover:bg-green-50"
-            onClick={handleSave}
+            className="h-6 w-6 p-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRename();
+            }}
           >
             <Check className="h-3 w-3" />
           </Button>
           <Button
-            variant="ghost"
             size="sm"
-            className="ml-1 h-4 w-4 p-0 text-red-600 hover:bg-red-50"
-            onClick={handleCancel}
+            variant="ghost"
+            className="h-6 w-6 p-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              setNewName(file.name);
+              setIsRenaming(false);
+            }}
           >
             <X className="h-3 w-3" />
           </Button>
-        </>
+        </div>
+      ) : (
+        <div className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+          <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={(e) => e.stopPropagation()}>
+                <MoreVertical className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleShowInFolder();
+                  setIsMenuOpen(false);
+                }}
+              >
+                <FolderOpen className="mr-2 h-4 w-4" />
+                查看目录
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsRenaming(true);
+                  setIsMenuOpen(false);
+                }}
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                重命名
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete();
+                  setIsMenuOpen(false);
+                }}
+                className="text-destructive"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                删除
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       )}
     </div>
   );

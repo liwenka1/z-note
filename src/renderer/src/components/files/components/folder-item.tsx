@@ -1,15 +1,15 @@
-import { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   ChevronRight,
   ChevronDown,
   Folder as FolderIcon,
   FolderOpen,
-  Plus,
-  MoreHorizontal,
-  Edit2,
+  MoreVertical,
+  Edit,
   Trash2,
-  Check,
   X,
+  Check,
+  FolderPlus,
   FileText
 } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
@@ -17,247 +17,249 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@renderer/components/ui/dropdown-menu";
-import { useFolders, useNotes, useUpdateFolder, useDeleteFolder } from "@renderer/hooks";
-import { useFilesUIStore } from "@renderer/stores";
-import { cn } from "@renderer/lib/utils";
-import type { Folder } from "@renderer/types";
+import { Input } from "@renderer/components/ui/input";
+import { useFilesState } from "../hooks/use-files-state";
 import { NoteItem } from "./note-item";
+import { shellApi } from "@renderer/api";
+import type { FileNode } from "@renderer/types/files";
 
 interface FolderItemProps {
-  folder: Folder;
+  folder: FileNode;
   level: number;
-  isSelected: boolean;
-  isExpanded: boolean;
-  onSelect: (folderId: string) => void;
-  onToggleExpand: (folderId: string) => void;
-  onCreateSubfolder: (parentId: string) => void;
-  onCreateNote: (folderId: string) => void;
-  folderNotes: Array<{ id: string; title: string; folderId?: string }>;
 }
 
-export function FolderItem({
-  folder,
-  level,
-  isSelected,
-  isExpanded,
-  onSelect,
-  onToggleExpand,
-  onCreateSubfolder,
-  onCreateNote,
-  folderNotes
-}: FolderItemProps) {
-  const { data: folders = [] } = useFolders();
-  const { data: notes = [] } = useNotes();
-  const { mutate: updateFolder } = useUpdateFolder();
-  const { mutate: deleteFolder } = useDeleteFolder();
-  const { expandedFolderIds } = useFilesUIStore();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState(folder.name);
+export function FolderItem({ folder, level }: FolderItemProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [newName, setNewName] = useState(folder.name);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // 获取子文件夹
-  const activeFolders = folders.filter((f) => !f.isDeleted);
-  const children = activeFolders.filter((f) => f.parentId === folder.id);
-  const hasChildren = children.length > 0;
+  const { collapsedFolders, toggleFolderCollapse, renameFile, deleteFile, createFile, createFolder } = useFilesState();
 
-  // 计算文件夹内的笔记数量（只计算直接属于该文件夹的笔记）
-  const notesInFolder = notes.filter((note) => !note.isDeleted && note.folderId === folder.id);
-  const notesCount = notesInFolder.length;
+  // 修复：使用正确的展开状态逻辑
+  const isExpanded = !collapsedFolders.has(folder.path);
 
-  const handleToggleExpand = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onToggleExpand(folder.id);
-  };
-
-  const handleSelect = () => {
-    onSelect(folder.id);
-  };
-
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handleSave = () => {
-    if (editName.trim() && editName !== folder.name) {
-      updateFolder({
-        id: folder.id,
-        data: { name: editName.trim() }
-      });
+  useEffect(() => {
+    if (isRenaming && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
     }
-    setIsEditing(false);
-    setEditName(folder.name);
+  }, [isRenaming]);
+
+  const handleToggleExpand = () => {
+    toggleFolderCollapse(folder.path);
   };
 
-  const handleCancel = () => {
-    setIsEditing(false);
-    setEditName(folder.name);
+  const handleRename = async () => {
+    if (newName.trim() && newName.trim() !== folder.name) {
+      const newPath = folder.path.replace(folder.name, newName.trim());
+      try {
+        await renameFile(folder.path, newPath);
+      } catch (error) {
+        console.error("Failed to rename folder:", error);
+        setNewName(folder.name); // Reset on error
+      }
+    }
+    setIsRenaming(false);
   };
 
-  const handleDelete = () => {
-    deleteFolder(folder.id);
+  const handleDelete = async () => {
+    try {
+      await deleteFile(folder.path);
+    } catch (error) {
+      console.error("Failed to delete folder:", error);
+    }
+  };
+
+  const handleCreateSubfolder = async () => {
+    try {
+      const folderName = `新文件夹_${Date.now()}`;
+      await createFolder(folder.path, folderName);
+    } catch (error) {
+      console.error("Failed to create subfolder:", error);
+    }
+  };
+
+  const handleCreateFile = async () => {
+    try {
+      const fileName = `新笔记_${Date.now()}.json`;
+      await createFile(folder.path, fileName);
+    } catch (error) {
+      console.error("Failed to create file:", error);
+    }
+  };
+
+  const handleShowInFolder = async () => {
+    try {
+      // 使用shellApi在文件管理器中显示文件夹
+      await shellApi.showItemInFolder(folder.path);
+    } catch (error) {
+      console.error("查看文件夹位置失败:", error);
+      // 备用方案：直接打开文件夹
+      try {
+        await shellApi.openPath(folder.path);
+      } catch (fallbackError) {
+        console.error("打开文件夹失败:", fallbackError);
+      }
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      handleSave();
+      handleRename();
     } else if (e.key === "Escape") {
-      handleCancel();
+      setNewName(folder.name);
+      setIsRenaming(false);
     }
   };
 
   return (
-    <div>
+    <div className="select-none">
+      {/* 文件夹主行 */}
       <div
-        className={cn(
-          "group hover:bg-secondary/60 flex cursor-pointer items-center rounded-md py-1.5 pr-2 text-sm transition-colors",
-          isSelected && "bg-secondary/80 text-foreground"
-        )}
-        style={{ paddingLeft: `${level * 12 + 8}px` }}
-        onClick={handleSelect}
+        className="hover:bg-muted/50 group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-sm"
+        style={{ paddingLeft: `${level * 16 + 8}px` }}
       >
-        {/* 展开/收起按钮 */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-muted-foreground hover:text-foreground mr-2 h-4 w-4 p-0"
-          onClick={handleToggleExpand}
-        >
+        {/* 展开/折叠按钮 */}
+        <Button variant="ghost" size="sm" className="hover:bg-muted h-5 w-5 p-0" onClick={handleToggleExpand}>
           {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
         </Button>
 
         {/* 文件夹图标 */}
-        <div className="mr-2">
-          {isExpanded ? <FolderOpen className="h-4 w-4" /> : <FolderIcon className="h-4 w-4" />}
+        <div className="shrink-0">
+          {isExpanded ? (
+            <FolderOpen className="text-muted-foreground h-4 w-4" />
+          ) : (
+            <FolderIcon className="text-muted-foreground h-4 w-4" />
+          )}
         </div>
 
-        {/* 文件夹名称 */}
-        {isEditing ? (
-          <input
-            type="text"
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            onBlur={handleSave}
-            onKeyDown={handleKeyDown}
-            className="bg-background border-border focus:ring-ring mr-2 flex-1 rounded border px-2 py-0.5 text-sm focus:ring-1 focus:outline-none"
-            autoFocus
-          />
-        ) : (
-          <span className="text-foreground flex-1 truncate">{folder.name}</span>
-        )}
+        {/* 文件夹名称 / 重命名输入框 */}
+        <div className="min-w-0 flex-1">
+          {isRenaming ? (
+            <Input
+              ref={inputRef}
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onBlur={handleRename}
+              className="h-6 px-1 text-sm"
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <span className="block truncate font-medium" title={folder.name}>
+              {folder.name}
+            </span>
+          )}
+        </div>
 
-        {/* 文件夹笔记数量 */}
-        {notesCount > 0 && (
-          <span className="text-muted-foreground bg-secondary/50 mr-1 rounded px-1 text-xs">{notesCount}</span>
-        )}
-
-        {/* 更多操作按钮 */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+        {/* 操作按钮 */}
+        {isRenaming ? (
+          <div className="flex shrink-0 items-center gap-1">
             <Button
-              variant="ghost"
               size="sm"
-              className="text-muted-foreground hover:bg-secondary hover:text-foreground h-4 w-4 p-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              <MoreHorizontal className="h-3 w-3" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                onCreateNote(folder.id);
-              }}
-            >
-              <FileText className="mr-2 h-3 w-3" />
-              新建笔记
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                onCreateSubfolder(folder.id);
-              }}
-            >
-              <Plus className="mr-2 h-3 w-3" />
-              新建文件夹
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                handleEdit();
-              }}
-            >
-              <Edit2 className="mr-2 h-3 w-3" />
-              重命名
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete();
-              }}
-            >
-              <Trash2 className="mr-2 h-3 w-3" />
-              删除
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {/* 编辑模式的保存/取消按钮 */}
-        {isEditing && (
-          <>
-            <Button
               variant="ghost"
-              size="sm"
-              className="ml-1 h-4 w-4 p-0 text-green-600 hover:bg-green-50"
-              onClick={handleSave}
+              className="h-6 w-6 p-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRename();
+              }}
             >
               <Check className="h-3 w-3" />
             </Button>
             <Button
-              variant="ghost"
               size="sm"
-              className="ml-1 h-4 w-4 p-0 text-red-600 hover:bg-red-50"
-              onClick={handleCancel}
+              variant="ghost"
+              className="h-6 w-6 p-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                setNewName(folder.name);
+                setIsRenaming(false);
+              }}
             >
               <X className="h-3 w-3" />
             </Button>
-          </>
+          </div>
+        ) : (
+          <div className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+            <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={(e) => e.stopPropagation()}>
+                  <MoreVertical className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCreateSubfolder();
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <FolderPlus className="mr-2 h-4 w-4" />
+                  新建文件夹
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCreateFile();
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <FileText className="mr-2 h-4 w-4" />
+                  新建文件
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleShowInFolder();
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <FolderOpen className="mr-2 h-4 w-4" />
+                  查看目录
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsRenaming(true);
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <Edit className="mr-2 h-4 w-4" />
+                  重命名
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete();
+                    setIsMenuOpen(false);
+                  }}
+                  className="text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  删除
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         )}
       </div>
 
-      {/* 子文件夹和笔记 */}
-      {isExpanded && (
+      {/* 子项（文件夹展开时显示） */}
+      {isExpanded && folder.children && (
         <div>
-          {/* 子文件夹 */}
-          {hasChildren &&
-            children
-              .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0) || a.name.localeCompare(b.name))
-              .map((child) => (
-                <FolderItem
-                  key={child.id}
-                  folder={child}
-                  level={level + 1}
-                  isSelected={isSelected}
-                  isExpanded={expandedFolderIds.has(child.id)}
-                  onSelect={onSelect}
-                  onToggleExpand={onToggleExpand}
-                  onCreateSubfolder={onCreateSubfolder}
-                  onCreateNote={onCreateNote}
-                  folderNotes={folderNotes}
-                />
-              ))}
-
-          {/* 文件夹内的笔记 */}
-          {folderNotes
-            .filter((note) => note.folderId === folder.id)
-            .map((note) => (
-              <NoteItem key={note.id} note={note} level={level + 1} />
-            ))}
+          {folder.children.map((child) => (
+            <div key={child.path}>
+              {child.isDirectory ? (
+                <FolderItem folder={child} level={level + 1} />
+              ) : (
+                <NoteItem file={child} level={level + 1} />
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>

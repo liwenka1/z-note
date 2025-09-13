@@ -1,87 +1,62 @@
-import { useNavigate } from "@tanstack/react-router";
-import { useFolders, useNotes, useCreateFolder, useCreateNote } from "@renderer/hooks";
-import { useFilesUIStore } from "@renderer/stores";
-import type { Folder } from "@renderer/types";
+import { useEffect } from "react";
+import { motion } from "framer-motion";
+import { useFilesState } from "../hooks/use-files-state";
 import { FolderItem } from "./folder-item";
 import { NoteItem } from "./note-item";
+import type { FileNode } from "@renderer/types/files";
 
+/**
+ * 递归渲染文件树节点
+ */
+function renderFileNode(node: FileNode, level: number = 0): React.ReactNode {
+  const key = `${node.path}-${level}`;
+
+  if (node.isDirectory) {
+    return <FolderItem key={key} folder={node} level={level} />;
+  } else {
+    return <NoteItem key={key} file={node} level={level} />;
+  }
+}
+
+/**
+ * 文件树组件
+ * 支持嵌套显示文件夹和文件
+ */
 export function FolderTree() {
-  const { data: folders = [] } = useFolders();
-  const { data: notes = [] } = useNotes();
-  const { mutate: createFolder } = useCreateFolder();
-  const { mutate: createNote } = useCreateNote();
-  const { selectedFolderId, setSelectedFolder, toggleFolderExpanded, expandedFolderIds } = useFilesUIStore();
-  const navigate = useNavigate();
+  const { fileTree, hasContent, isLoading, loadFileTree } = useFilesState();
 
-  // 过滤活跃的文件夹和笔记
-  const activeFolders = folders.filter((folder) => !folder.isDeleted);
-  const activeNotes = notes.filter((note) => !note.isDeleted);
+  // 初始化时加载文件树
+  useEffect(() => {
+    loadFileTree();
+  }, [loadFileTree]);
 
-  // 构建文件夹树
-  const buildFolderTree = (folders: Folder[]): Folder[] => {
-    return folders.filter((folder) => !folder.parentId);
-  };
-
-  const folderTree = buildFolderTree(activeFolders);
-  const rootFolders = folderTree;
-
-  // 获取根级别的笔记（没有文件夹的笔记）
-  const rootNotes = activeNotes.filter((note) => !note.folderId);
-
-  const handleCreateSubfolder = (parentId: string) => {
-    const newFolderName = `新文件夹 ${Date.now()}`;
-    createFolder({
-      name: newFolderName,
-      parentId,
-      color: "#6b7280",
-      icon: "📁"
-    });
-  };
-
-  const handleCreateNoteInFolder = (folderId: string) => {
-    createNote(
-      {
-        title: `新笔记 ${Date.now()}`,
-        content: "",
-        folderId,
-        tagIds: []
-      },
-      {
-        onSuccess: (newNote) => {
-          navigate({ to: "/notes/$noteId", params: { noteId: newNote.id } });
-        }
-      }
-    );
-  };
-
-  return (
-    <div className="h-full overflow-auto p-3">
-      <div className="space-y-1">
-        {/* 根级别文件夹 */}
-        {rootFolders
-          .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0) || a.name.localeCompare(b.name))
-          .map((folder) => (
-            <FolderItem
-              key={folder.id}
-              folder={folder}
-              level={0}
-              isSelected={selectedFolderId === folder.id}
-              isExpanded={expandedFolderIds.has(folder.id)}
-              onSelect={setSelectedFolder}
-              onToggleExpand={toggleFolderExpanded}
-              onCreateSubfolder={handleCreateSubfolder}
-              onCreateNote={handleCreateNoteInFolder}
-              folderNotes={activeNotes}
-            />
-          ))}
-
-        {/* 根级别笔记 */}
-        {rootNotes
-          .sort((a, b) => a.title.localeCompare(b.title))
-          .map((note) => (
-            <NoteItem key={note.id} note={note} level={0} />
-          ))}
+  // 加载中状态
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-muted-foreground text-sm">加载中...</div>
       </div>
-    </div>
+    );
+  }
+
+  // 空状态
+  if (!hasContent) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-muted-foreground text-sm">暂无文件</div>
+      </div>
+    );
+  }
+
+  // 文件树显示
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+      className="h-full overflow-auto"
+    >
+      <div className="space-y-0.5 p-2">{fileTree.map((node) => renderFileNode(node, 0))}</div>
+    </motion.div>
   );
 }

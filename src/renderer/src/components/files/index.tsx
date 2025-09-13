@@ -1,15 +1,57 @@
+import { useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { FilesHeader } from "./components/files-header";
 import { FolderTree } from "./components/folder-tree";
 import { EmptyFiles } from "./components/empty-files";
 import { useFilesState } from "./hooks/use-files-state";
+import { useFilesStore } from "@renderer/stores/files-store";
 
 /**
  * Files 主组件
  * 参考 chat 的模式，组合所有子组件
  */
 export function FilesPanel() {
-  const { hasContent } = useFilesState();
+  const { hasContent, workspacePath } = useFilesState();
+  const { loadFileTree, workspace } = useFilesStore();
+
+  // 初始化工作区
+  const initializeWorkspace = useCallback(async () => {
+    // 如果没有设置工作区路径，设置默认路径
+    if (!workspacePath) {
+      // 使用当前项目目录作为默认工作区
+      const defaultWorkspacePath = "d:\\Desktop\\z-note-test";
+
+      // 使用immer方式更新状态
+      useFilesStore.setState((state) => ({
+        ...state,
+        workspace: {
+          ...state.workspace,
+          config: {
+            ...state.workspace.config,
+            workspacePath: defaultWorkspacePath
+          },
+          initialized: true
+        }
+      }));
+
+      // 延迟加载文件树，确保状态更新完成
+      setTimeout(() => loadFileTree(), 100);
+    } else if (!workspace.initialized) {
+      // 如果有路径但未初始化，则初始化
+      await loadFileTree();
+      useFilesStore.setState((state) => ({
+        ...state,
+        workspace: {
+          ...state.workspace,
+          initialized: true
+        }
+      }));
+    }
+  }, [workspacePath, workspace.initialized, loadFileTree]);
+
+  useEffect(() => {
+    initializeWorkspace();
+  }, [initializeWorkspace]);
 
   return (
     <motion.div

@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
 import { FileText, FolderPlus } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
-import { useCreateNote, useCreateFolder } from "@renderer/hooks";
-import { useNavigate } from "@tanstack/react-router";
+import { useFilesState } from "../hooks/use-files-state";
 
 const suggestions = [
   {
@@ -18,33 +17,26 @@ const suggestions = [
 ];
 
 export function EmptyFiles() {
-  const { mutate: createNote } = useCreateNote();
-  const { mutate: createFolder } = useCreateFolder();
-  const navigate = useNavigate();
+  const { createFile, createFolder, workspacePath } = useFilesState();
 
-  const handleCreateNote = () => {
-    createNote(
-      {
-        title: `新笔记 ${Date.now()}`,
-        content: "",
-        folderId: undefined,
-        tagIds: []
-      },
-      {
-        onSuccess: (newNote) => {
-          navigate({ to: "/notes/$noteId", params: { noteId: newNote.id } });
-        }
-      }
-    );
+  const handleCreateNote = async () => {
+    try {
+      const fileName = `新笔记_${Date.now()}.json`;
+      await createFile(workspacePath, fileName);
+      console.log("笔记创建成功:", fileName);
+    } catch (error) {
+      console.error("创建笔记失败:", error);
+    }
   };
 
-  const handleCreateFolder = () => {
-    createFolder({
-      name: `新文件夹 ${Date.now()}`,
-      parentId: undefined,
-      color: "#6b7280",
-      icon: "📁"
-    });
+  const handleCreateFolder = async () => {
+    try {
+      const folderName = `新文件夹_${Date.now()}`;
+      await createFolder(workspacePath, folderName);
+      console.log("文件夹创建成功:", folderName);
+    } catch (error) {
+      console.error("创建文件夹失败:", error);
+    }
   };
 
   const handleSuggestionClick = (suggestionText: string) => {

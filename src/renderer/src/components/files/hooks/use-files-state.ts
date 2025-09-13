@@ -1,31 +1,68 @@
-import { useFolders, useNotes } from "@renderer/hooks";
+import { useFilesStore } from "@renderer/stores/files-store";
 
 /**
  * Files 状态管理 Hook
- * 使用 React Query 进行数据管理
+ * 基于文件系统的纯文件管理（参考 NoteGen 架构）
  */
 export function useFilesState() {
-  const { data: folders = [], isLoading: foldersLoading } = useFolders();
-  const { data: notes = [], isLoading: notesLoading } = useNotes();
+  const {
+    // 文件系统状态
+    fileTree,
+    currentFile,
+    workspace,
 
-  // 检查是否有活跃的文件或文件夹
-  const activeFolders = folders.filter((f) => !f.isDeleted);
-  const activeNotes = notes.filter((n) => !n.isDeleted);
-  const hasContent = activeFolders.length > 0 || activeNotes.length > 0;
+    // 操作方法
+    loadFileTree,
+    selectFile,
+    saveFileContent,
+    createFile,
+    createFolder,
+    renameFile,
+    deleteFile,
+    toggleFolder,
+    refreshFileTree,
+    searchFiles,
+    clearSearch
+  } = useFilesStore();
 
-  const isLoading = foldersLoading || notesLoading;
+  // 检查是否有内容
+  const hasContent = fileTree.nodes.length > 0;
+
+  // 获取文件夹和文件列表（兼容现有组件）
+  const folders = fileTree.nodes.filter((node) => node.isDirectory);
+  const files = fileTree.nodes.filter((node) => !node.isDirectory);
 
   return {
-    // 状态
-    folders,
-    notes,
-    activeFolders,
-    activeNotes,
+    // 文件系统状态
+    fileTree: fileTree.nodes,
+    selectedFile: currentFile.filePath,
+    currentContent: currentFile.content,
     hasContent,
-    isLoading,
+    isLoading: fileTree.loading,
+    collapsedFolders: fileTree.expandedPaths,
+    workspacePath: workspace.config.workspacePath,
 
-    // 加载状态
-    foldersLoading,
-    notesLoading
+    // 分类数据（兼容现有组件）
+    folders,
+    files,
+    activeFolders: folders,
+    activeNotes: files,
+
+    // 操作方法
+    loadFileTree,
+    selectFile,
+    saveCurrentFile: saveFileContent,
+    createFile,
+    createFolder,
+    renameFile,
+    deleteFile,
+    toggleFolderCollapse: toggleFolder,
+    refreshFileTree,
+    searchFiles,
+    clearSearch,
+
+    // 兼容性别名
+    foldersLoading: fileTree.loading,
+    notesLoading: fileTree.loading
   };
 }
