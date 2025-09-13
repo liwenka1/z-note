@@ -52,5 +52,47 @@ export const IPC_CHANNELS = {
     DELETE_BY_FILENAME: "vector:deleteByFilename",
     GET_SIMILAR: "vector:getSimilar",
     CLEAR: "vector:clear"
+  },
+
+  // 文件系统相关
+  FILE_SYSTEM: {
+    SCAN_DIRECTORY: "fileSystem:scanDirectory",
+    READ_FILE: "fileSystem:readFile",
+    WRITE_FILE: "fileSystem:writeFile",
+    CREATE_DIRECTORY: "fileSystem:createDirectory",
+    DELETE_FILE: "fileSystem:deleteFile",
+    RENAME_FILE: "fileSystem:renameFile",
+    MOVE_FILE: "fileSystem:moveFile",
+    COPY_FILE: "fileSystem:copyFile",
+    EXISTS: "fileSystem:exists",
+    GET_STATS: "fileSystem:getStats",
+    CREATE_UNIQUE_FILENAME: "fileSystem:createUniqueFileName",
+    GET_DIRECTORY_SIZE: "fileSystem:getDirectorySize",
+    WATCH_DIRECTORY: "fileSystem:watchDirectory",
+    SEARCH_FILES: "fileSystem:searchFiles"
+  },
+
+  // 工作区相关
+  WORKSPACE: {
+    GET_DEFAULT_PATH: "workspace:getDefaultPath",
+    GET_CONFIG: "workspace:getConfig",
+    SET_CONFIG: "workspace:setConfig",
+    SELECT_DIRECTORY: "workspace:selectDirectory",
+    VALIDATE_WORKSPACE: "workspace:validateWorkspace"
+  },
+
+  // 应用配置相关
+  CONFIG: {
+    GET: "config:get",
+    SET: "config:set",
+    REMOVE: "config:remove",
+    GET_ALL: "config:getAll"
+  },
+
+  // 系统Shell操作相关
+  SHELL: {
+    SHOW_ITEM_IN_FOLDER: "shell:showItemInFolder",
+    OPEN_PATH: "shell:openPath",
+    OPEN_EXTERNAL: "shell:openExternal"
   }
 } as const;
