@@ -1,195 +1,760 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
+import { fileSystemApi, workspaceApi, configApi, CONFIG_KEYS, FILE_EXTENSIONS } from "@renderer/api";
+import type {
+  FileNode,
+  WorkspaceConfig,
+  ScanOptions,
+  SortType,
+  SortDirection,
+  FileTreeState,
+  WorkspaceState,
+  FileEditState,
+  SearchResultItem
+} from "@renderer/types";
 
-// ==================== Files UI 状态类型 ====================
-interface FilesUIState {
-  // 选中状态
-  selectedTagId?: number;
-  selectedNoteId?: number;
+// ==================== Files 状态管理 ====================
 
-  // 标签展开状态
-  expandedTagIds: Set<number>;
+interface FilesState {
+  // 文件树状态
+  fileTree: FileTreeState;
 
-  // 视图设置
-  viewMode: "list" | "grid";
-  sortBy: "name" | "createdAt" | "updatedAt";
-  sortDirection: "asc" | "desc";
+  // 工作区状态
+  workspace: WorkspaceState;
 
-  // 搜索状态
-  searchQuery: string;
+  // 当前编辑文件状态
+  currentFile: FileEditState;
 
-  // 选择模式（多选）
-  isSelectionMode: boolean;
-  selectedItems: Set<number>; // 笔记的ID
+  // UI 状态
+  ui: {
+    // 侧边栏展开状态
+    sidebarCollapsed: boolean;
+    // 搜索状态
+    searchQuery: string;
+    searchResults: SearchResultItem[];
+    isSearching: boolean;
+    // 选择状态
+    selectedPaths: Set<string>;
+    isMultiSelectMode: boolean;
+    // 拖拽状态
+    isDragging: boolean;
+    draggedNode?: FileNode;
+    // 右键菜单状态
+    contextMenuVisible: boolean;
+    contextMenuPosition?: { x: number; y: number };
+    contextMenuNode?: FileNode;
+  };
 }
 
-interface FilesUIActions {
-  // ==================== 选中状态管理 ====================
-  setSelectedTag: (tagId?: number) => void;
-  setSelectedNote: (noteId?: number) => void;
-  clearSelection: () => void;
+interface FilesActions {
+  // ==================== 文件树操作 ====================
+  /** 加载工作区文件树 */
+  loadFileTree: () => Promise<void>;
+  /** 刷新文件树 */
+  refreshFileTree: () => Promise<void>;
+  /** 内部方法：静默刷新文件树（避免闪烁） */
+  _refreshFileTreeSilent: () => Promise<void>;
+  /** 展开/折叠文件夹 */
+  toggleFolder: (folderPath: string) => void;
+  /** 展开文件夹 */
+  expandFolder: (folderPath: string) => void;
+  /** 折叠文件夹 */
+  collapseFolder: (folderPath: string) => void;
+  /** 设置排序方式 */
+  setSortOptions: (type: SortType, direction: SortDirection) => void;
 
-  // ==================== 标签展开状态 ====================
-  toggleTagExpanded: (tagId: number) => void;
-  expandTag: (tagId: number) => void;
-  collapseTag: (tagId: number) => void;
-  collapseAllTags: () => void;
+  // ==================== 文件操作 ====================
+  /** 选择文件 */
+  selectFile: (filePath: string) => Promise<void>;
+  /** 创建新文件 */
+  createFile: (parentPath: string, fileName?: string) => Promise<void>;
+  /** 创建新文件夹 */
+  createFolder: (parentPath: string, folderName?: string) => Promise<void>;
+  /** 创建新文件 */
+  createNewFile: (fileName: string, content?: string) => Promise<string>;
+  /** 创建新文件夹 */
+  createNewFolder: (folderName: string) => Promise<string>;
+  /** 重命名文件/文件夹 */
+  renameFile: (oldPath: string, newName: string) => Promise<string>;
+  /** 删除文件/文件夹 */
+  deleteFile: (filePath: string) => Promise<void>;
+  /** 移动文件/文件夹 */
+  moveFile: (sourcePath: string, targetPath: string) => Promise<void>;
+  /** 复制文件 */
+  copyFile: (sourcePath: string, targetPath: string) => Promise<void>;
 
-  // ==================== 视图设置 ====================
-  setViewMode: (mode: "list" | "grid") => void;
-  setSortBy: (sortBy: "name" | "createdAt" | "updatedAt") => void;
-  setSortDirection: (direction: "asc" | "desc") => void;
+  // ==================== 文件内容操作 ====================
+  /** 读取文件内容 */
+  readFileContent: (filePath: string) => Promise<string>;
+  /** 保存文件内容 */
+  saveFileContent: (filePath: string, content: string) => Promise<void>;
+  /** 更新当前编辑内容 */
+  updateCurrentContent: (content: string) => void;
+  /** 标记文件有未保存更改 */
+  markFileAsModified: (modified: boolean) => void;
 
-  // ==================== 搜索状态 ====================
-  setSearchQuery: (query: string) => void;
+  // ==================== 工作区操作 ====================
+  /** 初始化工作区 */
+  initializeWorkspace: () => Promise<void>;
+  /** 切换工作区 */
+  switchWorkspace: (workspacePath: string) => Promise<void>;
+  /** 选择新工作区 */
+  selectWorkspace: () => Promise<void>;
+  /** 保存工作区配置 */
+  saveWorkspaceConfig: () => Promise<void>;
+
+  // ==================== 搜索操作 ====================
+  /** 搜索文件 */
+  searchFiles: (query: string, options?: { searchInContent?: boolean }) => Promise<void>;
+  /** 清除搜索 */
   clearSearch: () => void;
 
-  // ==================== 多选模式 ====================
-  toggleSelectionMode: () => void;
-  toggleItemSelection: (itemId: number) => void;
-  selectAllItems: (itemIds: number[]) => void;
-  clearItemSelection: () => void;
-  exitSelectionMode: () => void;
+  // ==================== UI 操作 ====================
+  /** 切换侧边栏 */
+  toggleSidebar: () => void;
+  /** 设置选择模式 */
+  setMultiSelectMode: (enabled: boolean) => void;
+  /** 切换文件选择 */
+  toggleFileSelection: (filePath: string) => void;
+  /** 清除选择 */
+  clearSelection: () => void;
+  /** 设置拖拽状态 */
+  setDragState: (isDragging: boolean, draggedNode?: FileNode) => void;
+  /** 显示右键菜单 */
+  showContextMenu: (position: { x: number; y: number }, node: FileNode) => void;
+  /** 隐藏右键菜单 */
+  hideContextMenu: () => void;
+
+  // ==================== 配置操作 ====================
+  /** 加载用户配置 */
+  loadUserConfig: () => Promise<void>;
+  /** 保存用户配置 */
+  saveUserConfig: () => Promise<void>;
 }
 
-type FilesUIStore = FilesUIState & FilesUIActions;
+type FilesStore = FilesState & FilesActions;
 
-// ==================== Store 实现 ====================
-export const useFilesStore = create<FilesUIStore>()(
-  immer((set) => ({
-    // ==================== 初始状态 ====================
-    selectedTagId: undefined,
-    selectedNoteId: undefined,
-    expandedTagIds: new Set(),
-    viewMode: "list",
-    sortBy: "updatedAt",
-    sortDirection: "desc",
-    searchQuery: "",
-    isSelectionMode: false,
-    selectedItems: new Set(),
+// 默认状态
+const defaultFileTreeState: FileTreeState = {
+  nodes: [],
+  expandedPaths: new Set(),
+  loading: false,
+  sortOptions: {
+    type: "name",
+    direction: "asc",
+    foldersFirst: true
+  }
+};
 
-    // ==================== 选中状态管理 ====================
-    setSelectedTag: (tagId?: number) => {
+const defaultWorkspaceState: WorkspaceState = {
+  config: {
+    workspacePath: "",
+    recentFiles: [],
+    excludePatterns: ["node_modules", ".git", ".DS_Store"],
+    includeExtensions: [".md", ".markdown", ".txt"],
+    watchEnabled: true,
+    maxFileSize: 10 * 1024 * 1024 // 10MB
+  },
+  initialized: false,
+  loading: false
+};
+
+const defaultFileEditState: FileEditState = {
+  content: "",
+  hasUnsavedChanges: false,
+  saving: false
+};
+
+// 创建 Store
+export const useFilesStore = create<FilesStore>()(
+  immer((set, get) => ({
+    // ==================== Initial State ====================
+    fileTree: defaultFileTreeState,
+    workspace: defaultWorkspaceState,
+    currentFile: defaultFileEditState,
+    ui: {
+      sidebarCollapsed: false,
+      searchQuery: "",
+      searchResults: [],
+      isSearching: false,
+      selectedPaths: new Set(),
+      isMultiSelectMode: false,
+      isDragging: false,
+      contextMenuVisible: false
+    },
+
+    // ==================== 文件树操作 ====================
+    loadFileTree: async () => {
+      const { workspace } = get();
+
+      if (!workspace.config.workspacePath) {
+        console.warn("工作区路径未设置");
+        return;
+      }
+
       set((state) => {
-        state.selectedTagId = tagId;
-        state.selectedNoteId = undefined; // 切换标签时清除笔记选择
+        state.fileTree.loading = true;
+        state.fileTree.error = undefined;
+      });
+
+      try {
+        const scanOptions: ScanOptions = {
+          recursive: true,
+          includeHidden: false,
+          includeExtensions: [...FILE_EXTENSIONS.ALL_SUPPORTED],
+          maxDepth: 10
+        };
+
+        const nodes = await fileSystemApi.scanDirectory(workspace.config.workspacePath, scanOptions);
+
+        set((state) => {
+          state.fileTree.nodes = nodes;
+          state.fileTree.loading = false;
+        });
+
+        // 恢复展开状态
+        const savedExpandedPaths = (await configApi.get<string[]>("workspace.expandedPaths")) || [];
+        const expandedPaths = new Set(savedExpandedPaths);
+        set((state) => {
+          state.fileTree.expandedPaths = expandedPaths;
+        });
+      } catch (error) {
+        console.error("加载文件树失败:", error);
+        set((state) => {
+          state.fileTree.loading = false;
+          state.fileTree.error = error instanceof Error ? error.message : "加载失败";
+        });
+      }
+    },
+
+    // 内部方法：刷新文件树但不显示loading状态（避免闪烁）
+    _refreshFileTreeSilent: async () => {
+      const { workspace } = get();
+
+      if (!workspace.config.workspacePath) {
+        console.warn("工作区路径未设置");
+        return;
+      }
+
+      try {
+        const scanOptions: ScanOptions = {
+          recursive: true,
+          includeHidden: false,
+          includeExtensions: [...FILE_EXTENSIONS.ALL_SUPPORTED],
+          maxDepth: 10
+        };
+
+        const nodes = await fileSystemApi.scanDirectory(workspace.config.workspacePath, scanOptions);
+
+        set((state) => {
+          state.fileTree.nodes = nodes;
+          // 不改变loading状态
+        });
+
+        // 恢复展开状态
+        const savedExpandedPaths = (await configApi.get<string[]>("workspace.expandedPaths")) || [];
+        const expandedPaths = new Set(savedExpandedPaths);
+        set((state) => {
+          state.fileTree.expandedPaths = expandedPaths;
+        });
+      } catch (error) {
+        console.error("刷新文件树失败:", error);
+        set((state) => {
+          state.fileTree.error = error instanceof Error ? error.message : "刷新失败";
+        });
+      }
+    },
+
+    refreshFileTree: async () => {
+      await get().loadFileTree();
+    },
+
+    toggleFolder: (folderPath: string) => {
+      set((state) => {
+        if (state.fileTree.expandedPaths.has(folderPath)) {
+          state.fileTree.expandedPaths.delete(folderPath);
+        } else {
+          state.fileTree.expandedPaths.add(folderPath);
+        }
       });
     },
 
-    setSelectedNote: (noteId?: number) => {
+    expandFolder: (folderPath: string) => {
       set((state) => {
-        state.selectedNoteId = noteId;
+        state.fileTree.expandedPaths.add(folderPath);
+      });
+    },
+
+    collapseFolder: (folderPath: string) => {
+      set((state) => {
+        state.fileTree.expandedPaths.delete(folderPath);
+      });
+    },
+
+    setSortOptions: (type: SortType, direction: SortDirection) => {
+      set((state) => {
+        state.fileTree.sortOptions.type = type;
+        state.fileTree.sortOptions.direction = direction;
+      });
+    },
+
+    // ==================== 文件操作 ====================
+    selectFile: async (filePath: string) => {
+      try {
+        const content = await fileSystemApi.readFile(filePath);
+
+        set((state) => {
+          state.fileTree.selectedPath = filePath;
+          state.currentFile = {
+            filePath,
+            content,
+            hasUnsavedChanges: false,
+            saving: false
+          };
+        });
+
+        // 保存最后打开的文件
+        await configApi.set(CONFIG_KEYS.LAST_OPENED_FILE, filePath);
+      } catch (error) {
+        console.error("选择文件失败:", error);
+        set((state) => {
+          state.fileTree.error = error instanceof Error ? error.message : "文件读取失败";
+        });
+      }
+    },
+
+    createFile: async (parentPath: string, fileName?: string) => {
+      try {
+        const name = fileName || "new-file.md";
+        const uniqueName = await fileSystemApi.createUniqueFileName(
+          parentPath,
+          name.replace(/\.[^/.]+$/, ""),
+          name.includes(".") ? `.${name.split(".").pop()}` : ".md"
+        );
+        const filePath = `${parentPath}/${uniqueName}`;
+
+        await fileSystemApi.writeFile(filePath, "");
+
+        // 使用静默刷新避免闪烁
+        await get()._refreshFileTreeSilent();
+        await get().selectFile(filePath);
+      } catch (error) {
+        console.error("创建文件失败:", error);
+        set((state) => {
+          state.fileTree.error = error instanceof Error ? error.message : "创建文件失败";
+        });
+      }
+    },
+
+    createFolder: async (parentPath: string, folderName?: string) => {
+      try {
+        const name = folderName || "new-folder";
+        const uniqueName = await fileSystemApi.createUniqueFileName(parentPath, name, "");
+        const folderPath = `${parentPath}/${uniqueName}`;
+
+        await fileSystemApi.createDirectory(folderPath);
+
+        // 使用静默刷新避免闪烁
+        await get()._refreshFileTreeSilent();
+        get().expandFolder(folderPath);
+      } catch (error) {
+        console.error("创建文件夹失败:", error);
+        set((state) => {
+          state.fileTree.error = error instanceof Error ? error.message : "创建文件夹失败";
+        });
+      }
+    },
+
+    renameFile: async (oldPath: string, newName: string) => {
+      try {
+        const parentPath = oldPath.substring(0, oldPath.lastIndexOf("/"));
+        const newPath = `${parentPath}/${newName}`;
+
+        await fileSystemApi.renameFile(oldPath, newPath);
+        await get().refreshFileTree();
+
+        // 如果重命名的是当前打开的文件，更新路径
+        const { currentFile } = get();
+        if (currentFile.filePath === oldPath) {
+          set((state) => {
+            state.currentFile.filePath = newPath;
+          });
+        }
+
+        return newPath;
+      } catch (error) {
+        console.error("重命名失败:", error);
+        set((state) => {
+          state.fileTree.error = error instanceof Error ? error.message : "重命名失败";
+        });
+        throw error;
+      }
+    },
+
+    deleteFile: async (filePath: string) => {
+      try {
+        await fileSystemApi.deleteFile(filePath);
+        await get().refreshFileTree();
+
+        // 如果删除的是当前打开的文件，清除状态
+        const { currentFile } = get();
+        if (currentFile.filePath === filePath) {
+          set((state) => {
+            state.currentFile = defaultFileEditState;
+            state.fileTree.selectedPath = undefined;
+          });
+        }
+      } catch (error) {
+        console.error("删除失败:", error);
+        set((state) => {
+          state.fileTree.error = error instanceof Error ? error.message : "删除失败";
+        });
+      }
+    },
+
+    moveFile: async (sourcePath: string, targetPath: string) => {
+      try {
+        await fileSystemApi.renameFile(sourcePath, targetPath);
+        await get().refreshFileTree();
+      } catch (error) {
+        console.error("移动失败:", error);
+        set((state) => {
+          state.fileTree.error = error instanceof Error ? error.message : "移动失败";
+        });
+      }
+    },
+
+    copyFile: async (sourcePath: string, targetPath: string) => {
+      try {
+        await fileSystemApi.copyFile(sourcePath, targetPath);
+        await get().refreshFileTree();
+      } catch (error) {
+        console.error("复制失败:", error);
+        set((state) => {
+          state.fileTree.error = error instanceof Error ? error.message : "复制失败";
+        });
+      }
+    },
+
+    // ==================== 文件内容操作 ====================
+    readFileContent: async (filePath: string) => {
+      try {
+        return await fileSystemApi.readFile(filePath);
+      } catch (error) {
+        console.error("读取文件内容失败:", error);
+        throw error;
+      }
+    },
+
+    saveFileContent: async (filePath: string, content: string) => {
+      set((state) => {
+        state.currentFile.saving = true;
+      });
+
+      try {
+        await fileSystemApi.writeFile(filePath, content);
+
+        set((state) => {
+          state.currentFile.hasUnsavedChanges = false;
+          state.currentFile.saving = false;
+          state.currentFile.lastSaved = new Date();
+        });
+      } catch (error) {
+        console.error("保存文件失败:", error);
+        set((state) => {
+          state.currentFile.saving = false;
+          state.fileTree.error = error instanceof Error ? error.message : "保存失败";
+        });
+        throw error;
+      }
+    },
+
+    updateCurrentContent: (content: string) => {
+      set((state) => {
+        state.currentFile.content = content;
+        state.currentFile.hasUnsavedChanges = true;
+      });
+    },
+
+    markFileAsModified: (modified: boolean) => {
+      set((state) => {
+        state.currentFile.hasUnsavedChanges = modified;
+      });
+    },
+
+    // ==================== 工作区操作 ====================
+    initializeWorkspace: async () => {
+      set((state) => {
+        state.workspace.loading = true;
+      });
+
+      try {
+        // 获取工作区配置
+        let config = await workspaceApi.getConfig();
+
+        // 验证工作区路径
+        const validation = await workspaceApi.validateWorkspace(config.workspacePath);
+        if (!validation.valid) {
+          // 使用默认工作区
+          const defaultPath = await workspaceApi.getDefaultPath();
+          config = {
+            workspacePath: defaultPath,
+            recentFiles: [],
+            excludePatterns: ["node_modules", ".git", ".DS_Store"],
+            includeExtensions: [".md", ".markdown", ".txt"],
+            watchEnabled: true,
+            maxFileSize: 10 * 1024 * 1024
+          };
+          await workspaceApi.setConfig(config);
+        }
+
+        set((state) => {
+          state.workspace.config = config;
+          state.workspace.initialized = true;
+          state.workspace.loading = false;
+        });
+
+        // 加载文件树
+        await get().loadFileTree();
+
+        // 恢复最后打开的文件
+        const lastOpenedFile = await configApi.get<string>(CONFIG_KEYS.LAST_OPENED_FILE);
+        if (lastOpenedFile && (await fileSystemApi.exists(lastOpenedFile))) {
+          await get().selectFile(lastOpenedFile);
+        }
+      } catch (error) {
+        console.error("初始化工作区失败:", error);
+        set((state) => {
+          state.workspace.loading = false;
+          state.workspace.error = error instanceof Error ? error.message : "初始化失败";
+        });
+      }
+    },
+
+    switchWorkspace: async (workspacePath: string) => {
+      const validation = await workspaceApi.validateWorkspace(workspacePath);
+      if (!validation.valid) {
+        throw new Error(validation.error || "工作区路径无效");
+      }
+
+      const config: WorkspaceConfig = {
+        workspacePath,
+        recentFiles: [],
+        excludePatterns: ["node_modules", ".git", ".DS_Store"],
+        includeExtensions: [".md", ".markdown", ".txt"],
+        watchEnabled: true,
+        maxFileSize: 10 * 1024 * 1024
+      };
+
+      await workspaceApi.setConfig(config);
+
+      set((state) => {
+        state.workspace.config = config;
+        state.currentFile = defaultFileEditState;
+        state.fileTree.selectedPath = undefined;
+      });
+
+      await get().loadFileTree();
+    },
+
+    selectWorkspace: async () => {
+      const selectedPath = await workspaceApi.selectDirectory();
+      if (selectedPath) {
+        await get().switchWorkspace(selectedPath);
+      }
+    },
+
+    saveWorkspaceConfig: async () => {
+      const { workspace, fileTree } = get();
+
+      // 保存展开状态到应用配置
+      await configApi.set("workspace.expandedPaths", Array.from(fileTree.expandedPaths));
+
+      await workspaceApi.setConfig(workspace.config);
+    },
+
+    // ==================== 搜索操作 ====================
+    searchFiles: async (query: string, options = {}) => {
+      if (!query.trim()) {
+        get().clearSearch();
+        return;
+      }
+
+      set((state) => {
+        state.ui.searchQuery = query;
+        state.ui.isSearching = true;
+      });
+
+      try {
+        const { workspace } = get();
+        const results = await fileSystemApi.searchFiles(workspace.config.workspacePath, query, {
+          searchInContent: options.searchInContent || false,
+          fileExtensions: [...FILE_EXTENSIONS.ALL_SUPPORTED],
+          caseSensitive: false,
+          maxResults: 50
+        });
+
+        set((state) => {
+          state.ui.searchResults = results.map((node) => ({ ...node }));
+          state.ui.isSearching = false;
+        });
+      } catch (error) {
+        console.error("搜索失败:", error);
+        set((state) => {
+          state.ui.isSearching = false;
+          state.fileTree.error = error instanceof Error ? error.message : "搜索失败";
+        });
+      }
+    },
+
+    clearSearch: () => {
+      set((state) => {
+        state.ui.searchQuery = "";
+        state.ui.searchResults = [];
+        state.ui.isSearching = false;
+      });
+    },
+
+    // ==================== UI 操作 ====================
+    toggleSidebar: () => {
+      set((state) => {
+        state.ui.sidebarCollapsed = !state.ui.sidebarCollapsed;
+      });
+    },
+
+    setMultiSelectMode: (enabled: boolean) => {
+      set((state) => {
+        state.ui.isMultiSelectMode = enabled;
+        if (!enabled) {
+          state.ui.selectedPaths.clear();
+        }
+      });
+    },
+
+    toggleFileSelection: (filePath: string) => {
+      set((state) => {
+        if (state.ui.selectedPaths.has(filePath)) {
+          state.ui.selectedPaths.delete(filePath);
+        } else {
+          state.ui.selectedPaths.add(filePath);
+        }
       });
     },
 
     clearSelection: () => {
       set((state) => {
-        state.selectedTagId = undefined;
-        state.selectedNoteId = undefined;
+        state.ui.selectedPaths.clear();
       });
     },
 
-    // ==================== 标签展开状态 ====================
-    toggleTagExpanded: (tagId: number) => {
+    setDragState: (isDragging: boolean, draggedNode?: FileNode) => {
       set((state) => {
-        if (state.expandedTagIds.has(tagId)) {
-          state.expandedTagIds.delete(tagId);
-        } else {
-          state.expandedTagIds.add(tagId);
-        }
+        state.ui.isDragging = isDragging;
+        state.ui.draggedNode = draggedNode;
       });
     },
 
-    expandTag: (tagId: number) => {
+    showContextMenu: (position: { x: number; y: number }, node: FileNode) => {
       set((state) => {
-        state.expandedTagIds.add(tagId);
+        state.ui.contextMenuVisible = true;
+        state.ui.contextMenuPosition = position;
+        state.ui.contextMenuNode = node;
       });
     },
 
-    collapseTag: (tagId: number) => {
+    hideContextMenu: () => {
       set((state) => {
-        state.expandedTagIds.delete(tagId);
+        state.ui.contextMenuVisible = false;
+        state.ui.contextMenuPosition = undefined;
+        state.ui.contextMenuNode = undefined;
       });
     },
 
-    collapseAllTags: () => {
-      set((state) => {
-        state.expandedTagIds.clear();
-      });
+    // ==================== 配置操作 ====================
+    loadUserConfig: async () => {
+      try {
+        const sortType = (await configApi.get<SortType>(CONFIG_KEYS.SORT_TYPE)) || "name";
+        const sortDirection = (await configApi.get<SortDirection>(CONFIG_KEYS.SORT_DIRECTION)) || "asc";
+        const sidebarCollapsed = (await configApi.get<boolean>(CONFIG_KEYS.FILE_TREE_WIDTH)) || false;
+
+        set((state) => {
+          state.fileTree.sortOptions.type = sortType;
+          state.fileTree.sortOptions.direction = sortDirection;
+          state.ui.sidebarCollapsed = sidebarCollapsed;
+        });
+      } catch (error) {
+        console.error("加载用户配置失败:", error);
+      }
     },
 
-    // ==================== 视图设置 ====================
-    setViewMode: (mode: "list" | "grid") => {
-      set((state) => {
-        state.viewMode = mode;
-      });
+    saveUserConfig: async () => {
+      try {
+        const { fileTree, ui } = get();
+
+        await Promise.all([
+          configApi.set(CONFIG_KEYS.SORT_TYPE, fileTree.sortOptions.type),
+          configApi.set(CONFIG_KEYS.SORT_DIRECTION, fileTree.sortOptions.direction),
+          configApi.set(CONFIG_KEYS.FILE_TREE_WIDTH, ui.sidebarCollapsed)
+        ]);
+      } catch (error) {
+        console.error("保存用户配置失败:", error);
+      }
     },
 
-    setSortBy: (sortBy: "name" | "createdAt" | "updatedAt") => {
-      set((state) => {
-        state.sortBy = sortBy;
-      });
+    // ==================== 文件操作 ====================
+    createNewFile: async (fileName: string, content = "") => {
+      const { workspace } = get();
+
+      if (!workspace.config.workspacePath) {
+        throw new Error("工作区路径未设置");
+      }
+
+      try {
+        // 生成唯一文件名
+        const uniqueFileName = await fileSystemApi.createUniqueFileName(
+          workspace.config.workspacePath,
+          fileName.replace(/\.[^/.]+$/, ""), // 去掉扩展名
+          fileName.match(/\.[^/.]+$/)?.[0] // 提取扩展名
+        );
+
+        const filePath = `${workspace.config.workspacePath}/${uniqueFileName}`;
+        await fileSystemApi.writeFile(filePath, content);
+
+        // 刷新文件树
+        await get().loadFileTree();
+
+        return filePath;
+      } catch (error) {
+        console.error("创建文件失败:", error);
+        throw error;
+      }
     },
 
-    setSortDirection: (direction: "asc" | "desc") => {
-      set((state) => {
-        state.sortDirection = direction;
-      });
-    },
+    createNewFolder: async (folderName: string) => {
+      const { workspace } = get();
 
-    // ==================== 搜索状态 ====================
-    setSearchQuery: (query: string) => {
-      set((state) => {
-        state.searchQuery = query;
-      });
-    },
+      if (!workspace.config.workspacePath) {
+        throw new Error("工作区路径未设置");
+      }
 
-    clearSearch: () => {
-      set((state) => {
-        state.searchQuery = "";
-      });
-    },
+      try {
+        // 生成唯一文件夹名
+        const uniqueFolderName = await fileSystemApi.createUniqueFileName(workspace.config.workspacePath, folderName);
 
-    // ==================== 多选模式 ====================
-    toggleSelectionMode: () => {
-      set((state) => {
-        state.isSelectionMode = !state.isSelectionMode;
-        if (!state.isSelectionMode) {
-          state.selectedItems.clear();
-        }
-      });
-    },
+        const folderPath = `${workspace.config.workspacePath}/${uniqueFolderName}`;
+        await fileSystemApi.createDirectory(folderPath);
 
-    toggleItemSelection: (itemId: number) => {
-      set((state) => {
-        if (state.selectedItems.has(itemId)) {
-          state.selectedItems.delete(itemId);
-        } else {
-          state.selectedItems.add(itemId);
-        }
-      });
-    },
+        // 刷新文件树
+        await get().loadFileTree();
 
-    selectAllItems: (itemIds: number[]) => {
-      set((state) => {
-        state.selectedItems = new Set(itemIds);
-      });
-    },
-
-    clearItemSelection: () => {
-      set((state) => {
-        state.selectedItems.clear();
-      });
-    },
-
-    exitSelectionMode: () => {
-      set((state) => {
-        state.isSelectionMode = false;
-        state.selectedItems.clear();
-      });
+        return folderPath;
+      } catch (error) {
+        console.error("创建文件夹失败:", error);
+        throw error;
+      }
     }
   }))
 );
 
 // 导出类型供组件使用
-export type { FilesUIStore };
+export type { FilesStore };
