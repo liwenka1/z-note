@@ -2,6 +2,9 @@ import { registerHandler, registerDBHandler } from "./registry";
 import { serviceManager } from "../services/service-manager";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
 import { initialize as initializeDatabase } from "../database/db";
+import { FileSystemService } from "../services/file-system-service";
+import { dialog, app, shell } from "electron";
+import * as path from "path";
 import type {
   NoteFormData,
   TagFormData,
@@ -9,6 +12,7 @@ import type {
   MarkFormData,
   VectorDocumentFormData
 } from "../repositories/types";
+import type { WorkspaceConfig, ScanOptions } from "../services/file-system-service";
 
 /**
  * IPC注册器 - 简化版
@@ -28,6 +32,12 @@ export class IpcRegistry {
     this.registerChatsHandlers();
     this.registerMarksHandlers();
     this.registerVectorHandlers();
+
+    // 注册文件系统处理器
+    this.registerFileSystemHandlers();
+    this.registerWorkspaceHandlers();
+    this.registerConfigHandlers();
+    this.registerShellHandlers();
 
     console.log("[IpcRegistry] 所有IPC处理器注册完成");
   }
@@ -222,6 +232,312 @@ export class IpcRegistry {
     // 清空所有向量文档
     registerHandler(IPC_CHANNELS.VECTOR.CLEAR, async () => {
       return await vectorService.clearAll();
+    });
+  }
+
+  /**
+   * 文件系统相关处理器
+   */
+  private static registerFileSystemHandlers(): void {
+    const fileSystemService = new FileSystemService();
+
+    // 扫描目录
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.SCAN_DIRECTORY, async (dirPath: string, options?: ScanOptions) => {
+      return await fileSystemService.scanDirectory(dirPath, options);
+    });
+
+    // 读取文件
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.READ_FILE, async (filePath: string) => {
+      return await fileSystemService.readFile(filePath);
+    });
+
+    // 写入文件
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.WRITE_FILE, async (filePath: string, content: string) => {
+      return await fileSystemService.writeFile(filePath, content);
+    });
+
+    // 创建目录
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.CREATE_DIRECTORY, async (dirPath: string) => {
+      return await fileSystemService.createDirectory(dirPath);
+    });
+
+    // 删除文件或目录
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.DELETE_FILE, async (filePath: string) => {
+      return await fileSystemService.deleteFile(filePath);
+    });
+
+    // 重命名/移动文件
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.RENAME_FILE, async (oldPath: string, newPath: string) => {
+      return await fileSystemService.renameFile(oldPath, newPath);
+    });
+
+    // 移动文件到指定目录
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.MOVE_FILE, async (sourcePath: string, targetDir: string) => {
+      return await fileSystemService.moveFile(sourcePath, targetDir);
+    });
+
+    // 复制文件
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.COPY_FILE, async (sourcePath: string, targetPath: string) => {
+      return await fileSystemService.copyFile(sourcePath, targetPath);
+    });
+
+    // 检查文件是否存在
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.EXISTS, async (filePath: string) => {
+      return await fileSystemService.exists(filePath);
+    });
+
+    // 获取文件统计信息
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.GET_STATS, async (filePath: string) => {
+      return await fileSystemService.getStats(filePath);
+    });
+
+    // 创建唯一文件名
+    registerHandler(
+      IPC_CHANNELS.FILE_SYSTEM.CREATE_UNIQUE_FILENAME,
+      async (dirPath: string, baseName: string, extension?: string) => {
+        return await fileSystemService.createUniqueFileName(dirPath, baseName, extension);
+      }
+    );
+
+    // 获取目录大小
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.GET_DIRECTORY_SIZE, async (dirPath: string) => {
+      return await fileSystemService.getDirectorySize(dirPath);
+    });
+
+    // 搜索文件
+    registerHandler(
+      IPC_CHANNELS.FILE_SYSTEM.SEARCH_FILES,
+      async (
+        dirPath: string,
+        searchTerm: string,
+        options?: {
+          searchInContent?: boolean;
+          fileExtensions?: string[];
+          caseSensitive?: boolean;
+          maxResults?: number;
+        }
+      ) => {
+        return await fileSystemService.searchFiles(dirPath, searchTerm, options);
+      }
+    );
+  }
+
+  /**
+   * 工作区相关处理器
+   */
+  private static registerWorkspaceHandlers(): void {
+    const fileSystemService = new FileSystemService();
+
+    // 获取默认工作区路径
+    registerHandler(IPC_CHANNELS.WORKSPACE.GET_DEFAULT_PATH, async () => {
+      return fileSystemService.getDefaultWorkspacePath();
+    });
+
+    // 获取工作区配置
+    registerHandler(IPC_CHANNELS.WORKSPACE.GET_CONFIG, async () => {
+      try {
+        const configPath = path.join(app.getPath("userData"), "workspace-config.json");
+        const exists = await fileSystemService.exists(configPath);
+
+        if (!exists) {
+          // 返回默认配置
+          const defaultConfig: WorkspaceConfig = {
+            path: fileSystemService.getDefaultWorkspacePath(),
+            isDefault: true,
+            collapsedFolders: []
+          };
+          return defaultConfig;
+        }
+
+        const configContent = await fileSystemService.readFile(configPath);
+        return JSON.parse(configContent) as WorkspaceConfig;
+      } catch (error) {
+        console.error("读取工作区配置失败:", error);
+        // 返回默认配置
+        return {
+          path: fileSystemService.getDefaultWorkspacePath(),
+          isDefault: true,
+          collapsedFolders: []
+        } as WorkspaceConfig;
+      }
+    });
+
+    // 设置工作区配置
+    registerHandler(IPC_CHANNELS.WORKSPACE.SET_CONFIG, async (config: WorkspaceConfig) => {
+      try {
+        const configPath = path.join(app.getPath("userData"), "workspace-config.json");
+        await fileSystemService.writeFile(configPath, JSON.stringify(config, null, 2));
+        return { success: true };
+      } catch (error) {
+        console.error("保存工作区配置失败:", error);
+        throw error;
+      }
+    });
+
+    // 选择目录对话框
+    registerHandler(IPC_CHANNELS.WORKSPACE.SELECT_DIRECTORY, async () => {
+      const result = await dialog.showOpenDialog({
+        properties: ["openDirectory"],
+        title: "选择工作区目录"
+      });
+
+      if (result.canceled || result.filePaths.length === 0) {
+        return null;
+      }
+
+      return result.filePaths[0];
+    });
+
+    // 验证工作区
+    registerHandler(IPC_CHANNELS.WORKSPACE.VALIDATE_WORKSPACE, async (workspacePath: string) => {
+      try {
+        const exists = await fileSystemService.exists(workspacePath);
+        if (!exists) {
+          return { isValid: false, error: "目录不存在" };
+        }
+
+        const stats = await fileSystemService.getStats(workspacePath);
+        if (!stats.isDirectory) {
+          return { isValid: false, error: "路径不是目录" };
+        }
+
+        return { isValid: true };
+      } catch (error) {
+        return {
+          isValid: false,
+          error: error instanceof Error ? error.message : "验证失败"
+        };
+      }
+    });
+  }
+
+  /**
+   * 应用配置相关处理器
+   */
+  private static registerConfigHandlers(): void {
+    const fileSystemService = new FileSystemService();
+
+    // 获取配置
+    registerHandler(IPC_CHANNELS.CONFIG.GET, async (key: string) => {
+      try {
+        const configPath = path.join(app.getPath("userData"), "app-config.json");
+        const exists = await fileSystemService.exists(configPath);
+
+        if (!exists) {
+          return null;
+        }
+
+        const configContent = await fileSystemService.readFile(configPath);
+        const config = JSON.parse(configContent);
+        return config[key] || null;
+      } catch (error) {
+        console.error("读取配置失败:", error);
+        return null;
+      }
+    });
+
+    // 设置配置
+    registerHandler(IPC_CHANNELS.CONFIG.SET, async (key: string, value: unknown) => {
+      try {
+        const configPath = path.join(app.getPath("userData"), "app-config.json");
+        let config = {};
+
+        // 读取现有配置
+        const exists = await fileSystemService.exists(configPath);
+        if (exists) {
+          const configContent = await fileSystemService.readFile(configPath);
+          config = JSON.parse(configContent);
+        }
+
+        // 更新配置
+        (config as Record<string, unknown>)[key] = value;
+
+        // 保存配置
+        await fileSystemService.writeFile(configPath, JSON.stringify(config, null, 2));
+        return { success: true };
+      } catch (error) {
+        console.error("保存配置失败:", error);
+        throw error;
+      }
+    });
+
+    // 删除配置
+    registerHandler(IPC_CHANNELS.CONFIG.REMOVE, async (key: string) => {
+      try {
+        const configPath = path.join(app.getPath("userData"), "app-config.json");
+        const exists = await fileSystemService.exists(configPath);
+
+        if (!exists) {
+          return { success: true }; // 文件不存在，认为删除成功
+        }
+
+        const configContent = await fileSystemService.readFile(configPath);
+        const config = JSON.parse(configContent);
+
+        delete (config as Record<string, unknown>)[key];
+
+        await fileSystemService.writeFile(configPath, JSON.stringify(config, null, 2));
+        return { success: true };
+      } catch (error) {
+        console.error("删除配置失败:", error);
+        throw error;
+      }
+    });
+
+    // 获取所有配置
+    registerHandler(IPC_CHANNELS.CONFIG.GET_ALL, async () => {
+      try {
+        const configPath = path.join(app.getPath("userData"), "app-config.json");
+        const exists = await fileSystemService.exists(configPath);
+
+        if (!exists) {
+          return {};
+        }
+
+        const configContent = await fileSystemService.readFile(configPath);
+        return JSON.parse(configContent);
+      } catch (error) {
+        console.error("读取所有配置失败:", error);
+        return {};
+      }
+    });
+  }
+
+  /**
+   * 系统Shell操作相关处理器
+   */
+  private static registerShellHandlers(): void {
+    // 在文件管理器中显示文件/文件夹
+    registerHandler(IPC_CHANNELS.SHELL.SHOW_ITEM_IN_FOLDER, async (itemPath: string) => {
+      try {
+        shell.showItemInFolder(itemPath);
+        return { success: true };
+      } catch (error) {
+        console.error("显示文件位置失败:", error);
+        throw error;
+      }
+    });
+
+    // 打开路径（文件夹）
+    registerHandler(IPC_CHANNELS.SHELL.OPEN_PATH, async (folderPath: string) => {
+      try {
+        await shell.openPath(folderPath);
+        return { success: true };
+      } catch (error) {
+        console.error("打开文件夹失败:", error);
+        throw error;
+      }
+    });
+
+    // 打开外部链接
+    registerHandler(IPC_CHANNELS.SHELL.OPEN_EXTERNAL, async (url: string) => {
+      try {
+        await shell.openExternal(url);
+        return { success: true };
+      } catch (error) {
+        console.error("打开外部链接失败:", error);
+        throw error;
+      }
     });
   }
 }
