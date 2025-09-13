@@ -48,3 +48,13 @@ export function handleResponse<T>(response: BaseResponse<T>): T {
   }
   return response.data;
 }
+
+/**
+ * 响应处理工具函数（支持可能为 null 的返回值）
+ */
+export function handleResponseNullable<T>(response: BaseResponse<T | null>): T | null {
+  if (!response.success) {
+    throw new Error(response.message || "请求失败");
+  }
+  return response.data;
+}

@@ -6,3 +6,5 @@ export * from "./tags";
 export * from "./chats";
 export * from "./marks";
 export * from "./vector";
+export * from "./file-system";
+export * from "./shell";
