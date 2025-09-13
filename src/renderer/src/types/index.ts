@@ -15,6 +15,9 @@ export * from "./ui";
 // 工具类型
 export * from "./utils";
 
+// 文件系统类型
+export * from "./files";
+
 // 导入 IPC 类型用于全局声明
 import type { IpcMethods, IpcEventListeners } from "./api";
 

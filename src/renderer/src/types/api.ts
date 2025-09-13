@@ -13,6 +13,14 @@ import type {
   VectorDocumentFormData
 } from "./entities";
 import type { BaseResponse } from "./common";
+import type {
+  FileNode,
+  WorkspaceConfig,
+  ScanOptions,
+  FileStats,
+  SearchOptions,
+  WorkspaceValidationResult
+} from "./files";
 
 /**
  * 引入 IPC 通道常量，与后端保持同步
@@ -123,6 +131,52 @@ export interface IpcMethods {
   [IPC_CHANNELS.VECTOR.DELETE_BY_FILENAME]: (filename: string) => Promise<BaseResponse<{ deletedCount: number }>>;
   [IPC_CHANNELS.VECTOR.GET_SIMILAR]: (embedding: string, limit?: number) => Promise<BaseResponse<VectorDocument[]>>;
   [IPC_CHANNELS.VECTOR.CLEAR]: () => Promise<BaseResponse<{ deletedCount: number }>>;
+
+  // 文件系统相关
+  [IPC_CHANNELS.FILE_SYSTEM.SCAN_DIRECTORY]: (
+    dirPath: string,
+    options?: ScanOptions
+  ) => Promise<BaseResponse<FileNode[]>>;
+  [IPC_CHANNELS.FILE_SYSTEM.READ_FILE]: (filePath: string) => Promise<BaseResponse<string>>;
+  [IPC_CHANNELS.FILE_SYSTEM.WRITE_FILE]: (filePath: string, content: string) => Promise<BaseResponse<void>>;
+  [IPC_CHANNELS.FILE_SYSTEM.CREATE_DIRECTORY]: (dirPath: string) => Promise<BaseResponse<void>>;
+  [IPC_CHANNELS.FILE_SYSTEM.DELETE_FILE]: (filePath: string) => Promise<BaseResponse<void>>;
+  [IPC_CHANNELS.FILE_SYSTEM.RENAME_FILE]: (oldPath: string, newPath: string) => Promise<BaseResponse<void>>;
+  [IPC_CHANNELS.FILE_SYSTEM.MOVE_FILE]: (sourcePath: string, targetDir: string) => Promise<BaseResponse<string>>;
+  [IPC_CHANNELS.FILE_SYSTEM.COPY_FILE]: (sourcePath: string, targetPath: string) => Promise<BaseResponse<void>>;
+  [IPC_CHANNELS.FILE_SYSTEM.EXISTS]: (filePath: string) => Promise<BaseResponse<boolean>>;
+  [IPC_CHANNELS.FILE_SYSTEM.GET_STATS]: (filePath: string) => Promise<BaseResponse<FileStats>>;
+  [IPC_CHANNELS.FILE_SYSTEM.CREATE_UNIQUE_FILENAME]: (
+    dirPath: string,
+    baseName: string,
+    extension?: string
+  ) => Promise<BaseResponse<string>>;
+  [IPC_CHANNELS.FILE_SYSTEM.GET_DIRECTORY_SIZE]: (dirPath: string) => Promise<BaseResponse<number>>;
+  [IPC_CHANNELS.FILE_SYSTEM.SEARCH_FILES]: (
+    dirPath: string,
+    searchTerm: string,
+    options?: SearchOptions
+  ) => Promise<BaseResponse<FileNode[]>>;
+
+  // 工作区相关
+  [IPC_CHANNELS.WORKSPACE.GET_DEFAULT_PATH]: () => Promise<BaseResponse<string>>;
+  [IPC_CHANNELS.WORKSPACE.GET_CONFIG]: () => Promise<BaseResponse<WorkspaceConfig>>;
+  [IPC_CHANNELS.WORKSPACE.SET_CONFIG]: (config: WorkspaceConfig) => Promise<BaseResponse<{ success: boolean }>>;
+  [IPC_CHANNELS.WORKSPACE.SELECT_DIRECTORY]: () => Promise<BaseResponse<string | null>>;
+  [IPC_CHANNELS.WORKSPACE.VALIDATE_WORKSPACE]: (
+    workspacePath: string
+  ) => Promise<BaseResponse<WorkspaceValidationResult>>;
+
+  // 应用配置相关
+  [IPC_CHANNELS.CONFIG.GET]: (key: string) => Promise<BaseResponse<unknown>>;
+  [IPC_CHANNELS.CONFIG.SET]: (key: string, value: unknown) => Promise<BaseResponse<{ success: boolean }>>;
+  [IPC_CHANNELS.CONFIG.REMOVE]: (key: string) => Promise<BaseResponse<{ success: boolean }>>;
+  [IPC_CHANNELS.CONFIG.GET_ALL]: () => Promise<BaseResponse<Record<string, unknown>>>;
+
+  // 系统Shell操作相关
+  [IPC_CHANNELS.SHELL.SHOW_ITEM_IN_FOLDER]: (itemPath: string) => Promise<BaseResponse<{ success: boolean }>>;
+  [IPC_CHANNELS.SHELL.OPEN_PATH]: (folderPath: string) => Promise<BaseResponse<{ success: boolean }>>;
+  [IPC_CHANNELS.SHELL.OPEN_EXTERNAL]: (url: string) => Promise<BaseResponse<{ success: boolean }>>;
 }
 
 // ==================== IPC 事件监听器类型 ====================
