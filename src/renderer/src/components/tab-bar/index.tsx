@@ -12,13 +12,13 @@ import {
   DropdownMenuTrigger
 } from "@renderer/components/ui/dropdown-menu";
 import { useTabStore } from "@renderer/stores";
-import { useCreateNote } from "@renderer/hooks";
 import { useEditorStore } from "@renderer/stores/editor-store";
+import { useFilesStore } from "@renderer/stores";
 
 export function TabBar() {
-  const { openTabs, activeTabId, closeTab, closeAllTabs, closeOtherTabs, setActiveTab, openTab } = useTabStore();
-  const { mutate: createNote } = useCreateNote();
+  const { openTabs, activeTabId, closeTab, closeAllTabs, closeOtherTabs, setActiveTab } = useTabStore();
   const { isNoteModified, stopEditing } = useEditorStore();
+  const { createFile, workspace } = useFilesStore();
   const navigate = useNavigate();
   const [scrollLeft, setScrollLeft] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -118,26 +118,17 @@ export function TabBar() {
     closeTab(tabId);
   };
 
-  const handleNewNote = () => {
-    const noteData = {
-      title: "新建笔记",
-      content: "",
-      folderId: undefined,
-      tagIds: []
-    };
+  const handleNewNote = async () => {
+    try {
+      const fileName = `新建笔记_${Date.now()}.json`;
+      await createFile(workspace.config.workspacePath, fileName);
 
-    createNote(noteData, {
-      onSuccess: (newNote) => {
-        // 添加到标签页并激活
-        openTab(newNote.id, newNote.title, "note");
-        setActiveTab(newNote.id);
-        // 导航到新笔记
-        navigate({ to: "/notes/$noteId", params: { noteId: newNote.id } });
-      },
-      onError: (error) => {
-        console.error("创建笔记失败:", error);
-      }
-    });
+      // 创建文件成功后，可以选择打开该文件
+      // 这里暂时只是创建，后续可以根据需要添加打开逻辑
+      console.log("笔记创建成功:", fileName);
+    } catch (error) {
+      console.error("创建笔记失败:", error);
+    }
   };
 
   if (openTabs.length === 0) {
