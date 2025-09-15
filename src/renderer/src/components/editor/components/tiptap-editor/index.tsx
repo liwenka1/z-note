@@ -1,4 +1,4 @@
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, type JSONContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -8,8 +8,8 @@ import { cn } from "@renderer/lib/utils";
 import { EditorToolbar } from "./toolbar";
 
 interface TipTapEditorProps {
-  content: string;
-  onChange: (content: string) => void;
+  content: JSONContent;
+  onChange: (content: JSONContent) => void;
   onSave?: () => void; // 添加保存回调
   editable?: boolean;
   className?: string;
@@ -41,8 +41,8 @@ export function TipTapEditor({
     content,
     editable,
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      onChange(html);
+      const json = editor.getJSON();
+      onChange(json);
     },
     editorProps: {
       attributes: {
@@ -62,7 +62,7 @@ export function TipTapEditor({
 
   // 当外部 content 改变时更新编辑器内容
   useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
+    if (editor && content && JSON.stringify(content) !== JSON.stringify(editor.getJSON())) {
       editor.commands.setContent(content);
     }
   }, [content, editor]);
