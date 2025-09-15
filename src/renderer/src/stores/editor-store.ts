@@ -1,19 +1,20 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
+import type { JSONContent } from "@tiptap/react";
 
 // 编辑器状态接口
 interface EditorState {
   // 当前正在编辑的笔记内容（按noteId存储）
-  editingContent: Record<string, string>;
+  editingContent: Record<string, JSONContent>;
   // 原始内容（用于对比是否修改）
-  originalContent: Record<string, string>;
+  originalContent: Record<string, JSONContent>;
 }
 
 interface EditorActions {
   // 开始编辑笔记
-  startEditing: (noteId: string, content: string) => void;
+  startEditing: (noteId: string, content: JSONContent) => void;
   // 更新编辑内容
-  updateContent: (noteId: string, content: string) => void;
+  updateContent: (noteId: string, content: JSONContent) => void;
   // 保存笔记
   saveNote: (noteId: string) => void;
   // 停止编辑（关闭标签时调用）
@@ -21,7 +22,7 @@ interface EditorActions {
   // 检查笔记是否被修改
   isNoteModified: (noteId: string) => boolean;
   // 获取笔记的编辑内容
-  getEditingContent: (noteId: string) => string | undefined;
+  getEditingContent: (noteId: string) => JSONContent | undefined;
   // 重置笔记到原始状态
   resetNote: (noteId: string) => void;
 }
@@ -35,7 +36,7 @@ export const useEditorStore = create<EditorStore>()(
     originalContent: {},
 
     // Actions
-    startEditing: (noteId: string, content: string) => {
+    startEditing: (noteId: string, content: JSONContent) => {
       set((state) => {
         // 设置原始内容和当前编辑内容
         state.originalContent[noteId] = content;
@@ -43,7 +44,7 @@ export const useEditorStore = create<EditorStore>()(
       });
     },
 
-    updateContent: (noteId: string, content: string) => {
+    updateContent: (noteId: string, content: JSONContent) => {
       set((state) => {
         // 只更新编辑内容，不设置自动保存
         state.editingContent[noteId] = content;
@@ -78,7 +79,8 @@ export const useEditorStore = create<EditorStore>()(
         return false;
       }
 
-      return original !== current;
+      // 比较 JSON 内容
+      return JSON.stringify(original) !== JSON.stringify(current);
     },
 
     getEditingContent: (noteId: string) => {

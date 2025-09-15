@@ -335,6 +335,26 @@ export const useFilesStore = create<FilesStore>()(
 
         await fileSystemApi.writeFile(filePath, "");
 
+        // 如果是 .json 文件，需要创建符合笔记格式的内容
+        if (uniqueName.endsWith(".json")) {
+          const noteTitle = uniqueName.replace(/\.json$/, "");
+          const noteFileContent = {
+            version: "1.0",
+            content: {
+              type: "doc",
+              content: []
+            },
+            metadata: {
+              title: noteTitle,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              characterCount: 0
+            }
+          };
+          const jsonContent = JSON.stringify(noteFileContent, null, 2);
+          await fileSystemApi.writeFile(filePath, jsonContent);
+        }
+
         // 使用静默刷新避免闪烁
         await get()._refreshFileTreeSilent();
         await get().selectFile(filePath);
