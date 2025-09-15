@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { File, MoreVertical, Edit, Trash2, X, Check, FolderOpen } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { Button } from "@renderer/components/ui/button";
 import {
   DropdownMenu,
@@ -9,7 +11,9 @@ import {
 } from "@renderer/components/ui/dropdown-menu";
 import { Input } from "@renderer/components/ui/input";
 import { useFilesState } from "../hooks/use-files-state";
-import { shellApi } from "@renderer/api";
+import { useTabStore } from "@renderer/stores/tab-store";
+import { shellApi, filesApi } from "@renderer/api";
+import { createFileNoteId } from "@renderer/types/file-content";
 import type { FileNode } from "@renderer/types/files";
 
 interface NoteItemProps {
@@ -20,6 +24,8 @@ interface NoteItemProps {
 export function NoteItem({ file, level }: NoteItemProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
+  const navigate = useNavigate();
+  const { openTab } = useTabStore();
 
   // 获取显示用的文件名（去掉.json后缀）
   const getDisplayName = (fileName: string) => {
@@ -47,7 +53,28 @@ export function NoteItem({ file, level }: NoteItemProps) {
 
   const handleFileClick = async () => {
     try {
+      // 首先选中文件（保持现有行为）
       await selectFile(file.path);
+
+      // 如果是 .json 文件，尝试作为笔记打开
+      if (file.name.endsWith(".json")) {
+        try {
+          // 读取笔记文件内容
+          const noteContent = await filesApi.readNoteFile(file.path);
+
+          // 生成文件 noteId
+          const fileNoteId = createFileNoteId(file.path);
+
+          // 打开标签页
+          openTab(fileNoteId, noteContent.metadata.title, "note");
+
+          // 导航到笔记页面
+          navigate({ to: "/notes/$noteId", params: { noteId: fileNoteId } });
+        } catch (error) {
+          console.error("Failed to open note file:", error);
+          toast.error("无法打开笔记文件");
+        }
+      }
     } catch (error) {
       console.error("Failed to select file:", error);
     }
