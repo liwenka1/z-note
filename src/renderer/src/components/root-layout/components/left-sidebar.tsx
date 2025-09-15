@@ -1,15 +1,24 @@
 import { FilesPanel } from "@renderer/components/files";
-import { TrashPanel } from "@renderer/components/trash";
+// import { SearchCommand } from "@renderer/components/search-command";
+// import { TrashPanel } from "@renderer/components/trash";
 
 interface LeftSidebarProps {
   activePanel: string | null;
 }
 
 export function LeftSidebar({ activePanel }: LeftSidebarProps) {
-  return (
-    <div className="bg-secondary/20 border-border/50 h-full border-r">
-      {activePanel === "files" && <FilesPanel />}
-      {activePanel === "trash" && <TrashPanel />}
-    </div>
-  );
+  const renderActivePanel = () => {
+    switch (activePanel) {
+      case "files":
+        return <FilesPanel />;
+      // case "search":
+      //   return <SearchCommand />;
+      // case "trash":
+      //   return <TrashPanel />;
+      default:
+        return <FilesPanel />;
+    }
+  };
+
+  return <div className="bg-muted/30 h-full w-full">{renderActivePanel()}</div>;
 }
