@@ -2,8 +2,8 @@ import { FolderOpen, Search, Settings, Trash, BookOpen, Tag, BarChart3, MessageS
 
 // 左侧活动栏按钮配置
 export const leftActivityButtons = [
-  { id: "files", icon: FolderOpen, tooltip: "笔记 (Ctrl+Shift+E)" }
-  // { id: "search", icon: Search, tooltip: "搜索 (Ctrl+Shift+F)" }
+  { id: "files", icon: FolderOpen, tooltip: "笔记 (Ctrl+Shift+E)" },
+  { id: "search", icon: Search, tooltip: "搜索 (Ctrl+Shift+F)" }
   // { id: "trash", icon: Trash, tooltip: "回收站" }
 ];
 

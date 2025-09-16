@@ -1,7 +1,7 @@
 import { Allotment, LayoutPriority } from "allotment";
 import "allotment/dist/style.css";
 
-// import { SearchCommand } from "@renderer/components/search-command";
+import { SearchCommand } from "@renderer/components/search-command";
 import { StatusBar } from "@renderer/components/status-bar";
 import { EditorLayout } from "@renderer/components/root-layout/components/editor-layout";
 import { useChatStore } from "@renderer/stores/chat-store";
@@ -69,7 +69,7 @@ export function RootLayout() {
       <StatusBar />
 
       {/* SearchCommand 全局弹窗 */}
-      {/* <SearchCommand /> */}
+      <SearchCommand />
     </div>
   );
 }
