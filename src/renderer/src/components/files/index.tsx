@@ -5,6 +5,7 @@ import { FolderTree } from "./components/folder-tree";
 import { EmptyFiles } from "./components/empty-files";
 import { useFilesState } from "./hooks/use-files-state";
 import { useFilesStore } from "@renderer/stores/files-store";
+import { DEFAULT_WORKSPACE_PATH } from "@renderer/config/workspace";
 
 /**
  * Files 主组件
@@ -18,8 +19,8 @@ export function FilesPanel() {
   const initializeWorkspace = useCallback(async () => {
     // 如果没有设置工作区路径，设置默认路径
     if (!workspacePath) {
-      // 使用当前项目目录作为默认工作区
-      const defaultWorkspacePath = "d:\\Desktop\\z-note-test";
+      // 使用统一的默认工作区路径配置
+      const defaultWorkspacePath = DEFAULT_WORKSPACE_PATH;
 
       // 使用immer方式更新状态
       useFilesStore.setState((state) => ({
