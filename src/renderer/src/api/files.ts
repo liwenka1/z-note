@@ -1,6 +1,7 @@
 // ==================== 文件系统 API 封装 ====================
 
 import { fileSystemApi } from "./file-system";
+import { fileSearchIndex } from "@renderer/utils/file-search-index";
 import type { NoteFileContent, NoteFileMetadata } from "@renderer/types/file-content";
 import {
   createEmptyNoteFile,
@@ -62,6 +63,9 @@ export const filesApi = {
     try {
       const jsonString = JSON.stringify(content, null, 2);
       await fileSystemApi.writeFile(filePath, jsonString);
+
+      // 通知搜索索引文件已更新
+      fileSearchIndex.notifyFileUpdated(filePath);
     } catch (error) {
       throw new FileSystemError(
         `写入文件失败: ${error instanceof Error ? error.message : "未知错误"}`,
@@ -128,6 +132,9 @@ export const filesApi = {
   async deleteNoteFile(filePath: string): Promise<void> {
     try {
       await fileSystemApi.deleteFile(filePath);
+
+      // 通知搜索索引文件已删除
+      fileSearchIndex.notifyFileDeleted(filePath);
     } catch (error) {
       throw new FileSystemError(
         `删除文件失败: ${error instanceof Error ? error.message : "未知错误"}`,
