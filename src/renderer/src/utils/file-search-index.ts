@@ -31,6 +31,7 @@ class FileSearchIndexManager {
   private searchIndex: SearchIndexItem[] = [];
   private isIndexing = false;
   private lastIndexTime: number = 0;
+  private fileWatchers: Set<(filePath: string, operation: "create" | "update" | "delete") => void> = new Set();
 
   /**
    * 构建完整的文件索引 - 效仿 readDirRecursively + setSearchData
@@ -127,7 +128,7 @@ class FileSearchIndexManager {
         if (config.workspacePath) {
           return config.workspacePath;
         }
-      } catch (apiError) {
+      } catch {
         // 静默失败，使用默认路径
       }
 
@@ -214,6 +215,55 @@ class FileSearchIndexManager {
       lastIndexTime: this.lastIndexTime,
       isIndexing: this.isIndexing
     };
+  }
+
+  /**
+   * 添加文件变化监听器
+   */
+  addFileWatcher(callback: (filePath: string, operation: "create" | "update" | "delete") => void): () => void {
+    this.fileWatchers.add(callback);
+
+    // 返回取消监听的函数
+    return () => {
+      this.fileWatchers.delete(callback);
+    };
+  }
+
+  /**
+   * 通知文件变化
+   */
+  private notifyFileChange(filePath: string, operation: "create" | "update" | "delete"): void {
+    this.fileWatchers.forEach((callback) => {
+      try {
+        callback(filePath, operation);
+      } catch (error) {
+        console.error("文件监听器回调失败:", error);
+      }
+    });
+  }
+
+  /**
+   * 通知文件创建
+   */
+  notifyFileCreated(filePath: string): void {
+    this.updateFileIndex(filePath);
+    this.notifyFileChange(filePath, "create");
+  }
+
+  /**
+   * 通知文件更新
+   */
+  notifyFileUpdated(filePath: string): void {
+    this.updateFileIndex(filePath);
+    this.notifyFileChange(filePath, "update");
+  }
+
+  /**
+   * 通知文件删除
+   */
+  notifyFileDeleted(filePath: string): void {
+    this.removeFileIndex(filePath);
+    this.notifyFileChange(filePath, "delete");
   }
 }
 
