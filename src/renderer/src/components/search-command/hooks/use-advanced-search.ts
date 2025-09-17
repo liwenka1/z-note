@@ -139,6 +139,7 @@ export function useAdvancedSearch(options: SearchOptions = {}) {
 
         setSearchResults(results);
       } catch (error) {
+        console.error("搜索失败:", error);
         setSearchResults([]);
       } finally {
         setIsSearching(false);
@@ -172,6 +173,7 @@ export function useAdvancedSearch(options: SearchOptions = {}) {
 
         setIsIndexReady(true);
       } catch (error) {
+        console.error("初始化索引失败:", error);
         if (!isStale) {
           setIsIndexReady(true);
         }
@@ -183,6 +185,19 @@ export function useAdvancedSearch(options: SearchOptions = {}) {
     return () => {
       isStale = true; // 组件卸载时标记为stale
     };
+  }, []);
+
+  // 监听文件变化，自动更新 Fuse 实例
+  useEffect(() => {
+    const unsubscribe = fileSearchIndex.addFileWatcher(() => {
+      // 文件变化时，强制重新创建 Fuse 实例
+      // 通过依赖数组中的 isIndexReady 变化来触发 fuseSearch 的重新计算
+      setIsIndexReady(false);
+      // 短暂延迟后重新设置为 true，触发 Fuse 实例重建
+      setTimeout(() => setIsIndexReady(true), 50);
+    });
+
+    return unsubscribe;
   }, []);
 
   // 生成高亮片段
