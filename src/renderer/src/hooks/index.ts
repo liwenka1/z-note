@@ -8,3 +8,4 @@ export * from "./mutations";
 
 // 业务逻辑 Hooks
 export * from "./use-note-manager";
+export * from "./use-active-note";
