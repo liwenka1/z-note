@@ -1,5 +1,4 @@
 import { useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
 import { FilesHeader } from "./components/files-header";
 import { FolderTree } from "./components/folder-tree";
 import { EmptyFiles } from "./components/empty-files";
@@ -35,11 +34,11 @@ export function FilesPanel() {
         }
       }));
 
-      // 延迟加载文件树，确保状态更新完成
-      setTimeout(() => loadFileTree(), 100);
+      // 延迟加载文件树，确保状态更新完成，初始化时恢复保存的展开状态
+      setTimeout(() => loadFileTree(true), 100);
     } else if (!workspace.initialized) {
-      // 如果有路径但未初始化，则初始化
-      await loadFileTree();
+      // 如果有路径但未初始化，则初始化并恢复保存的展开状态
+      await loadFileTree(true);
       useFilesStore.setState((state) => ({
         ...state,
         workspace: {
@@ -55,16 +54,10 @@ export function FilesPanel() {
   }, [initializeWorkspace]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      transition={{ duration: 0.2 }}
-      className="bg-background flex h-full flex-col"
-    >
+    <div className="bg-background flex h-full flex-col">
       <FilesHeader />
 
       <div className="flex-1 overflow-hidden">{hasContent ? <FolderTree /> : <EmptyFiles />}</div>
-    </motion.div>
+    </div>
   );
 }
