@@ -85,7 +85,8 @@ export function FolderItem({ folder, level }: FolderItemProps) {
   const handleCreateFile = async () => {
     try {
       const fileName = `新笔记_${Date.now()}.json`;
-      await createFile(folder.path, fileName);
+      const actualFilePath = await createFile(folder.path, fileName);
+      console.log("文件创建成功:", actualFilePath);
     } catch (error) {
       console.error("Failed to create file:", error);
     }

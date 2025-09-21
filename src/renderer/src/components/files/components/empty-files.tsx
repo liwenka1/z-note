@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { FileText, FolderPlus } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import { useFilesState } from "../hooks/use-files-state";
+import { useNoteManager } from "@renderer/hooks/use-note-manager";
 
 const suggestions = [
   {
@@ -17,16 +18,11 @@ const suggestions = [
 ];
 
 export function EmptyFiles() {
-  const { createFile, createFolder, workspacePath } = useFilesState();
+  const { createFolder, workspacePath } = useFilesState();
+  const { quickCreateNote } = useNoteManager();
 
   const handleCreateNote = async () => {
-    try {
-      const fileName = `新笔记_${Date.now()}.json`;
-      await createFile(workspacePath, fileName);
-      console.log("笔记创建成功:", fileName);
-    } catch (error) {
-      console.error("创建笔记失败:", error);
-    }
+    await quickCreateNote();
   };
 
   const handleCreateFolder = async () => {
