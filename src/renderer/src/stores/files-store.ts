@@ -67,11 +67,13 @@ interface FilesActions {
   /** 选择文件 */
   selectFile: (filePath: string) => Promise<void>;
   /** 创建新文件 */
-  createFile: (parentPath: string, fileName?: string) => Promise<void>;
+  createFile: (parentPath: string, fileName?: string) => Promise<string>;
   /** 创建新文件夹 */
   createFolder: (parentPath: string, folderName?: string) => Promise<void>;
   /** 创建新文件 */
   createNewFile: (fileName: string, content?: string) => Promise<string>;
+  /** 创建新文件（不刷新文件树） */
+  createNewFileNoRefresh: (fileName: string, content?: string) => Promise<string>;
   /** 创建新文件夹 */
   createNewFolder: (folderName: string) => Promise<string>;
   /** 重命名文件/文件夹 */
@@ -358,11 +360,14 @@ export const useFilesStore = create<FilesStore>()(
         // 使用静默刷新避免闪烁
         await get()._refreshFileTreeSilent();
         await get().selectFile(filePath);
+
+        return filePath;
       } catch (error) {
         console.error("创建文件失败:", error);
         set((state) => {
           state.fileTree.error = error instanceof Error ? error.message : "创建文件失败";
         });
+        throw error;
       }
     },
 
@@ -742,6 +747,34 @@ export const useFilesStore = create<FilesStore>()(
 
         // 刷新文件树
         await get().loadFileTree();
+
+        return filePath;
+      } catch (error) {
+        console.error("创建文件失败:", error);
+        throw error;
+      }
+    },
+
+    createNewFileNoRefresh: async (fileName: string, content = "") => {
+      const { workspace } = get();
+
+      if (!workspace.config.workspacePath) {
+        throw new Error("工作区路径未设置");
+      }
+
+      try {
+        // 生成唯一文件名
+        const uniqueFileName = await fileSystemApi.createUniqueFileName(
+          workspace.config.workspacePath,
+          fileName.replace(/\.[^/.]+$/, ""), // 去掉扩展名
+          fileName.match(/\.[^/.]+$/)?.[0] // 提取扩展名
+        );
+
+        const filePath = `${workspace.config.workspacePath}/${uniqueFileName}`;
+        await fileSystemApi.writeFile(filePath, content);
+
+        // 使用静默刷新，避免视觉上的刷新
+        await get()._refreshFileTreeSilent();
 
         return filePath;
       } catch (error) {
