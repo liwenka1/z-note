@@ -14,6 +14,7 @@ import { useFilesState } from "../hooks/use-files-state";
 import { useTabStore } from "@renderer/stores/tab-store";
 import { shellApi, filesApi } from "@renderer/api";
 import { createFileNoteId } from "@renderer/types/file-content";
+import { cn } from "@renderer/lib/utils";
 import type { FileNode } from "@renderer/types/files";
 
 interface NoteItemProps {
@@ -134,22 +135,24 @@ export function NoteItem({ file, level }: NoteItemProps) {
 
   const getFileIcon = () => {
     // 所有文件都使用统一的灰色图标，不区分类型
-    return <File className="text-muted-foreground h-4 w-4" />;
+    return <File className={cn("text-muted-foreground h-4 w-4")} />;
   };
 
   return (
     <div
-      className={`hover:bg-muted/50 group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-sm ${
-        isSelected ? "bg-muted" : ""
-      }`}
-      style={{ paddingLeft: `${level * 16 + 8}px` }}
+      className={cn(
+        "group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-sm transition-colors duration-200",
+        "hover:bg-muted/50",
+        isSelected && "bg-accent text-accent-foreground"
+      )}
+      style={{ paddingLeft: `${level * 20 + 8 + 24}px` }} // +24px 是为了与文件夹的展开按钮对齐
       onClick={handleFileClick}
     >
       {/* 文件图标 */}
-      <div className="shrink-0">{getFileIcon()}</div>
+      <div className={cn("ml-1 shrink-0")}>{getFileIcon()}</div>
 
       {/* 文件名 / 重命名输入框 */}
-      <div className="min-w-0 flex-1">
+      <div className={cn("min-w-0 flex-1")}>
         {isRenaming ? (
           <Input
             ref={inputRef}
@@ -157,11 +160,11 @@ export function NoteItem({ file, level }: NoteItemProps) {
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={handleKeyDown}
             onBlur={handleRename}
-            className="h-6 px-1 text-sm"
+            className={cn("h-6 px-1 text-sm")}
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <span className="block truncate" title={displayName}>
+          <span className={cn("block truncate")} title={displayName}>
             {displayName}
           </span>
         )}
@@ -169,37 +172,37 @@ export function NoteItem({ file, level }: NoteItemProps) {
 
       {/* 操作按钮 */}
       {isRenaming ? (
-        <div className="flex shrink-0 items-center gap-1">
+        <div className={cn("flex shrink-0 items-center gap-1")}>
           <Button
             size="sm"
             variant="ghost"
-            className="h-6 w-6 p-0"
+            className={cn("h-6 w-6 p-0")}
             onClick={(e) => {
               e.stopPropagation();
               handleRename();
             }}
           >
-            <Check className="h-3 w-3" />
+            <Check className={cn("h-3 w-3")} />
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            className="h-6 w-6 p-0"
+            className={cn("h-6 w-6 p-0")}
             onClick={(e) => {
               e.stopPropagation();
               setNewName(file.name);
               setIsRenaming(false);
             }}
           >
-            <X className="h-3 w-3" />
+            <X className={cn("h-3 w-3")} />
           </Button>
         </div>
       ) : (
-        <div className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+        <div className={cn("shrink-0 opacity-0 transition-opacity group-hover:opacity-100")}>
           <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <DropdownMenuTrigger asChild>
-              <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={(e) => e.stopPropagation()}>
-                <MoreVertical className="h-3 w-3" />
+              <Button size="sm" variant="ghost" className={cn("h-6 w-6 p-0")} onClick={(e) => e.stopPropagation()}>
+                <MoreVertical className={cn("h-3 w-3")} />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">

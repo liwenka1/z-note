@@ -53,10 +53,30 @@ export function FolderTree() {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       className="h-full overflow-auto"
     >
-      <div className="space-y-0.5 p-2">{fileTree.map((node) => renderFileNode(node, 0))}</div>
+      <motion.div
+        className="space-y-0.5 p-2"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+      >
+        {fileTree.map((node, index) => (
+          <motion.div
+            key={node.path}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{
+              duration: 0.3,
+              delay: index * 0.05,
+              ease: "easeOut"
+            }}
+          >
+            {renderFileNode(node, 0)}
+          </motion.div>
+        ))}
+      </motion.div>
     </motion.div>
   );
 }

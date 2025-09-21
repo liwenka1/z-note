@@ -1,5 +1,6 @@
 import { FileText, Folder, RefreshCw } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@renderer/components/ui/tooltip";
 import { useFilesState } from "../hooks/use-files-state";
 import { useNoteManager } from "@renderer/hooks/use-note-manager";
 
@@ -34,17 +35,40 @@ export function FilesHeader() {
     <div className="border-border/50 bg-secondary/30 border-b">
       {/* 标题栏 */}
       <div className="flex items-center justify-between px-4 py-3">
-        <h2 className="text-foreground text-sm font-medium">文件</h2>
+        <h2 className="text-foreground text-sm font-medium">笔记</h2>
         <div className="flex gap-1">
-          <Button variant="ghost" size="sm" onClick={handleCreateNote} className="h-7 w-7 p-0" title="新建文件">
-            <FileText className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={handleCreateFolder} className="h-7 w-7 p-0" title="新建文件夹">
-            <Folder className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={handleRefresh} className="h-7 w-7 p-0" title="刷新">
-            <RefreshCw className="h-4 w-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="sm" onClick={handleCreateNote} className="h-7 w-7 p-0">
+                <FileText className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p>新建笔记</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="sm" onClick={handleCreateFolder} className="h-7 w-7 p-0">
+                <Folder className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p>新建文件夹</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="sm" onClick={handleRefresh} className="h-7 w-7 p-0">
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p>刷新</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
     </div>

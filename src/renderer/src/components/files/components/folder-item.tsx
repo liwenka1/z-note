@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronRight,
-  ChevronDown,
   Folder as FolderIcon,
   FolderOpen,
   MoreVertical,
@@ -23,6 +23,7 @@ import { Input } from "@renderer/components/ui/input";
 import { useFilesState } from "../hooks/use-files-state";
 import { NoteItem } from "./note-item";
 import { shellApi } from "@renderer/api";
+import { cn } from "@renderer/lib/utils";
 import type { FileNode } from "@renderer/types/files";
 
 interface FolderItemProps {
@@ -36,10 +37,10 @@ export function FolderItem({ folder, level }: FolderItemProps) {
   const [newName, setNewName] = useState(folder.name);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { collapsedFolders, toggleFolderCollapse, renameFile, deleteFile, createFile, createFolder } = useFilesState();
+  const { expandedFolders, toggleFolderCollapse, renameFile, deleteFile, createFile, createFolder } = useFilesState();
 
-  // 修复：使用正确的展开状态逻辑
-  const isExpanded = !collapsedFolders.has(folder.path);
+  // 使用正确的展开状态逻辑
+  const isExpanded = expandedFolders.has(folder.path);
 
   useEffect(() => {
     if (isRenaming && inputRef.current) {
@@ -77,6 +78,8 @@ export function FolderItem({ folder, level }: FolderItemProps) {
     try {
       const folderName = `新文件夹_${Date.now()}`;
       await createFolder(folder.path, folderName);
+
+      // 注意：createFolder 方法已经处理了文件夹展开逻辑，这里不需要重复处理
     } catch (error) {
       console.error("Failed to create subfolder:", error);
     }
@@ -87,6 +90,8 @@ export function FolderItem({ folder, level }: FolderItemProps) {
       const fileName = `新笔记_${Date.now()}.json`;
       const actualFilePath = await createFile(folder.path, fileName);
       console.log("文件创建成功:", actualFilePath);
+
+      // 注意：createFile 方法已经处理了文件夹展开逻辑，这里不需要重复处理
     } catch (error) {
       console.error("Failed to create file:", error);
     }
@@ -120,25 +125,34 @@ export function FolderItem({ folder, level }: FolderItemProps) {
     <div className="select-none">
       {/* 文件夹主行 */}
       <div
-        className="hover:bg-muted/50 group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-sm"
-        style={{ paddingLeft: `${level * 16 + 8}px` }}
+        className={cn(
+          "group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-sm transition-colors duration-200",
+          "hover:bg-muted/50"
+        )}
+        style={{ paddingLeft: `${level * 20 + 8}px` }}
       >
         {/* 展开/折叠按钮 */}
-        <Button variant="ghost" size="sm" className="hover:bg-muted h-5 w-5 p-0" onClick={handleToggleExpand}>
-          {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-        </Button>
+        <motion.div
+          className={cn("flex h-5 w-5 items-center justify-center")}
+          animate={{ rotate: isExpanded ? 90 : 0 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+        >
+          <Button variant="ghost" size="sm" className={cn("hover:bg-muted h-5 w-5 p-0")} onClick={handleToggleExpand}>
+            <ChevronRight className={cn("h-3 w-3")} />
+          </Button>
+        </motion.div>
 
         {/* 文件夹图标 */}
-        <div className="shrink-0">
+        <div className={cn("ml-1 shrink-0")}>
           {isExpanded ? (
-            <FolderOpen className="text-muted-foreground h-4 w-4" />
+            <FolderOpen className={cn("text-muted-foreground h-4 w-4")} />
           ) : (
-            <FolderIcon className="text-muted-foreground h-4 w-4" />
+            <FolderIcon className={cn("text-muted-foreground h-4 w-4")} />
           )}
         </div>
 
         {/* 文件夹名称 / 重命名输入框 */}
-        <div className="min-w-0 flex-1">
+        <div className={cn("min-w-0 flex-1")}>
           {isRenaming ? (
             <Input
               ref={inputRef}
@@ -146,11 +160,11 @@ export function FolderItem({ folder, level }: FolderItemProps) {
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={handleKeyDown}
               onBlur={handleRename}
-              className="h-6 px-1 text-sm"
+              className={cn("h-6 px-1 text-sm")}
               onClick={(e) => e.stopPropagation()}
             />
           ) : (
-            <span className="block truncate font-medium" title={folder.name}>
+            <span className={cn("block truncate font-medium")} title={folder.name}>
               {folder.name}
             </span>
           )}
@@ -158,37 +172,37 @@ export function FolderItem({ folder, level }: FolderItemProps) {
 
         {/* 操作按钮 */}
         {isRenaming ? (
-          <div className="flex shrink-0 items-center gap-1">
+          <div className={cn("flex shrink-0 items-center gap-1")}>
             <Button
               size="sm"
               variant="ghost"
-              className="h-6 w-6 p-0"
+              className={cn("h-6 w-6 p-0")}
               onClick={(e) => {
                 e.stopPropagation();
                 handleRename();
               }}
             >
-              <Check className="h-3 w-3" />
+              <Check className={cn("h-3 w-3")} />
             </Button>
             <Button
               size="sm"
               variant="ghost"
-              className="h-6 w-6 p-0"
+              className={cn("h-6 w-6 p-0")}
               onClick={(e) => {
                 e.stopPropagation();
                 setNewName(folder.name);
                 setIsRenaming(false);
               }}
             >
-              <X className="h-3 w-3" />
+              <X className={cn("h-3 w-3")} />
             </Button>
           </div>
         ) : (
-          <div className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className={cn("shrink-0 opacity-0 transition-opacity group-hover:opacity-100")}>
             <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
               <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={(e) => e.stopPropagation()}>
-                  <MoreVertical className="h-3 w-3" />
+                <Button size="sm" variant="ghost" className={cn("h-6 w-6 p-0")} onClick={(e) => e.stopPropagation()}>
+                  <MoreVertical className={cn("h-3 w-3")} />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
@@ -210,7 +224,7 @@ export function FolderItem({ folder, level }: FolderItemProps) {
                   }}
                 >
                   <FileText className="mr-2 h-4 w-4" />
-                  新建文件
+                  新建笔记
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={(e) => {
@@ -250,19 +264,46 @@ export function FolderItem({ folder, level }: FolderItemProps) {
       </div>
 
       {/* 子项（文件夹展开时显示） */}
-      {isExpanded && folder.children && (
-        <div>
-          {folder.children.map((child) => (
-            <div key={child.path}>
-              {child.isDirectory ? (
-                <FolderItem folder={child} level={level + 1} />
-              ) : (
-                <NoteItem file={child} level={level + 1} />
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      <AnimatePresence>
+        {isExpanded && folder.children && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{
+              duration: 0.3,
+              ease: "easeInOut",
+              opacity: { duration: 0.2 }
+            }}
+            className="overflow-hidden"
+          >
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{
+                duration: 0.2,
+                delay: 0.1
+              }}
+            >
+              {folder.children.map((child, index) => (
+                <motion.div
+                  key={child.path}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.15, delay: index * 0.03 }}
+                >
+                  {child.isDirectory ? (
+                    <FolderItem folder={child} level={level + 1} />
+                  ) : (
+                    <NoteItem file={child} level={level + 1} />
+                  )}
+                </motion.div>
+              ))}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
