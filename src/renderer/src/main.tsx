@@ -4,7 +4,6 @@ import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeProvider } from "next-themes";
 import { enableMapSet } from "immer";
 
@@ -36,7 +35,6 @@ if (!rootElement.innerHTML) {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="z-note-theme">
           <RouterProvider router={router} />
-          <ReactQueryDevtools initialIsOpen={false} />
           <Toaster />
         </ThemeProvider>
       </QueryClientProvider>
