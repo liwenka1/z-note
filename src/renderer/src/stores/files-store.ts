@@ -49,7 +49,7 @@ interface FilesState {
 interface FilesActions {
   // ==================== 文件树操作 ====================
   /** 加载工作区文件树 */
-  loadFileTree: () => Promise<void>;
+  loadFileTree: (restoreSavedState?: boolean) => Promise<void>;
   /** 刷新文件树 */
   refreshFileTree: () => Promise<void>;
   /** 内部方法：静默刷新文件树（避免闪烁） */
@@ -186,7 +186,7 @@ export const useFilesStore = create<FilesStore>()(
     },
 
     // ==================== 文件树操作 ====================
-    loadFileTree: async () => {
+    loadFileTree: async (restoreSavedState = false) => {
       const { workspace } = get();
 
       if (!workspace.config.workspacePath) {
@@ -209,15 +209,21 @@ export const useFilesStore = create<FilesStore>()(
 
         const nodes = await fileSystemApi.scanDirectory(workspace.config.workspacePath, scanOptions);
 
+        // 根据参数决定是否恢复保存的展开状态
+        let expandedPaths: Set<string>;
+        if (restoreSavedState) {
+          // 初始化时恢复保存的展开状态
+          const savedExpandedPaths = (await configApi.get<string[]>("workspace.expandedPaths")) || [];
+          expandedPaths = new Set(savedExpandedPaths);
+        } else {
+          // 刷新时保留当前的展开状态
+          const { fileTree: currentFileTree } = get();
+          expandedPaths = currentFileTree.expandedPaths;
+        }
+
         set((state) => {
           state.fileTree.nodes = nodes;
           state.fileTree.loading = false;
-        });
-
-        // 恢复展开状态
-        const savedExpandedPaths = (await configApi.get<string[]>("workspace.expandedPaths")) || [];
-        const expandedPaths = new Set(savedExpandedPaths);
-        set((state) => {
           state.fileTree.expandedPaths = expandedPaths;
         });
       } catch (error) {
@@ -231,7 +237,7 @@ export const useFilesStore = create<FilesStore>()(
 
     // 内部方法：刷新文件树但不显示loading状态（避免闪烁）
     _refreshFileTreeSilent: async () => {
-      const { workspace } = get();
+      const { workspace, fileTree } = get();
 
       if (!workspace.config.workspacePath) {
         console.warn("工作区路径未设置");
@@ -248,16 +254,13 @@ export const useFilesStore = create<FilesStore>()(
 
         const nodes = await fileSystemApi.scanDirectory(workspace.config.workspacePath, scanOptions);
 
+        // 保留当前的展开状态
+        const currentExpandedPaths = fileTree.expandedPaths;
+
         set((state) => {
           state.fileTree.nodes = nodes;
-          // 不改变loading状态
-        });
-
-        // 恢复展开状态
-        const savedExpandedPaths = (await configApi.get<string[]>("workspace.expandedPaths")) || [];
-        const expandedPaths = new Set(savedExpandedPaths);
-        set((state) => {
-          state.fileTree.expandedPaths = expandedPaths;
+          // 保留当前展开状态，不从配置重新加载
+          state.fileTree.expandedPaths = currentExpandedPaths;
         });
       } catch (error) {
         console.error("刷新文件树失败:", error);
@@ -357,6 +360,9 @@ export const useFilesStore = create<FilesStore>()(
           await fileSystemApi.writeFile(filePath, jsonContent);
         }
 
+        // 确保父文件夹展开以显示新创建的文件
+        get().expandFolder(parentPath);
+
         // 使用静默刷新避免闪烁
         await get()._refreshFileTreeSilent();
         await get().selectFile(filePath);
@@ -378,6 +384,9 @@ export const useFilesStore = create<FilesStore>()(
         const folderPath = `${parentPath}/${uniqueName}`;
 
         await fileSystemApi.createDirectory(folderPath);
+
+        // 确保父文件夹展开以显示新创建的文件夹
+        get().expandFolder(parentPath);
 
         // 使用静默刷新避免闪烁
         await get()._refreshFileTreeSilent();
