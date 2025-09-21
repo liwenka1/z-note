@@ -39,7 +39,7 @@ export function useFilesState() {
     currentContent: currentFile.content,
     hasContent,
     isLoading: fileTree.loading,
-    collapsedFolders: fileTree.expandedPaths,
+    expandedFolders: fileTree.expandedPaths,
     workspacePath: workspace.config.workspacePath,
 
     // 分类数据（兼容现有组件）
