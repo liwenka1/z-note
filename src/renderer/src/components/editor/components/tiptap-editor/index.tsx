@@ -3,7 +3,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import Typography from "@tiptap/extension-typography";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { cn } from "@renderer/lib/utils";
 import { EditorToolbar } from "./toolbar";
 
@@ -24,6 +24,8 @@ export function TipTapEditor({
   className,
   placeholder = "开始写作..."
 }: TipTapEditorProps) {
+  // 用于防止在设置内容时触发 onChange
+  const isSettingContentRef = useRef(false);
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -38,9 +40,12 @@ export function TipTapEditor({
       }),
       Typography
     ],
-    content,
     editable,
     onUpdate: ({ editor }) => {
+      // 如果当前正在设置内容，则不触发 onChange
+      if (isSettingContentRef.current) {
+        return;
+      }
       const json = editor.getJSON();
       onChange(json);
     },
@@ -62,8 +67,14 @@ export function TipTapEditor({
 
   // 当外部 content 改变时更新编辑器内容
   useEffect(() => {
-    if (editor && content && JSON.stringify(content) !== JSON.stringify(editor.getJSON())) {
+    if (editor && content) {
+      // 设置标志，防止触发 onChange
+      isSettingContentRef.current = true;
+
       editor.commands.setContent(content);
+
+      // 重置标志
+      isSettingContentRef.current = false;
     }
   }, [content, editor]);
 

@@ -84,7 +84,8 @@ export function useEditorState(noteId: string) {
   useEffect(() => {
     if (note && !editingContent) {
       if (isFileMode && fileNote?.jsonContent) {
-        startEditing(noteId, fileNote.jsonContent);
+        // 为文件模式启动编辑，深拷贝确保对象引用独立
+        startEditing(noteId, structuredClone(fileNote.jsonContent));
       } else if (!isFileMode && note?.content) {
         // 对于数据库模式，需要将 HTML 转换为 JSON
         // 临时使用空内容，后续可以实现 HTML 到 JSON 的转换
