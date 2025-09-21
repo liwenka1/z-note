@@ -24,15 +24,6 @@ export function useLayoutState() {
     } else if (panelId === "search") {
       // 搜索
       openSearch();
-    } else if (panelId === "trash") {
-      // 垃圾桶改为侧边栏模式
-      if (activePanel === "trash" && leftSidebarOpen) {
-        setLeftSidebarOpen(false);
-        setActivePanel(null);
-      } else {
-        setLeftSidebarOpen(true);
-        setActivePanel("trash");
-      }
     }
   };
 
