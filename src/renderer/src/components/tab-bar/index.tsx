@@ -13,12 +13,12 @@ import {
 } from "@renderer/components/ui/dropdown-menu";
 import { useTabStore } from "@renderer/stores";
 import { useEditorStore } from "@renderer/stores/editor-store";
-import { useFilesStore } from "@renderer/stores";
+import { useNoteManager } from "@renderer/hooks/use-note-manager";
 
 export function TabBar() {
   const { openTabs, activeTabId, closeTab, closeAllTabs, closeOtherTabs, setActiveTab } = useTabStore();
   const { isNoteModified, stopEditing } = useEditorStore();
-  const { createFile, workspace } = useFilesStore();
+  const { quickCreateNote } = useNoteManager();
   const navigate = useNavigate();
   const [scrollLeft, setScrollLeft] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -119,16 +119,7 @@ export function TabBar() {
   };
 
   const handleNewNote = async () => {
-    try {
-      const fileName = `新建笔记_${Date.now()}.json`;
-      await createFile(workspace.config.workspacePath, fileName);
-
-      // 创建文件成功后，可以选择打开该文件
-      // 这里暂时只是创建，后续可以根据需要添加打开逻辑
-      console.log("笔记创建成功:", fileName);
-    } catch (error) {
-      console.error("创建笔记失败:", error);
-    }
+    await quickCreateNote();
   };
 
   if (openTabs.length === 0) {
