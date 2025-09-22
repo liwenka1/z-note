@@ -50,7 +50,7 @@ export function RootLayout() {
           </Allotment.Pane>
 
           {/* 右侧面板 - 可收起 */}
-          <Allotment.Pane preferredSize={350} priority={LayoutPriority.Low} snap visible={rightSidebarOpen}>
+          <Allotment.Pane preferredSize={450} priority={LayoutPriority.Low} snap visible={rightSidebarOpen}>
             <RightSidebar rightActivePanel={rightActivePanel} />
           </Allotment.Pane>
 
