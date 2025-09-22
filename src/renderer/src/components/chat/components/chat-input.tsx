@@ -1,32 +1,73 @@
-import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Send, Paperclip } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Send } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import { Textarea } from "@renderer/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@renderer/components/ui/select";
 import { useChatStore } from "@renderer/stores/chat-store";
+import { cn } from "@renderer/lib/utils";
+
+// 模型选项
+const models = [
+  { id: "gpt-4", name: "GPT-4" },
+  { id: "gpt-3.5-turbo", name: "GPT-3.5" },
+  { id: "claude-3", name: "Claude" }
+];
+
+// 自动调整高度的 Hook
+function useAutoResizeTextarea({ minHeight, maxHeight }: { minHeight: number; maxHeight?: number }) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const adjustHeight = useCallback(
+    (reset?: boolean) => {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+
+      if (reset) {
+        textarea.style.height = `${minHeight}px`;
+        return;
+      }
+
+      // 临时缩小以获得正确的 scrollHeight
+      textarea.style.height = `${minHeight}px`;
+
+      // 计算新高度
+      const newHeight = Math.max(minHeight, Math.min(textarea.scrollHeight, maxHeight ?? Number.POSITIVE_INFINITY));
+
+      textarea.style.height = `${newHeight}px`;
+    },
+    [minHeight, maxHeight]
+  );
+
+  useEffect(() => {
+    // 设置初始高度
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = `${minHeight}px`;
+    }
+  }, [minHeight]);
+
+  return { textareaRef, adjustHeight };
+}
 
 export function ChatInput() {
   const [input, setInput] = useState("");
+  const [selectedModel, setSelectedModel] = useState(models[0]);
   const [isComposing, setIsComposing] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const { textareaRef, adjustHeight } = useAutoResizeTextarea({
+    minHeight: 80,
+    maxHeight: 200
+  });
 
   const { getCurrentSession, addMessage, createSession, isTyping } = useChatStore();
   const currentSession = getCurrentSession();
-
-  // 自动调整高度
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  }, [input]);
 
   // 聚焦到输入框
   useEffect(() => {
     if (textareaRef.current && !isTyping) {
       textareaRef.current.focus();
     }
-  }, [isTyping]);
+  }, [isTyping, textareaRef]);
 
   const handleSend = () => {
     if (!input.trim() || isTyping) return;
@@ -45,73 +86,90 @@ export function ChatInput() {
     });
 
     setInput("");
+    adjustHeight(true); // 重置高度
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey && !isComposing) {
       e.preventDefault();
-      handleSend();
+      if (input.trim()) {
+        handleSend();
+      }
     }
   };
 
   const canSend = input.trim() && !isTyping;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-      className="border-border/50 bg-background border-t p-4"
-    >
-      <div className="flex items-end gap-2">
-        {/* 附件按钮（预留） */}
-        <Button variant="ghost" size="sm" className="h-10 w-10 flex-shrink-0 p-0" disabled title="附件功能（开发中）">
-          <Paperclip className="h-4 w-4" />
-        </Button>
+    <div className="p-4">
+      <div className="w-full">
+        <div className="bg-background relative rounded-xl border shadow-sm">
+          {/* 主要输入区域 */}
+          <div className="overflow-y-auto">
+            <Textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => {
+                setInput(e.target.value);
+                adjustHeight();
+              }}
+              onKeyDown={handleKeyDown}
+              onCompositionStart={() => setIsComposing(true)}
+              onCompositionEnd={() => setIsComposing(false)}
+              placeholder={isTyping ? "AI 正在回复中..." : "输入消息..."}
+              className={cn(
+                "w-full px-4 py-3",
+                "resize-none",
+                "!bg-background",
+                "border-none",
+                "text-sm",
+                "focus:outline-none",
+                "focus-visible:ring-0 focus-visible:ring-offset-0",
+                "placeholder:text-muted-foreground placeholder:text-sm",
+                "min-h-[80px]",
+                "rounded-t-xl"
+              )}
+              style={{
+                overflow: "hidden"
+              }}
+              disabled={isTyping}
+            />
+          </div>
 
-        {/* 输入框 */}
-        <div className="relative flex-1">
-          <Textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onCompositionStart={() => setIsComposing(true)}
-            onCompositionEnd={() => setIsComposing(false)}
-            placeholder={isTyping ? "AI 正在回复中..." : "输入消息... (Shift+Enter 换行)"}
-            className="max-h-[120px] min-h-[40px] resize-none pr-12"
-            rows={1}
-            disabled={isTyping}
-          />
+          {/* 底部操作栏 */}
+          <div className="bg-background flex items-center justify-between rounded-b-xl border-t p-3">
+            {/* 左侧：模型选择器 */}
+            <div className="flex items-center gap-2">
+              <Select
+                value={selectedModel.id}
+                onValueChange={(value) => {
+                  const model = models.find((m) => m.id === value);
+                  if (model) setSelectedModel(model);
+                }}
+                disabled={isTyping}
+              >
+                <SelectTrigger className="h-7 border-none bg-transparent text-xs shadow-none focus:ring-0">
+                  <SelectValue>{selectedModel.name}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {models.map((model) => (
+                    <SelectItem key={model.id} value={model.id}>
+                      {model.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* 字符计数（可选显示） */}
-          {input.length > 100 && (
-            <div className="text-muted-foreground absolute right-12 bottom-2 text-xs">{input.length}</div>
-          )}
+            {/* 右侧：发送按钮 */}
+            <div className="flex items-center gap-2">
+              <Button onClick={handleSend} disabled={!canSend} size="sm" className="h-8 w-8 p-0">
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </div>
-
-        {/* 发送按钮 */}
-        <Button
-          onClick={handleSend}
-          disabled={!canSend}
-          size="sm"
-          className="h-10 w-10 flex-shrink-0 p-0"
-          title="发送消息"
-        >
-          {isTyping ? (
-            <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
-              <Send className="h-4 w-4" />
-            </motion.div>
-          ) : (
-            <Send className="h-4 w-4" />
-          )}
-        </Button>
       </div>
-
-      {/* 提示文本 */}
-      <div className="text-muted-foreground mt-2 text-xs">
-        {isTyping ? "请等待 AI 回复完成..." : "支持 Markdown 格式，Enter 发送，Shift+Enter 换行"}
-      </div>
-    </motion.div>
+    </div>
   );
 }
