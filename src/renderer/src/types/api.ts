@@ -177,6 +177,28 @@ export interface IpcMethods {
   [IPC_CHANNELS.SHELL.SHOW_ITEM_IN_FOLDER]: (itemPath: string) => Promise<BaseResponse<{ success: boolean }>>;
   [IPC_CHANNELS.SHELL.OPEN_PATH]: (folderPath: string) => Promise<BaseResponse<{ success: boolean }>>;
   [IPC_CHANNELS.SHELL.OPEN_EXTERNAL]: (url: string) => Promise<BaseResponse<{ success: boolean }>>;
+
+  // AI 相关
+  [IPC_CHANNELS.AI.CHAT]: (
+    config: {
+      apiKey: string;
+      baseURL: string;
+      model: string;
+      temperature: number;
+      maxTokens: number;
+    },
+    messages: Array<{ role: "user" | "assistant" | "system"; content: string }>
+  ) => Promise<
+    BaseResponse<{
+      content: string;
+      model: string;
+      usage?: {
+        promptTokens: number;
+        completionTokens: number;
+        totalTokens: number;
+      };
+    }>
+  >;
 }
 
 // ==================== IPC 事件监听器类型 ====================
