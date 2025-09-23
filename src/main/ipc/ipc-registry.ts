@@ -39,6 +39,9 @@ export class IpcRegistry {
     this.registerConfigHandlers();
     this.registerShellHandlers();
 
+    // 注册 AI 处理器
+    this.registerAIHandlers();
+
     console.log("[IpcRegistry] 所有IPC处理器注册完成");
   }
 
@@ -539,5 +542,65 @@ export class IpcRegistry {
         throw error;
       }
     });
+  }
+
+  /**
+   * AI 相关处理器
+   */
+  private static registerAIHandlers(): void {
+    // AI 聊天
+    registerHandler(
+      IPC_CHANNELS.AI.CHAT,
+      async (
+        config: {
+          apiKey: string;
+          baseURL: string;
+          model: string;
+          temperature: number;
+          maxTokens: number;
+        },
+        messages: Array<{ role: "user" | "assistant" | "system"; content: string }>
+      ) => {
+        try {
+          // AI 调用
+          const { generateText } = await import("ai");
+          const { createOpenAI } = await import("@ai-sdk/openai");
+
+          const openai = createOpenAI({
+            apiKey: config.apiKey,
+            baseURL: config.baseURL
+          });
+
+          const result = await generateText({
+            model: openai.chat(config.model),
+            messages: messages,
+            temperature: config.temperature
+          });
+
+          return {
+            content: result.text,
+            model: config.model,
+            usage: undefined
+          };
+        } catch (error) {
+          // 统一错误处理
+          if (error instanceof Error) {
+            if (error.message.includes("401") || error.message.includes("unauthorized")) {
+              throw new Error("API 密钥无效，请检查配置");
+            }
+            if (error.message.includes("timeout") || error.message.includes("网络")) {
+              throw new Error("网络连接超时，请重试");
+            }
+            if (error.message.includes("quota") || error.message.includes("limit")) {
+              throw new Error("API 配额不足，请检查账户余额");
+            }
+
+            // 添加更多错误信息
+            throw new Error(`AI 调用失败: ${error.message}`);
+          }
+          throw error;
+        }
+      }
+    );
   }
 }

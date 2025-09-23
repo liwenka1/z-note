@@ -19,12 +19,8 @@ export class IPCError extends Error {
  */
 export interface APIResponse<T = unknown> {
   success: boolean;
-  data?: T;
-  error?: {
-    message: string;
-    code: string;
-    context?: Record<string, unknown>;
-  };
+  data: T | null;
+  message?: string;
   timestamp: number;
 }
 
@@ -67,11 +63,8 @@ export function withErrorHandling<T extends unknown[], R>(fn: (...args: T) => Pr
       // 错误响应
       return {
         success: false,
-        error: {
-          message: ipcError.message,
-          code: ipcError.code,
-          context: ipcError.context
-        },
+        data: null,
+        message: ipcError.message,
         timestamp: startTime
       };
     }
