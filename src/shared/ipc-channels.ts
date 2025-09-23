@@ -94,5 +94,10 @@ export const IPC_CHANNELS = {
     SHOW_ITEM_IN_FOLDER: "shell:showItemInFolder",
     OPEN_PATH: "shell:openPath",
     OPEN_EXTERNAL: "shell:openExternal"
+  },
+
+  // AI 相关
+  AI: {
+    CHAT: "ai:chat"
   }
 } as const;
