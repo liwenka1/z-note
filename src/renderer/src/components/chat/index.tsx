@@ -14,7 +14,7 @@ export function ChatPanel() {
     <div className="bg-background flex h-full flex-col">
       <ChatHeader />
 
-      <div className="flex-1 overflow-hidden">{hasMessages ? <ChatMessageList /> : <EmptyChat />}</div>
+      <div className="min-h-0 flex-1">{hasMessages ? <ChatMessageList /> : <EmptyChat />}</div>
 
       <ChatInput />
     </div>

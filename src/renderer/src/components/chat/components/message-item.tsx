@@ -15,8 +15,11 @@ interface MessageItemProps {
 
 export function MessageItem({ message }: MessageItemProps) {
   const { theme } = useTheme();
-  const { deleteMessage, getCurrentSession } = useChatStore();
-  const currentSession = getCurrentSession();
+  const { deleteMessage } = useChatStore();
+  const currentSession = useChatStore((state) => {
+    const current = state.sessions.find((s) => s.id === state.currentSessionId);
+    return current || null;
+  });
 
   const handleCopy = async () => {
     try {

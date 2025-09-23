@@ -21,10 +21,14 @@ const suggestions = [
 ];
 
 export function EmptyChat() {
-  const { addMessage, getCurrentSession, createSession } = useChatStore();
+  const { addMessage, createSession } = useChatStore();
+  const currentSession = useChatStore((state) => {
+    const current = state.sessions.find((s) => s.id === state.currentSessionId);
+    return current || null;
+  });
 
   const handleSuggestionClick = (suggestionText: string) => {
-    let sessionId = getCurrentSession()?.id;
+    let sessionId = currentSession?.id;
 
     // 如果没有当前会话，创建一个新会话
     if (!sessionId) {

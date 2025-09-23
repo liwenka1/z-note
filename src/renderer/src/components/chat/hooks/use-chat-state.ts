@@ -6,8 +6,12 @@ import { useChatStore } from "@renderer/stores/chat-store";
  * 参考 root-layout 的 use-layout-state.ts
  */
 export function useChatState() {
-  const { getCurrentSession } = useChatStore();
-  const currentSession = getCurrentSession();
+  // 直接订阅 store 的状态变化
+  const currentSession = useChatStore((state) => {
+    const current = state.sessions.find((s) => s.id === state.currentSessionId);
+    return current || null;
+  });
+
   const hasMessages = currentSession && currentSession.messages.length > 0;
 
   return {

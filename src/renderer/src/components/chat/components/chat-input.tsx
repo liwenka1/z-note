@@ -4,14 +4,9 @@ import { Button } from "@renderer/components/ui/button";
 import { Textarea } from "@renderer/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@renderer/components/ui/select";
 import { useChatStore } from "@renderer/stores/chat-store";
+import { useAIConfigStore } from "@renderer/stores/ai-config-store";
+import { useAIChat } from "@renderer/hooks/use-ai-chat";
 import { cn } from "@renderer/lib/utils";
-
-// 模型选项
-const models = [
-  { id: "gpt-4", name: "GPT-4" },
-  { id: "gpt-3.5-turbo", name: "GPT-3.5" },
-  { id: "claude-3", name: "Claude" }
-];
 
 // 自动调整高度的 Hook
 function useAutoResizeTextarea({ minHeight, maxHeight }: { minHeight: number; maxHeight?: number }) {
@@ -51,16 +46,57 @@ function useAutoResizeTextarea({ minHeight, maxHeight }: { minHeight: number; ma
 
 export function ChatInput() {
   const [input, setInput] = useState("");
-  const [selectedModel, setSelectedModel] = useState(models[0]);
   const [isComposing, setIsComposing] = useState(false);
+
+  // AI 配置相关
+  const { configs, getCurrentConfig } = useAIConfigStore();
+  const [selectedConfigId, setSelectedConfigId] = useState<string>("");
+
+  // 获取当前选中的配置
+  const selectedConfig = configs.find((c) => c.id === selectedConfigId) || getCurrentConfig();
 
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
     minHeight: 80,
     maxHeight: 200
   });
 
-  const { getCurrentSession, addMessage, createSession, isTyping } = useChatStore();
-  const currentSession = getCurrentSession();
+  const { addMessage, createSession } = useChatStore();
+  const currentSession = useChatStore((state) => {
+    const current = state.sessions.find((s) => s.id === state.currentSessionId);
+    return current || null;
+  });
+  const isTyping = useChatStore((state) => state.isTyping);
+
+  // AI Chat Hook
+  const {
+    sendMessage: sendAIMessage,
+    isLoading: isAILoading,
+    clearHistory
+  } = useAIChat({
+    config: selectedConfig!,
+    onMessageAdd: (message) => {
+      let sessionId = currentSession?.id;
+      if (!sessionId) {
+        sessionId = createSession();
+      }
+      addMessage(sessionId, message);
+    }
+  });
+
+  // 当切换会话时清空 AI 消息历史
+  useEffect(() => {
+    clearHistory();
+  }, [currentSession?.id, clearHistory]);
+
+  // 初始化默认配置
+  useEffect(() => {
+    if (!selectedConfigId && configs.length > 0) {
+      const defaultConfig = getCurrentConfig();
+      if (defaultConfig) {
+        setSelectedConfigId(defaultConfig.id);
+      }
+    }
+  }, [configs, getCurrentConfig, selectedConfigId]);
 
   // 聚焦到输入框
   useEffect(() => {
@@ -70,20 +106,10 @@ export function ChatInput() {
   }, [isTyping, textareaRef]);
 
   const handleSend = () => {
-    if (!input.trim() || isTyping) return;
+    if (!input.trim() || isTyping || isAILoading || !selectedConfig) return;
 
-    let sessionId = currentSession?.id;
-
-    // 如果没有当前会话，创建一个新会话
-    if (!sessionId) {
-      sessionId = createSession();
-    }
-
-    // 添加用户消息
-    addMessage(sessionId, {
-      role: "user",
-      content: input.trim()
-    });
+    // 使用 AI Chat Hook 发送消息
+    sendAIMessage(input.trim());
 
     setInput("");
     adjustHeight(true); // 重置高度
@@ -98,7 +124,7 @@ export function ChatInput() {
     }
   };
 
-  const canSend = input.trim() && !isTyping;
+  const canSend = input.trim() && !isTyping && !isAILoading && selectedConfig;
 
   return (
     <div className="p-4">
@@ -116,7 +142,7 @@ export function ChatInput() {
               onKeyDown={handleKeyDown}
               onCompositionStart={() => setIsComposing(true)}
               onCompositionEnd={() => setIsComposing(false)}
-              placeholder={isTyping ? "AI 正在回复中..." : "输入消息..."}
+              placeholder={isTyping || isAILoading ? "AI 正在回复中..." : "输入消息..."}
               className={cn(
                 "w-full px-4 py-3",
                 "resize-none",
@@ -132,29 +158,26 @@ export function ChatInput() {
               style={{
                 overflow: "hidden"
               }}
-              disabled={isTyping}
+              disabled={isTyping || isAILoading}
             />
           </div>
 
           {/* 底部操作栏 */}
           <div className="bg-background flex items-center justify-between rounded-b-xl border-t p-3">
-            {/* 左侧：模型选择器 */}
+            {/* 左侧：AI 配置选择器 */}
             <div className="flex items-center gap-2">
               <Select
-                value={selectedModel.id}
-                onValueChange={(value) => {
-                  const model = models.find((m) => m.id === value);
-                  if (model) setSelectedModel(model);
-                }}
-                disabled={isTyping}
+                value={selectedConfigId}
+                onValueChange={(value) => setSelectedConfigId(value)}
+                disabled={isTyping || isAILoading}
               >
                 <SelectTrigger className="h-7 border-none bg-transparent text-xs shadow-none focus:ring-0">
-                  <SelectValue>{selectedModel.name}</SelectValue>
+                  <SelectValue>{selectedConfig ? selectedConfig.name : "选择配置"}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {models.map((model) => (
-                    <SelectItem key={model.id} value={model.id}>
-                      {model.name}
+                  {configs.map((config) => (
+                    <SelectItem key={config.id} value={config.id}>
+                      {config.name} ({config.model})
                     </SelectItem>
                   ))}
                 </SelectContent>

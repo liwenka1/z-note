@@ -11,8 +11,11 @@ import { SessionSelector } from "./session-selector";
 import { useChatStore } from "@renderer/stores/chat-store";
 
 export function ChatHeader() {
-  const { createSession, clearSession, getCurrentSession } = useChatStore();
-  const currentSession = getCurrentSession();
+  const { createSession, clearSession } = useChatStore();
+  const currentSession = useChatStore((state) => {
+    const current = state.sessions.find((s) => s.id === state.currentSessionId);
+    return current || null;
+  });
 
   const handleNewSession = () => {
     createSession();
