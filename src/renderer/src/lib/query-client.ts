@@ -86,5 +86,12 @@ export const queryKeys = {
     list: (params?: Record<string, unknown>) => [...queryKeys.vector.lists(), params] as const,
     details: () => [...queryKeys.vector.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.vector.details(), id] as const
+  },
+
+  // AI 相关查询键
+  ai: {
+    all: ["ai"] as const,
+    chat: (configId: string) => [...queryKeys.ai.all, "chat", configId] as const,
+    configs: () => [...queryKeys.ai.all, "configs"] as const
   }
 } as const;
