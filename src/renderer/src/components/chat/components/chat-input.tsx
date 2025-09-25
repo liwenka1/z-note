@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send } from "lucide-react";
+import { Send, Square } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import { Textarea } from "@renderer/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@renderer/components/ui/select";
 import { useChatStore } from "@renderer/stores/chat-store";
 import { useAIConfigStore } from "@renderer/stores/ai-config-store";
-import { useAIChat } from "@renderer/hooks/use-ai-chat";
+import { useStreamingChat } from "@renderer/hooks/use-streaming-chat";
 import { cn } from "@renderer/lib/utils";
 
 // 自动调整高度的 Hook
@@ -60,33 +60,67 @@ export function ChatInput() {
     maxHeight: 200
   });
 
-  const { addMessage, createSession } = useChatStore();
+  const { addMessage, createSession, updateMessage } = useChatStore();
   const currentSession = useChatStore((state) => {
     const current = state.sessions.find((s) => s.id === state.currentSessionId);
     return current || null;
   });
   const isTyping = useChatStore((state) => state.isTyping);
 
-  // AI Chat Hook
-  const {
-    sendMessage: sendAIMessage,
-    isLoading: isAILoading,
-    clearHistory
-  } = useAIChat({
-    config: selectedConfig!,
+  // 流式AI Chat Hook - 只有当配置存在时才启用
+  const streamingChatResult = useStreamingChat({
+    config: selectedConfig || {
+      id: "temp",
+      name: "temp",
+      provider: "openai",
+      apiKey: "",
+      baseURL: "",
+      model: "",
+      temperature: 0.7,
+      maxTokens: 1000,
+      isDefault: false
+    },
     onMessageAdd: (message) => {
       let sessionId = currentSession?.id;
       if (!sessionId) {
         sessionId = createSession();
       }
-      addMessage(sessionId, message);
+
+      // addMessage会生成新的ID并返回
+      const messageId = addMessage(sessionId, message);
+
+      // 如果是assistant消息，返回ID用于后续更新
+      if (message.role === "assistant") {
+        return messageId;
+      }
+
+      return undefined;
+    },
+    onMessageUpdate: (messageId, content) => {
+      const sessionId = currentSession?.id;
+      if (sessionId) {
+        updateMessage(sessionId, messageId, { content, isStreaming: true });
+      }
+    },
+    onMessageComplete: (messageId) => {
+      const sessionId = currentSession?.id;
+      if (sessionId) {
+        updateMessage(sessionId, messageId, { isStreaming: false });
+      }
     }
   });
 
+  const {
+    sendMessage: sendAIMessage,
+    isLoading: isAILoading,
+    setMessages: setAIMessages,
+    stop: stopStreaming
+  } = streamingChatResult;
+
   // 当切换会话时清空 AI 消息历史
   useEffect(() => {
-    clearHistory();
-  }, [currentSession?.id, clearHistory]);
+    setAIMessages([]);
+  }, [currentSession?.id, setAIMessages]);
 
   // 初始化默认配置
   useEffect(() => {
@@ -108,11 +142,23 @@ export function ChatInput() {
   const handleSend = () => {
     if (!input.trim() || isTyping || isAILoading || !selectedConfig) return;
 
-    // 使用 AI Chat Hook 发送消息
+    // 确保有活动会话
+    let sessionId = currentSession?.id;
+    if (!sessionId) {
+      sessionId = createSession();
+    }
+
+    // 使用流式AI Chat Hook发送消息
     sendAIMessage(input.trim());
 
     setInput("");
     adjustHeight(true); // 重置高度
+  };
+
+  const handleStop = () => {
+    if (isAILoading) {
+      stopStreaming();
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -184,11 +230,17 @@ export function ChatInput() {
               </Select>
             </div>
 
-            {/* 右侧：发送按钮 */}
+            {/* 右侧：发送/停止按钮 */}
             <div className="flex items-center gap-2">
-              <Button onClick={handleSend} disabled={!canSend} size="sm" className="h-8 w-8 p-0">
-                <Send className="h-4 w-4" />
-              </Button>
+              {isAILoading ? (
+                <Button onClick={handleStop} size="sm" className="h-8 w-8 p-0" variant="destructive">
+                  <Square className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button onClick={handleSend} disabled={!canSend} size="sm" className="h-8 w-8 p-0">
+                  <Send className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           </div>
         </div>
