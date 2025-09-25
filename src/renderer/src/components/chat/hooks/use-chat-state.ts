@@ -3,7 +3,6 @@ import { useChatStore } from "@renderer/stores/chat-store";
 /**
  * Chat 状态管理 Hook
  * 封装与 useChatStore 的交互，提供简化的接口
- * 参考 root-layout 的 use-layout-state.ts
  */
 export function useChatState() {
   // 直接订阅 store 的状态变化

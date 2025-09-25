@@ -1,5 +1,5 @@
 import { ChatHeader } from "./components/chat-header";
-import { ChatMessageList } from "./components/chat-message-list";
+import { ChatMessageList } from "./components/message-list";
 import { ChatInput } from "./components/chat-input";
 import { EmptyChat } from "./components/empty-chat";
 import { useChatState } from "./hooks/use-chat-state";
