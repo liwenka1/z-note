@@ -19,15 +19,15 @@ export * from "./utils";
 export * from "./files";
 
 // 导入 IPC 类型用于全局声明
-import type { IpcMethods, IpcEventListeners } from "./api";
+import type { IpcMethods } from "./api";
 
 // 全局类型声明
 declare global {
   interface Window {
     electronAPI?: {
       invoke: <T extends keyof IpcMethods>(channel: T, ...args: Parameters<IpcMethods[T]>) => ReturnType<IpcMethods[T]>;
-      on: <T extends keyof IpcEventListeners>(channel: T, callback: IpcEventListeners[T]) => void;
-      removeAllListeners: (channel: keyof IpcEventListeners) => void;
+      on: (channel: string, callback: (...args: unknown[]) => void) => () => void;
+      removeAllListeners: (channel: string) => void;
     };
   }
 }

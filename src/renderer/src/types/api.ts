@@ -199,17 +199,28 @@ export interface IpcMethods {
       };
     }>
   >;
-}
 
-// ==================== IPC 事件监听器类型 ====================
+  [IPC_CHANNELS.AI.CHAT_STREAM]: (
+    config: {
+      apiKey: string;
+      baseURL: string;
+      model: string;
+      temperature: number;
+      maxTokens: number;
+    },
+    messages: Array<{ role: "user" | "assistant" | "system"; content: string }>
+  ) => Promise<
+    BaseResponse<{
+      streamId: string;
+      model: string;
+    }>
+  >;
 
-export interface IpcEventListeners {
-  "note-updated": (note: Note) => void;
-  "note-deleted": (id: number) => void;
-  "chat-updated": (chat: Chat) => void;
-  "chat-deleted": (id: number) => void;
-  "mark-updated": (mark: Mark) => void;
-  "mark-deleted": (id: number) => void;
-  "tag-updated": (tag: Tag) => void;
-  "tag-deleted": (id: number) => void;
+  [IPC_CHANNELS.AI.ABORT_STREAM]: (streamId: string) => Promise<
+    BaseResponse<{
+      success: boolean;
+      streamId: string;
+      error?: string;
+    }>
+  >;
 }
