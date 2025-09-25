@@ -34,6 +34,21 @@ class IpcClient {
       } as ReturnType<IpcMethods[T]>;
     }
   }
+
+  /**
+   * 监听 IPC 事件
+   */
+  on(channel: string, callback: (...args: unknown[]) => void): () => void {
+    const unsubscribe = this.electronAPI.on(channel, callback);
+    return unsubscribe;
+  }
+
+  /**
+   * 移除所有监听器
+   */
+  removeAllListeners(channel: string): void {
+    this.electronAPI.removeAllListeners(channel);
+  }
 }
 
 // 导出单例实例
