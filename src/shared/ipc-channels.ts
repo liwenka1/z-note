@@ -98,6 +98,8 @@ export const IPC_CHANNELS = {
 
   // AI 相关
   AI: {
-    CHAT: "ai:chat"
+    CHAT: "ai:chat",
+    CHAT_STREAM: "ai:chat-stream",
+    ABORT_STREAM: "ai:abort-stream"
   }
 } as const;
