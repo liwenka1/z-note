@@ -7,6 +7,7 @@ export interface Message {
   content: string;
   timestamp: Date;
   isLoading?: boolean;
+  isStreaming?: boolean;
   error?: string;
 }
 
@@ -27,7 +28,7 @@ interface ChatState {
   createSession: () => string;
   deleteSession: (id: string) => void;
   setCurrentSession: (id: string) => void;
-  addMessage: (sessionId: string, message: Omit<Message, "id" | "timestamp">) => void;
+  addMessage: (sessionId: string, message: Omit<Message, "id" | "timestamp">) => string;
   updateMessage: (sessionId: string, messageId: string, updates: Partial<Message>) => void;
   deleteMessage: (sessionId: string, messageId: string) => void;
   clearSession: (sessionId: string) => void;
@@ -93,6 +94,8 @@ export const useChatStore = create<ChatState>()(
               : session
           )
         }));
+
+        return newMessage.id;
       },
 
       updateMessage: (sessionId: string, messageId: string, updates: Partial<Message>) => {
