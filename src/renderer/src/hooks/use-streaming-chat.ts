@@ -22,6 +22,7 @@ interface UseStreamingChatReturn {
 
 interface UseStreamingChatOptions {
   config: AIConfig;
+  contextMessages?: ChatMessage[]; // 新增：对话上下文消息
   onMessageAdd?: (message: { role: "user" | "assistant"; content: string; isStreaming?: boolean }) => string | void;
   onMessageUpdate?: (messageId: string, content: string) => void;
   onMessageComplete?: (messageId: string) => void;
@@ -33,6 +34,7 @@ interface UseStreamingChatOptions {
  */
 export function useStreamingChat({
   config,
+  contextMessages = [],
   onMessageAdd,
   onMessageUpdate,
   onMessageComplete
@@ -53,6 +55,11 @@ export function useStreamingChat({
     onMessageUpdateRef.current = onMessageUpdate;
     onMessageCompleteRef.current = onMessageComplete;
   });
+
+  // 同步上下文消息到内部状态
+  useEffect(() => {
+    messagesRef.current = [...contextMessages];
+  }, [contextMessages]);
 
   // 清理函数
   useEffect(() => {
