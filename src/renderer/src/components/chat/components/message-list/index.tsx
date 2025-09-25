@@ -1,10 +1,10 @@
 import { useRef, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { MessageItem } from "./message-item";
+import { MessageItem } from "./components/message-item";
 import { useChatStore } from "@renderer/stores/chat-store";
 
 export function ChatMessageList() {
-  // 直接订阅 store 的状态变化，而不是使用 getCurrentSession
+  // 直接订阅 store 的状态变化
   const currentSession = useChatStore((state) => {
     const current = state.sessions.find((s) => s.id === state.currentSessionId);
     return current || null;
