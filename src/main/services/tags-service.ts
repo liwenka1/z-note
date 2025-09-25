@@ -1,5 +1,7 @@
 import { TagsRepository } from "../repositories/tags-repository";
 import type { TagFormData, TagEntity } from "../repositories/types";
+import { registerHandler } from "../ipc/registry";
+import { IPC_CHANNELS } from "@shared/ipc-channels";
 
 /**
  * 标签服务 - 简化版
@@ -44,5 +46,35 @@ export class TagsService {
    */
   async deleteAllTags(): Promise<{ deletedCount: number }> {
     return await this.tagsRepository.deleteAll();
+  }
+
+  /**
+   * 注册标签相关的 IPC 处理器
+   */
+  registerTagsHandlers(): void {
+    // 获取所有标签
+    registerHandler(IPC_CHANNELS.TAGS.GET_ALL, async () => {
+      return await this.getAllTags();
+    });
+
+    // 创建标签
+    registerHandler(IPC_CHANNELS.TAGS.CREATE, async (data: TagFormData) => {
+      return await this.createTag(data);
+    });
+
+    // 更新标签
+    registerHandler(IPC_CHANNELS.TAGS.UPDATE, async (id: number, data: Partial<TagFormData>) => {
+      return await this.updateTag(id, data);
+    });
+
+    // 删除标签
+    registerHandler(IPC_CHANNELS.TAGS.DELETE, async (id: number) => {
+      return await this.deleteTag(id);
+    });
+
+    // 删除所有标签
+    registerHandler(IPC_CHANNELS.TAGS.DELETE_ALL, async () => {
+      return await this.deleteAllTags();
+    });
   }
 }

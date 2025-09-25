@@ -2,6 +2,8 @@ import * as fs from "fs/promises";
 import { watch } from "fs";
 import * as path from "path";
 import { app } from "electron";
+import { registerHandler } from "../ipc/registry";
+import { IPC_CHANNELS } from "@shared/ipc-channels";
 
 /**
  * 文件节点接口
@@ -430,5 +432,90 @@ export class FileSystemService {
 
     await searchRecursive(dirPath);
     return results;
+  }
+
+  /**
+   * 注册文件系统相关的 IPC 处理器
+   */
+  registerFileSystemHandlers(): void {
+    // 扫描目录
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.SCAN_DIRECTORY, async (dirPath: string, options?: ScanOptions) => {
+      return await this.scanDirectory(dirPath, options);
+    });
+
+    // 读取文件
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.READ_FILE, async (filePath: string) => {
+      return await this.readFile(filePath);
+    });
+
+    // 写入文件
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.WRITE_FILE, async (filePath: string, content: string) => {
+      return await this.writeFile(filePath, content);
+    });
+
+    // 创建目录
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.CREATE_DIRECTORY, async (dirPath: string) => {
+      return await this.createDirectory(dirPath);
+    });
+
+    // 删除文件或目录
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.DELETE_FILE, async (filePath: string) => {
+      return await this.deleteFile(filePath);
+    });
+
+    // 重命名/移动文件
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.RENAME_FILE, async (oldPath: string, newPath: string) => {
+      return await this.renameFile(oldPath, newPath);
+    });
+
+    // 移动文件到指定目录
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.MOVE_FILE, async (sourcePath: string, targetDir: string) => {
+      return await this.moveFile(sourcePath, targetDir);
+    });
+
+    // 复制文件
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.COPY_FILE, async (sourcePath: string, targetPath: string) => {
+      return await this.copyFile(sourcePath, targetPath);
+    });
+
+    // 检查文件是否存在
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.EXISTS, async (filePath: string) => {
+      return await this.exists(filePath);
+    });
+
+    // 获取文件统计信息
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.GET_STATS, async (filePath: string) => {
+      return await this.getStats(filePath);
+    });
+
+    // 创建唯一文件名
+    registerHandler(
+      IPC_CHANNELS.FILE_SYSTEM.CREATE_UNIQUE_FILENAME,
+      async (dirPath: string, baseName: string, extension?: string) => {
+        return await this.createUniqueFileName(dirPath, baseName, extension);
+      }
+    );
+
+    // 获取目录大小
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.GET_DIRECTORY_SIZE, async (dirPath: string) => {
+      return await this.getDirectorySize(dirPath);
+    });
+
+    // 搜索文件
+    registerHandler(
+      IPC_CHANNELS.FILE_SYSTEM.SEARCH_FILES,
+      async (
+        dirPath: string,
+        searchTerm: string,
+        options?: {
+          searchInContent?: boolean;
+          fileExtensions?: string[];
+          caseSensitive?: boolean;
+          maxResults?: number;
+        }
+      ) => {
+        return await this.searchFiles(dirPath, searchTerm, options);
+      }
+    );
   }
 }

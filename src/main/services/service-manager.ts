@@ -3,6 +3,11 @@ import { TagsService } from "./tags-service";
 import { ChatsService } from "./chats-service";
 import { MarksService } from "./marks-service";
 import { VectorService } from "./vector-service";
+import { FileSystemService } from "./file-system-service";
+import { WorkspaceService } from "./workspace-service";
+import { ConfigService } from "./config-service";
+import { ShellService } from "./shell-service";
+import { AIService } from "./ai-service";
 
 /**
  * 增强的服务管理器
@@ -15,6 +20,11 @@ export class ServiceManager {
   private chatsService?: ChatsService;
   private marksService?: MarksService;
   private vectorService?: VectorService;
+  private fileSystemService?: FileSystemService;
+  private workspaceService?: WorkspaceService;
+  private configService?: ConfigService;
+  private shellService?: ShellService;
+  private aiService?: AIService;
 
   // 服务状态跟踪
   private readonly serviceStatus = {
@@ -22,7 +32,12 @@ export class ServiceManager {
     tags: false,
     chats: false,
     marks: false,
-    vector: false
+    vector: false,
+    fileSystem: false,
+    workspace: false,
+    config: false,
+    shell: false,
+    ai: false
   };
 
   private constructor() {
@@ -125,6 +140,91 @@ export class ServiceManager {
   }
 
   /**
+   * 获取文件系统服务
+   */
+  getFileSystemService(): FileSystemService {
+    if (!this.fileSystemService) {
+      try {
+        this.fileSystemService = new FileSystemService();
+        this.serviceStatus.fileSystem = true;
+        console.log("[ServiceManager] FileSystemService 初始化成功");
+      } catch (error) {
+        console.error("[ServiceManager] FileSystemService 初始化失败:", error);
+        throw new Error(`FileSystemService初始化失败: ${error instanceof Error ? error.message : "未知错误"}`);
+      }
+    }
+    return this.fileSystemService;
+  }
+
+  /**
+   * 获取工作区服务
+   */
+  getWorkspaceService(): WorkspaceService {
+    if (!this.workspaceService) {
+      try {
+        this.workspaceService = new WorkspaceService();
+        this.serviceStatus.workspace = true;
+        console.log("[ServiceManager] WorkspaceService 初始化成功");
+      } catch (error) {
+        console.error("[ServiceManager] WorkspaceService 初始化失败:", error);
+        throw new Error(`WorkspaceService初始化失败: ${error instanceof Error ? error.message : "未知错误"}`);
+      }
+    }
+    return this.workspaceService;
+  }
+
+  /**
+   * 获取配置服务
+   */
+  getConfigService(): ConfigService {
+    if (!this.configService) {
+      try {
+        this.configService = new ConfigService();
+        this.serviceStatus.config = true;
+        console.log("[ServiceManager] ConfigService 初始化成功");
+      } catch (error) {
+        console.error("[ServiceManager] ConfigService 初始化失败:", error);
+        throw new Error(`ConfigService初始化失败: ${error instanceof Error ? error.message : "未知错误"}`);
+      }
+    }
+    return this.configService;
+  }
+
+  /**
+   * 获取Shell服务
+   */
+  getShellService(): ShellService {
+    if (!this.shellService) {
+      try {
+        this.shellService = new ShellService();
+        this.serviceStatus.shell = true;
+        console.log("[ServiceManager] ShellService 初始化成功");
+      } catch (error) {
+        console.error("[ServiceManager] ShellService 初始化失败:", error);
+        throw new Error(`ShellService初始化失败: ${error instanceof Error ? error.message : "未知错误"}`);
+      }
+    }
+    return this.shellService;
+  }
+
+  /**
+   * 获取AI服务
+   */
+  getAIService(): AIService {
+    if (!this.aiService) {
+      try {
+        this.aiService = new AIService();
+        this.serviceStatus.ai = true;
+        console.log("[ServiceManager] AIService 初始化成功");
+      } catch (error) {
+        console.error("[ServiceManager] AIService 初始化失败:", error);
+        throw new Error(`AIService初始化失败: ${error instanceof Error ? error.message : "未知错误"}`);
+      }
+    }
+    return this.aiService;
+  }
+
+  /**
    * 获取服务状态
    */
   getServiceStatus() {
@@ -147,6 +247,11 @@ export class ServiceManager {
     this.chatsService = undefined;
     this.marksService = undefined;
     this.vectorService = undefined;
+    this.fileSystemService = undefined;
+    this.workspaceService = undefined;
+    this.configService = undefined;
+    this.shellService = undefined;
+    this.aiService = undefined;
 
     // 重置状态
     this.serviceStatus.notes = false;
@@ -154,6 +259,11 @@ export class ServiceManager {
     this.serviceStatus.chats = false;
     this.serviceStatus.marks = false;
     this.serviceStatus.vector = false;
+    this.serviceStatus.fileSystem = false;
+    this.serviceStatus.workspace = false;
+    this.serviceStatus.config = false;
+    this.serviceStatus.shell = false;
+    this.serviceStatus.ai = false;
 
     console.log("[ServiceManager] 所有服务已重置");
   }

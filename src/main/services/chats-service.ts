@@ -1,5 +1,7 @@
 import { ChatsRepository } from "../repositories/chats-repository";
 import type { ChatFormData, ChatEntity } from "../repositories/types";
+import { registerHandler } from "../ipc/registry";
+import { IPC_CHANNELS } from "@shared/ipc-channels";
 
 /**
  * 聊天服务 - 简化版
@@ -51,5 +53,40 @@ export class ChatsService {
    */
   async updateInserted(id: number, inserted: boolean): Promise<ChatEntity> {
     return await this.chatsRepository.updateInserted(id, inserted);
+  }
+
+  /**
+   * 注册聊天相关的 IPC 处理器
+   */
+  registerChatsHandlers(): void {
+    // 根据标签获取聊天记录
+    registerHandler(IPC_CHANNELS.CHATS.GET_BY_TAG, async (tagId: number) => {
+      return await this.getChatsByTag(tagId);
+    });
+
+    // 创建聊天记录
+    registerHandler(IPC_CHANNELS.CHATS.CREATE, async (data: ChatFormData) => {
+      return await this.createChat(data);
+    });
+
+    // 更新聊天记录
+    registerHandler(IPC_CHANNELS.CHATS.UPDATE, async (id: number, data: Partial<ChatFormData>) => {
+      return await this.updateChat(id, data);
+    });
+
+    // 删除聊天记录
+    registerHandler(IPC_CHANNELS.CHATS.DELETE, async (id: number) => {
+      return await this.deleteChat(id);
+    });
+
+    // 清空标签下的聊天记录
+    registerHandler(IPC_CHANNELS.CHATS.CLEAR_BY_TAG, async (tagId: number) => {
+      return await this.clearChatsByTag(tagId);
+    });
+
+    // 更新插入状态
+    registerHandler(IPC_CHANNELS.CHATS.UPDATE_INSERTED, async (id: number, inserted: boolean) => {
+      return await this.updateInserted(id, inserted);
+    });
   }
 }

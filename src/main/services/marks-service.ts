@@ -1,5 +1,7 @@
 import { MarksRepository } from "../repositories/marks-repository";
 import type { MarkFormData, MarkEntity } from "../repositories/types";
+import { registerHandler } from "../ipc/registry";
+import { IPC_CHANNELS } from "@shared/ipc-channels";
 
 /**
  * 标记服务 - 简化版
@@ -65,5 +67,50 @@ export class MarksService {
    */
   async clearTrash(): Promise<{ deletedCount: number }> {
     return await this.marksRepository.clearTrash();
+  }
+
+  /**
+   * 注册标记相关的 IPC 处理器
+   */
+  registerMarksHandlers(): void {
+    // 根据标签获取标记
+    registerHandler(IPC_CHANNELS.MARKS.GET_BY_TAG, async (tagId: number) => {
+      return await this.getMarksByTag(tagId);
+    });
+
+    // 获取所有标记
+    registerHandler(IPC_CHANNELS.MARKS.GET_ALL, async (includeDeleted?: boolean) => {
+      return await this.getAllMarks(includeDeleted || false);
+    });
+
+    // 创建标记
+    registerHandler(IPC_CHANNELS.MARKS.CREATE, async (data: MarkFormData) => {
+      return await this.createMark(data);
+    });
+
+    // 更新标记
+    registerHandler(IPC_CHANNELS.MARKS.UPDATE, async (id: number, data: Partial<MarkFormData>) => {
+      return await this.updateMark(id, data);
+    });
+
+    // 删除标记（移至回收站）
+    registerHandler(IPC_CHANNELS.MARKS.DELETE, async (id: number) => {
+      return await this.deleteMark(id);
+    });
+
+    // 恢复标记
+    registerHandler(IPC_CHANNELS.MARKS.RESTORE, async (id: number) => {
+      return await this.restoreMark(id);
+    });
+
+    // 永久删除标记
+    registerHandler(IPC_CHANNELS.MARKS.DELETE_FOREVER, async (id: number) => {
+      return await this.deleteMarkForever(id);
+    });
+
+    // 清空回收站
+    registerHandler(IPC_CHANNELS.MARKS.CLEAR_TRASH, async () => {
+      return await this.clearTrash();
+    });
   }
 }

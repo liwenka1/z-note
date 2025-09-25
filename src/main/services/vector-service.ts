@@ -1,5 +1,7 @@
 import { VectorRepository } from "../repositories/vector-repository";
 import type { VectorDocumentFormData, VectorDocumentEntity } from "../repositories/types";
+import { registerHandler } from "../ipc/registry";
+import { IPC_CHANNELS } from "@shared/ipc-channels";
 
 /**
  * 向量文档服务
@@ -131,5 +133,43 @@ export class VectorService {
       console.error("Failed to get vector stats:", error);
       return { documentCount: 0 };
     }
+  }
+
+  /**
+   * 注册向量相关的 IPC 处理器
+   */
+  registerVectorHandlers(): void {
+    // 初始化向量数据库
+    registerHandler(IPC_CHANNELS.VECTOR.INIT, async () => {
+      return await this.init();
+    });
+
+    // 插入或更新向量文档
+    registerHandler(IPC_CHANNELS.VECTOR.UPSERT, async (data: VectorDocumentFormData) => {
+      return await this.upsertDocument(data);
+    });
+
+    // 根据文件名获取向量文档
+    registerHandler(IPC_CHANNELS.VECTOR.GET_BY_FILENAME, async (filename: string) => {
+      return await this.getDocumentsByFilename(filename);
+    });
+
+    // 根据文件名删除向量文档
+    registerHandler(IPC_CHANNELS.VECTOR.DELETE_BY_FILENAME, async (filename: string) => {
+      return await this.deleteDocumentsByFilename(filename);
+    });
+
+    // 获取相似文档
+    registerHandler(
+      IPC_CHANNELS.VECTOR.GET_SIMILAR,
+      async (queryEmbedding: number[], limit?: number, threshold?: number) => {
+        return await this.getSimilarDocuments(queryEmbedding, limit || 5, threshold || 0.7);
+      }
+    );
+
+    // 清空所有向量文档
+    registerHandler(IPC_CHANNELS.VECTOR.CLEAR, async () => {
+      return await this.clearAll();
+    });
   }
 }
