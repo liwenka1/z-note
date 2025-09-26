@@ -96,29 +96,33 @@ export function useStreamingChat({
           content: userMessage.trim()
         };
 
-        const assistantUIMessage: UIMessage = {
-          id: `assistant_${Date.now()}`,
-          role: "assistant",
-          content: ""
-        };
+        setMessages((prev) => [...prev, userUIMessage]);
 
-        setMessages((prev) => [...prev, userUIMessage, assistantUIMessage]);
+        let assistantUIMessage: UIMessage | null = null;
 
         // 如果有外部的消息添加回调，也调用它
         if (onMessageAddRef.current) {
           onMessageAddRef.current({ role: "user", content: userMessage.trim() });
-          // 获取真实的assistant消息ID
-          const realAssistantMessageId = onMessageAddRef.current({
+
+          const streamingId = onMessageAddRef.current({
             role: "assistant",
             content: "",
             isStreaming: true
           });
 
-          // 保存真实的ID用于后续更新
-          if (typeof realAssistantMessageId === "string") {
-            currentAssistantMessageIdRef.current = realAssistantMessageId;
+          if (typeof streamingId === "string") {
+            currentAssistantMessageIdRef.current = streamingId;
           }
         }
+
+        // 在内部状态中添加一个助手占位消息，方便 UI 渲染
+        assistantUIMessage = {
+          id: `assistant_${Date.now()}`,
+          role: "assistant",
+          content: ""
+        };
+
+        setMessages((prev) => [...prev, assistantUIMessage!]);
 
         setStatus("streaming");
 

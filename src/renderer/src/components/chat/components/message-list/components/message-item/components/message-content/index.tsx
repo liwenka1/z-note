@@ -12,7 +12,10 @@ interface MessageContentProps {
 export function MessageContent({ message }: MessageContentProps) {
   const { theme } = useTheme();
 
-  if (message.isLoading) {
+  const hasContent = typeof message.content === "string" && message.content.trim().length > 0;
+  const isPending = Boolean((message.isLoading || message.isStreaming) && !hasContent);
+
+  if (isPending) {
     return <TypingIndicator />;
   }
 

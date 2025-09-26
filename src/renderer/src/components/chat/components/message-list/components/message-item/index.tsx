@@ -15,6 +15,9 @@ export function MessageItem({ message }: MessageItemProps) {
     return current || null;
   });
 
+  const hasContent = typeof message.content === "string" && message.content.trim().length > 0;
+  const isPending = Boolean((message.isLoading || message.isStreaming) && !hasContent);
+
   if (message.role === "user") {
     return (
       <div className="group flex justify-end">
@@ -53,13 +56,11 @@ export function MessageItem({ message }: MessageItemProps) {
         {/* 消息内容 */}
         <div className="bg-secondary rounded-2xl rounded-bl-md px-4 py-2">
           <MessageContent message={message} />
-          {!message.isLoading && (
-            <div className="text-muted-foreground mt-1 text-xs">{format(message.timestamp, "HH:mm")}</div>
-          )}
+          {!isPending && <div className="text-muted-foreground mt-1 text-xs">{format(message.timestamp, "HH:mm")}</div>}
         </div>
 
         {/* 操作按钮 - 在AI消息右侧 */}
-        {!message.isLoading && <MessageActions message={message} currentSession={currentSession} position="right" />}
+        {!isPending && <MessageActions message={message} currentSession={currentSession} position="right" />}
       </div>
     </div>
   );
