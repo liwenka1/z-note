@@ -127,7 +127,7 @@ export function TabBar() {
   }
 
   return (
-    <div className="bg-card flex h-9 shrink-0">
+    <div className="bg-card border-border/30 flex h-9 shrink-0 border-b">
       {/* 左滚动按钮 */}
       {canScrollLeft && (
         <Button
@@ -159,13 +159,13 @@ export function TabBar() {
                   "group relative flex h-full max-w-[200px] min-w-[120px] cursor-pointer items-center px-3",
                   "border-border/30 border-r",
                   isActive
-                    ? "bg-background text-foreground border-t-2 border-t-transparent"
+                    ? "bg-background text-foreground"
                     : "bg-card hover:bg-muted/30 text-muted-foreground border-t-border/20 border-t"
                 )}
                 onClick={() => handleTabClick(tab.id)}
               >
                 {/* VSCode 风格的顶部指示条 */}
-                {isActive && <div className="bg-primary absolute top-0 right-0 left-0 h-[2px]"></div>}
+                {isActive && <div className="bg-primary absolute top-0 right-0 left-0 h-[3px] rounded-b-sm"></div>}
 
                 {/* 标签内容 */}
                 <div className="flex min-w-0 flex-1 items-center gap-2">
