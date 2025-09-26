@@ -18,12 +18,12 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
   }
 
   return (
-    <div className="bg-background h-full w-full overflow-auto">
+    <div className="bg-background flex h-full w-full flex-col">
       <TipTapEditor
         content={editingContent}
         onChange={handleContentChange}
         onSave={handleSave}
-        className="bg-background min-h-full"
+        className="bg-background flex flex-1 flex-col"
       />
     </div>
   );

@@ -1,11 +1,9 @@
-import { useEditor, EditorContent, type JSONContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import Link from "@tiptap/extension-link";
-import Placeholder from "@tiptap/extension-placeholder";
-import Typography from "@tiptap/extension-typography";
+import { useEditor, type JSONContent } from "@tiptap/react";
 import { useEffect, useRef } from "react";
 import { cn } from "@renderer/lib/utils";
-import { EditorToolbar } from "./toolbar";
+import { EditorToolbar } from "./components/editor-toolbar";
+import { EditorContentArea } from "./components/editor-content";
+import { createEditorExtensions } from "./components/editor-extensions";
 
 interface TipTapEditorProps {
   content: JSONContent;
@@ -27,19 +25,7 @@ export function TipTapEditor({
   // 用于防止在设置内容时触发 onChange
   const isSettingContentRef = useRef(false);
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          class: "text-primary underline-offset-4 hover:underline"
-        }
-      }),
-      Placeholder.configure({
-        placeholder
-      }),
-      Typography
-    ],
+    extensions: createEditorExtensions(placeholder),
     editable,
     onUpdate: ({ editor }) => {
       // 如果当前正在设置内容，则不触发 onChange
@@ -51,7 +37,7 @@ export function TipTapEditor({
     },
     editorProps: {
       attributes: {
-        class: "focus:outline-none prose prose-neutral dark:prose-invert max-w-none p-6"
+        class: "focus:outline-none"
       },
       handleKeyDown: (_view, event) => {
         // 检测 Ctrl+S (Windows/Linux) 或 Cmd+S (macOS)
@@ -88,9 +74,16 @@ export function TipTapEditor({
   }, [editor]);
 
   return (
-    <div className={cn("", className)}>
-      <EditorToolbar editor={editor} />
-      <EditorContent editor={editor} />
+    <div className={cn("flex h-full flex-col", className)}>
+      {/* 固定工具栏 - 不参与滚动 */}
+      <div className="flex-shrink-0">
+        <EditorToolbar editor={editor} />
+      </div>
+
+      {/* 可滚动的内容区域 */}
+      <div className="flex-1 overflow-auto">
+        <EditorContentArea editor={editor} />
+      </div>
     </div>
   );
 }

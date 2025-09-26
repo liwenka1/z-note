@@ -25,10 +25,11 @@ export function ChatInput() {
   const isTyping = useChatStore((state) => state.isTyping);
 
   // 准备上下文消息：将会话中的消息转换为AI API格式
-  const contextMessages = currentSession?.messages.map(msg => ({
-    role: msg.role as "user" | "assistant",
-    content: msg.content
-  })) || [];
+  const contextMessages =
+    currentSession?.messages.map((msg) => ({
+      role: msg.role as "user" | "assistant",
+      content: msg.content
+    })) || [];
 
   // 流式AI Chat Hook
   const streamingChatResult = useStreamingChat({
@@ -82,12 +83,13 @@ export function ChatInput() {
   // 当切换会话时同步会话消息到AI Chat Hook
   useEffect(() => {
     // 将当前会话的消息转换为UI消息格式
-    const uiMessages = currentSession?.messages.map(msg => ({
-      id: msg.id,
-      role: msg.role,
-      content: msg.content
-    })) || [];
-    
+    const uiMessages =
+      currentSession?.messages.map((msg) => ({
+        id: msg.id,
+        role: msg.role,
+        content: msg.content
+      })) || [];
+
     setAIMessages(uiMessages);
   }, [currentSession?.id, currentSession?.messages, setAIMessages]);
 
