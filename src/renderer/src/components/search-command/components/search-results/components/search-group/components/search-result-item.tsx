@@ -1,5 +1,5 @@
 import { CommandItem } from "@renderer/components/ui/command";
-import type { SearchItem } from "../types";
+import type { SearchItem } from "../../../../../types";
 
 interface SearchResultItemProps {
   item: SearchItem;

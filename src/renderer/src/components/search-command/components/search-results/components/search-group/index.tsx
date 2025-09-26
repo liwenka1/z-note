@@ -1,6 +1,6 @@
 import { CommandGroup } from "@renderer/components/ui/command";
-import { SearchResultItem } from "./search-result-item";
-import type { SearchItem } from "../types";
+import { SearchResultItem } from "./components/search-result-item";
+import type { SearchItem } from "../../../../types";
 
 interface SearchGroupProps {
   heading: string;
