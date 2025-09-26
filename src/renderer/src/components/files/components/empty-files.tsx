@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { FileText, FolderPlus } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import { useFilesState } from "../hooks/use-files-state";
-import { useNoteManager } from "@renderer/hooks/use-note-manager";
+import { useNoteManager } from "@renderer/hooks";
 
 const suggestions = [
   {

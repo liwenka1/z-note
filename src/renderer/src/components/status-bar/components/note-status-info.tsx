@@ -1,7 +1,7 @@
 import { useTabStore } from "@renderer/stores/tab-store";
 import { useEditorStore } from "@renderer/stores/editor-store";
 import { calculateDocumentStats } from "@renderer/utils/tiptap-content-extractor";
-import { useActiveNote } from "@renderer/hooks/use-active-note";
+import { useActiveNote } from "@renderer/hooks";
 
 export function NoteStatusInfo() {
   const { activeTabId } = useTabStore();

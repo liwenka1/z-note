@@ -2,7 +2,7 @@ import { FileText, Folder, RefreshCw } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@renderer/components/ui/tooltip";
 import { useFilesState } from "../hooks/use-files-state";
-import { useNoteManager } from "@renderer/hooks/use-note-manager";
+import { useNoteManager } from "@renderer/hooks";
 
 export function FilesHeader() {
   const { createFolder, refreshFileTree, workspacePath } = useFilesState();

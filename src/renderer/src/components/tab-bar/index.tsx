@@ -13,7 +13,7 @@ import {
 } from "@renderer/components/ui/dropdown-menu";
 import { useTabStore } from "@renderer/stores";
 import { useEditorStore } from "@renderer/stores/editor-store";
-import { useNoteManager } from "@renderer/hooks/use-note-manager";
+import { useNoteManager } from "@renderer/hooks";
 
 export function TabBar() {
   const { openTabs, activeTabId, closeTab, closeAllTabs, closeOtherTabs, setActiveTab } = useTabStore();

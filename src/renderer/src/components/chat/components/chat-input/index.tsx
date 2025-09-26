@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useChatStore } from "@renderer/stores/chat-store";
 import { useAIConfigStore } from "@renderer/stores/ai-config-store";
-import { useStreamingChat } from "@renderer/hooks/use-streaming-chat";
+import { useStreamingChat } from "@renderer/hooks";
 import { ConfigSelector } from "./components/config-selector";
 import { InputArea } from "./components/input-area";
 import { InputControls } from "./components/input-controls";
