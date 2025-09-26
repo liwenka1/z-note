@@ -53,11 +53,6 @@ export function useSearchCommandState(options: UseSearchCommandStateOptions = {}
       closeSearch();
       setSearchTerm("");
 
-      if (item.path) {
-        navigate({ to: item.path });
-        return;
-      }
-
       if (item.type === "note") {
         openTab(item.id, item.title, "note");
         setActiveTab(item.id);
@@ -68,6 +63,11 @@ export function useSearchCommandState(options: UseSearchCommandStateOptions = {}
       if (item.type === "folder") {
         navigate({ to: "/" });
         console.log("选中文件夹:", item.title);
+        return;
+      }
+
+      if (item.path) {
+        navigate({ to: item.path });
       }
     },
     [closeSearch, setSearchTerm, navigate, openTab, setActiveTab]
