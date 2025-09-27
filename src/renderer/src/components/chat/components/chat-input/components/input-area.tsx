@@ -13,6 +13,7 @@ function useAutoResizeTextarea({ minHeight, maxHeight }: { minHeight: number; ma
 
       if (reset) {
         textarea.style.height = `${minHeight}px`;
+        textarea.style.overflowY = "hidden";
         return;
       }
 
@@ -23,6 +24,8 @@ function useAutoResizeTextarea({ minHeight, maxHeight }: { minHeight: number; ma
       const newHeight = Math.max(minHeight, Math.min(textarea.scrollHeight, maxHeight ?? Number.POSITIVE_INFINITY));
 
       textarea.style.height = `${newHeight}px`;
+      const shouldScroll = maxHeight !== undefined && textarea.scrollHeight > maxHeight;
+      textarea.style.overflowY = shouldScroll ? "auto" : "hidden";
     },
     [minHeight, maxHeight]
   );
@@ -32,6 +35,7 @@ function useAutoResizeTextarea({ minHeight, maxHeight }: { minHeight: number; ma
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = `${minHeight}px`;
+      textarea.style.overflowY = "hidden";
     }
   }, [minHeight]);
 
@@ -67,7 +71,7 @@ export function InputArea({
     if (textareaRef.current && !disabled) {
       textareaRef.current.focus();
     }
-  }, [disabled]);
+  }, [disabled, textareaRef]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey && !isComposing) {
@@ -104,9 +108,6 @@ export function InputArea({
           "min-h-[80px]",
           "rounded-t-xl"
         )}
-        style={{
-          overflow: "hidden"
-        }}
         disabled={disabled}
       />
     </div>
