@@ -11,7 +11,7 @@ export const leftBottomButtons = [{ id: "settings", icon: Settings, tooltip: "�
 
 // 右侧活动栏按钮配置
 export const rightActivityButtons = [
-  { id: "chat", icon: MessageSquare, tooltip: "AI 助手", badge: 0 },
+  { id: "chat", icon: MessageSquare, tooltip: "AI 助手" },
   { id: "outline", icon: BookOpen, tooltip: "文档大纲" },
   { id: "tags", icon: Tag, tooltip: "标签管理" },
   { id: "stats", icon: BarChart3, tooltip: "统计信息" }

@@ -4,7 +4,6 @@ import "allotment/dist/style.css";
 import { SearchCommand } from "@renderer/components/search-command";
 import { StatusBar } from "@renderer/components/status-bar";
 import { EditorLayout } from "@renderer/components/root-layout/components/editor-layout";
-import { useChatStore } from "@renderer/stores/chat-store";
 
 import { LeftActivityBar } from "./components/left-activity-bar";
 import { RightActivityBar } from "./components/right-activity-bar";
@@ -13,8 +12,6 @@ import { RightSidebar } from "./components/right-sidebar";
 import { useLayoutState } from "./hooks/use-layout-state";
 
 export function RootLayout() {
-  const { sessions } = useChatStore();
-
   const {
     leftSidebarOpen,
     activePanel,
@@ -56,11 +53,7 @@ export function RootLayout() {
 
           {/* 右侧活动栏 - 固定宽度 */}
           <Allotment.Pane minSize={40} maxSize={40}>
-            <RightActivityBar
-              rightActivePanel={rightActivePanel}
-              onToggleRightSidebar={toggleRightSidebar}
-              sessionsLength={sessions.length}
-            />
+            <RightActivityBar rightActivePanel={rightActivePanel} onToggleRightSidebar={toggleRightSidebar} />
           </Allotment.Pane>
         </Allotment>
       </div>
