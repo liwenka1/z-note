@@ -12,10 +12,12 @@ export function useChatState() {
   });
 
   const hasMessages = currentSession && currentSession.messages.length > 0;
+  const isTyping = useChatStore((state) => state.isTyping);
 
   return {
     // 状态
     currentSession,
-    hasMessages
+    hasMessages,
+    isTyping
   };
 }

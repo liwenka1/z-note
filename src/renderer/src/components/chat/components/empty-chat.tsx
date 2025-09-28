@@ -27,15 +27,15 @@ export function EmptyChat() {
     return current || null;
   });
 
-  const handleSuggestionClick = (suggestionText: string) => {
+  const handleSuggestionClick = async (suggestionText: string) => {
     let sessionId = currentSession?.id;
 
     // 如果没有当前会话，创建一个新会话
     if (!sessionId) {
-      sessionId = createSession();
+      sessionId = await createSession();
     }
 
-    addMessage(sessionId, {
+    await addMessage(sessionId, {
       role: "user",
       content: suggestionText
     });

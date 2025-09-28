@@ -17,7 +17,7 @@ export function ChatInput() {
   // 获取当前选中的配置
   const selectedConfig = configs.find((c) => c.id === selectedConfigId) || getCurrentConfig();
 
-  const { addMessage, createSession, updateMessage } = useChatStore();
+  const { addMessage, createSession, updateMessage, setIsTyping } = useChatStore();
   const currentSession = useChatStore((state) => {
     const current = state.sessions.find((s) => s.id === state.currentSessionId);
     return current || null;
@@ -27,7 +27,7 @@ export function ChatInput() {
   // 准备上下文消息：将会话中的消息转换为AI API格式
   const contextMessages =
     currentSession?.messages.map((msg) => ({
-      role: msg.role as "user" | "assistant",
+      role: msg.role as "user" | "assistant" | "system",
       content: msg.content
     })) || [];
 
@@ -45,30 +45,34 @@ export function ChatInput() {
       isDefault: false
     },
     contextMessages, // 传递完整的对话上下文
-    onMessageAdd: (message) => {
+    onMessageAdd: async (message) => {
       let sessionId = currentSession?.id;
       if (!sessionId) {
-        sessionId = createSession();
+        sessionId = await createSession();
       }
 
-      const messageId = addMessage(sessionId, message);
+      const messageId = await addMessage(sessionId, {
+        ...message,
+        isStreaming: message.isStreaming,
+        isLoading: message.isStreaming
+      });
 
       if (message.role === "assistant") {
         return messageId;
       }
 
-      return undefined;
+      return messageId;
     },
-    onMessageUpdate: (messageId, content) => {
+    onMessageUpdate: async (messageId, content) => {
       const sessionId = currentSession?.id;
       if (sessionId) {
-        updateMessage(sessionId, messageId, { content, isStreaming: true });
+        await updateMessage(sessionId, messageId, { content, isStreaming: true });
       }
     },
-    onMessageComplete: (messageId) => {
+    onMessageComplete: async (messageId) => {
       const sessionId = currentSession?.id;
       if (sessionId) {
-        updateMessage(sessionId, messageId, { isStreaming: false });
+        await updateMessage(sessionId, messageId, { isStreaming: false, isLoading: false });
       }
     }
   });
@@ -79,6 +83,11 @@ export function ChatInput() {
     setMessages: setAIMessages,
     stop: stopStreaming
   } = streamingChatResult;
+
+  // 同步AI加载状态到store的isTyping状态
+  useEffect(() => {
+    setIsTyping(isAILoading);
+  }, [isAILoading, setIsTyping]);
 
   // 当切换会话时同步会话消息到AI Chat Hook
   useEffect(() => {
@@ -103,13 +112,13 @@ export function ChatInput() {
     }
   }, [configs, getCurrentConfig, selectedConfigId]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim() || isTyping || isAILoading || !selectedConfig) return;
 
     // 确保有活动会话
     let sessionId = currentSession?.id;
     if (!sessionId) {
-      sessionId = createSession();
+      sessionId = await createSession();
     }
 
     // 使用流式AI Chat Hook发送消息
