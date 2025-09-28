@@ -11,9 +11,6 @@ export interface TagEntity {
   name: string;
   isLocked: boolean;
   isPin: boolean;
-  noteCount?: number;
-  chatCount?: number;
-  markCount?: number;
 }
 
 /**
