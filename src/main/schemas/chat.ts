@@ -10,7 +10,7 @@ export const BaseChatSchema = z.object({
   id: IdSchema,
   tagId: IdSchema,
   content: createStringSchema("聊天内容", 0, 1000000).optional(), // 1MB限制
-  role: z.enum(["system", "user"]),
+  role: z.enum(["user", "assistant", "system"]),
   type: z.enum(["chat", "note", "clipboard", "clear"]),
   image: createStringSchema("图片路径", 0, 500).optional(),
   inserted: z.boolean(),
@@ -21,7 +21,7 @@ export const BaseChatSchema = z.object({
 export const CreateChatSchema = z.object({
   tagId: IdSchema,
   content: createStringSchema("聊天内容", 0, 1000000).optional(),
-  role: z.enum(["system", "user"]),
+  role: z.enum(["user", "assistant", "system"]),
   type: z.enum(["chat", "note", "clipboard", "clear"]),
   image: createStringSchema("图片路径", 0, 500).optional(),
   inserted: z.boolean().optional().default(false)
@@ -39,7 +39,7 @@ export const UpdateChatSchema = z.object({
 // 聊天查询参数 schema
 export const GetChatsRequestSchema = z.object({
   tagId: IdSchema.optional(),
-  role: z.enum(["system", "user"]).optional(),
+  role: z.enum(["user", "assistant", "system"]).optional(),
   type: z.enum(["chat", "note", "clipboard", "clear"]).optional(),
   inserted: z.boolean().optional(),
   search: z.string().optional(),

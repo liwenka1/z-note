@@ -10,10 +10,7 @@ export const BaseTagSchema = z.object({
   id: IdSchema,
   name: createStringSchema("标签名称", 1, 50),
   isLocked: z.boolean(),
-  isPin: z.boolean(),
-  noteCount: z.number().min(0).optional(),
-  chatCount: z.number().min(0).optional(),
-  markCount: z.number().min(0).optional()
+  isPin: z.boolean()
 });
 
 // 标签创建 schema
@@ -33,7 +30,7 @@ export const UpdateTagSchema = z.object({
 // 标签查询参数 schema
 export const GetTagsRequestSchema = z.object({
   search: z.string().optional(),
-  sortBy: z.enum(["name", "noteCount", "chatCount", "markCount"]).optional(),
+  sortBy: z.enum(["name"]).optional(),
   sortOrder: z.enum(["asc", "desc"]).optional()
 });
 
