@@ -20,7 +20,7 @@ export interface Chat {
   id: number;
   tagId: number;
   content?: string;
-  role: "system" | "user";
+  role: "user" | "assistant" | "system";
   type: "chat" | "note" | "clipboard" | "clear";
   image?: string;
   inserted: boolean;
@@ -37,9 +37,6 @@ export interface Tag {
   name: string;
   isLocked: boolean;
   isPin: boolean;
-  noteCount?: number;
-  chatCount?: number;
-  markCount?: number;
 }
 
 // 标签表单数据

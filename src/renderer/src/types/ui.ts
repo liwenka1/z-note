@@ -50,8 +50,3 @@ export interface FolderTreeItem extends Folder {
   level: number;
   isExpanded?: boolean; // UI状态
 }
-
-// 带统计的标签（扩展Tag实体）
-export interface TagWithStats extends Tag {
-  noteCount: number; // UI计算字段
-}
