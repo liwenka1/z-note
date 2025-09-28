@@ -15,20 +15,14 @@ export function useTags() {
 }
 
 /**
- * 获取热门标签（根据关联笔记数量排序）
+ * 获取热门标签（按名称排序）
  */
 export function usePopularTags(limit = 10) {
   return useQuery({
     queryKey: ["tags", "popular", limit],
     queryFn: async () => {
       const tags = await tagsApi.getAll();
-      return tags
-        .sort((a, b) => {
-          const aCount = a.noteCount || 0;
-          const bCount = b.noteCount || 0;
-          return bCount - aCount;
-        })
-        .slice(0, limit);
+      return tags.sort((a, b) => a.name.localeCompare(b.name)).slice(0, limit);
     }
   });
 }

@@ -7,7 +7,7 @@ import { IPC_CHANNELS } from "@shared/ipc-channels";
 
 interface UIMessage {
   id: string;
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
 }
 
@@ -23,9 +23,13 @@ interface UseStreamingChatReturn {
 interface UseStreamingChatOptions {
   config: AIConfig;
   contextMessages?: ChatMessage[]; // 新增：对话上下文消息
-  onMessageAdd?: (message: { role: "user" | "assistant"; content: string; isStreaming?: boolean }) => string | void;
-  onMessageUpdate?: (messageId: string, content: string) => void;
-  onMessageComplete?: (messageId: string) => void;
+  onMessageAdd?: (message: {
+    role: "user" | "assistant" | "system";
+    content: string;
+    isStreaming?: boolean;
+  }) => Promise<string> | string | void;
+  onMessageUpdate?: (messageId: string, content: string) => Promise<void> | void;
+  onMessageComplete?: (messageId: string) => Promise<void> | void;
 }
 
 /**
@@ -102,9 +106,9 @@ export function useStreamingChat({
 
         // 如果有外部的消息添加回调，也调用它
         if (onMessageAddRef.current) {
-          onMessageAddRef.current({ role: "user", content: userMessage.trim() });
+          await onMessageAddRef.current({ role: "user", content: userMessage.trim() });
 
-          const streamingId = onMessageAddRef.current({
+          const streamingId = await onMessageAddRef.current({
             role: "assistant",
             content: "",
             isStreaming: true
@@ -155,14 +159,14 @@ export function useStreamingChat({
                   const lastMessage = newMessages[newMessages.length - 1];
                   if (lastMessage && lastMessage.role === "assistant") {
                     lastMessage.content = streamChunk.content!; // 直接设置累积内容
-
-                    // 立即更新全局存储
-                    if (onMessageUpdateRef.current && currentAssistantMessageIdRef.current) {
-                      onMessageUpdateRef.current(currentAssistantMessageIdRef.current, streamChunk.content!);
-                    }
                   }
                   return newMessages;
                 });
+
+                // 立即更新全局存储（在回调外执行异步操作）
+                if (onMessageUpdateRef.current && currentAssistantMessageIdRef.current) {
+                  onMessageUpdateRef.current(currentAssistantMessageIdRef.current, streamChunk.content!);
+                }
               }
               break;
             case "end":
@@ -178,11 +182,20 @@ export function useStreamingChat({
                     content: lastMessage.content
                   };
                   messagesRef.current = [...messagesRef.current, aiMsgForAPI];
+                }
+                return current;
+              });
 
-                  // 通知完成
-                  if (onMessageCompleteRef.current && currentAssistantMessageIdRef.current) {
-                    onMessageCompleteRef.current(currentAssistantMessageIdRef.current);
-                  }
+              // 通知完成（在回调外执行异步操作）
+              setMessages((current) => {
+                const lastMessage = current[current.length - 1];
+                if (
+                  lastMessage &&
+                  lastMessage.role === "assistant" &&
+                  onMessageCompleteRef.current &&
+                  currentAssistantMessageIdRef.current
+                ) {
+                  onMessageCompleteRef.current(currentAssistantMessageIdRef.current);
                 }
                 return current;
               });
@@ -239,7 +252,7 @@ export function useStreamingChat({
     setMessages(newMessages);
     // 同步更新内部消息历史
     messagesRef.current = newMessages.map((msg) => ({
-      role: msg.role as "user" | "assistant",
+      role: msg.role as "user" | "assistant" | "system",
       content: msg.content
     }));
   }, []);
