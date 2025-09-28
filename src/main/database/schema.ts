@@ -28,7 +28,7 @@ export const chats = sqliteTable("chats", {
     .notNull()
     .references(() => tags.id),
   content: text("content"),
-  role: text("role").notNull(), // 'system' | 'user'
+  role: text("role").notNull(), // 'user' | 'assistant' | 'system'
   type: text("type").notNull(), // 'chat' | 'note' | 'clipboard' | 'clear'
   image: text("image"),
   inserted: integer("inserted", { mode: "boolean" }).notNull().default(false),
