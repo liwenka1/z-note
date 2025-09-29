@@ -1,6 +1,6 @@
 // ==================== 基础 UI 状态类型 ====================
 
-import type { Note, Folder, Tag } from "./entities";
+import type { Note } from "./entities";
 
 // ==================== 基础状态类型 ====================
 
@@ -39,13 +39,16 @@ export interface ModalState {
 // ==================== 展示相关类型（通过entities扩展） ====================
 
 // 笔记列表项（扩展Note实体）
-export interface NoteListItem extends Pick<Note, "id" | "title" | "folderId" | "tagIds" | "isFavorite" | "updatedAt"> {
+export interface NoteListItem extends Pick<Note, "id" | "tagId" | "content" | "createdAt"> {
   excerpt: string; // UI计算字段
   isSelected?: boolean; // UI状态
 }
 
-// 文件夹树形项（扩展Folder实体）
-export interface FolderTreeItem extends Folder {
+// 文件夹树形项（基础文件夹接口）
+export interface FolderTreeItem {
+  id: string;
+  name: string;
+  path: string;
   children: FolderTreeItem[];
   level: number;
   isExpanded?: boolean; // UI状态
