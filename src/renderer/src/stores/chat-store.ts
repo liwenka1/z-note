@@ -169,7 +169,8 @@ export const useChatStore = create<ChatState>()((set, get) => ({
     try {
       const tagId = parseInt(sessionId.replace("chat_", ""));
 
-      // 分离UI状态和数据库数据
+      // 分离UI状态和数据库数据，忽略UI专用字段
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { isLoading, isStreaming, error, ...messageForDB } = message;
       const chatFormData = convertMessageToChat(messageForDB, tagId);
       const newChat = await chatsApi.create(chatFormData);
