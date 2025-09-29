@@ -13,17 +13,20 @@ export function useLayoutState() {
 
   // 切换左侧边栏
   const toggleLeftSidebar = (panelId: string) => {
-    if (panelId === "files") {
-      if (activePanel === "files" && leftSidebarOpen) {
+    if (panelId === "search") {
+      // 搜索做特殊处理，直接打开搜索弹窗
+      openSearch();
+    } else {
+      // 其他面板使用通用切换逻辑
+      if (activePanel === panelId && leftSidebarOpen) {
+        // 如果当前面板已激活且边栏已打开，则关闭
         setLeftSidebarOpen(false);
         setActivePanel(null);
       } else {
+        // 否则打开对应面板
         setLeftSidebarOpen(true);
-        setActivePanel("files");
+        setActivePanel(panelId);
       }
-    } else if (panelId === "search") {
-      // 搜索
-      openSearch();
     }
   };
 
@@ -34,24 +37,16 @@ export function useLayoutState() {
 
   // 切换右侧边栏
   const toggleRightSidebar = (panelId: string) => {
-    if (panelId === "chat") {
-      if (rightActivePanel === "chat" && rightSidebarOpen) {
-        setRightSidebarOpen(false);
-        setRightActivePanel(null);
-      } else {
-        setRightSidebarOpen(true);
-        setRightActivePanel("chat");
-      }
-    } else if (panelId === "outline") {
-      if (rightActivePanel === "outline" && rightSidebarOpen) {
-        setRightSidebarOpen(false);
-        setRightActivePanel(null);
-      } else {
-        setRightSidebarOpen(true);
-        setRightActivePanel("outline");
-      }
+    // 通用的切换逻辑，支持所有右侧面板
+    if (rightActivePanel === panelId && rightSidebarOpen) {
+      // 如果当前面板已激活且边栏已打开，则关闭
+      setRightSidebarOpen(false);
+      setRightActivePanel(null);
+    } else {
+      // 否则打开对应面板
+      setRightSidebarOpen(true);
+      setRightActivePanel(panelId);
     }
-    // 右侧按钮都已实现相应功能
   };
 
   return {
