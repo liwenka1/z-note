@@ -1,6 +1,8 @@
 import { Copy, RotateCcw, Trash } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import { useChatStore, type Message, type ChatSession } from "@renderer/stores/chat-store";
+import { RecordButton } from "./components/record-button";
+import { useChatTagStore } from "@renderer/stores/chat-tag-store";
 
 interface MessageActionsProps {
   message: Message;
@@ -10,6 +12,7 @@ interface MessageActionsProps {
 
 export function MessageActions({ message, currentSession }: MessageActionsProps) {
   const { deleteMessage } = useChatStore();
+  const { currentAssociatedTagId } = useChatTagStore();
 
   const handleCopy = async () => {
     try {
@@ -44,6 +47,9 @@ export function MessageActions({ message, currentSession }: MessageActionsProps)
           <RotateCcw className="h-3 w-3" />
         </Button>
       )}
+
+      {/* 记录按钮 */}
+      <RecordButton message={message} associatedTagId={currentAssociatedTagId} />
 
       <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={handleDelete} title="删除">
         <Trash className="h-3 w-3" />
