@@ -4,10 +4,10 @@ import { useAIConfigStore } from "@renderer/stores/ai-config-store";
 import { useChatTagStore } from "@renderer/stores/chat-tag-store";
 import { useStreamingChat } from "@renderer/hooks";
 import { useMarksByTag } from "@renderer/hooks/queries";
+import { buildAIRequestContent } from "@renderer/lib/tag-context";
 import { ConfigSelector } from "./components/config-selector";
 import { InputArea } from "./components/input-area";
 import { InputControls } from "./components/input-controls";
-import type { Mark } from "@renderer/types";
 
 export function ChatInput() {
   const [input, setInput] = useState("");
@@ -17,67 +17,6 @@ export function ChatInput() {
   // 标签关联相关
   const { currentAssociatedTagId } = useChatTagStore();
   const { data: marks } = useMarksByTag(currentAssociatedTagId || 0, !!currentAssociatedTagId);
-
-  // 工具函数：按类型分类 marks
-  const categorizeMarks = (marks: Mark[]) => {
-    return {
-      scan: marks.filter((item) => item.type === "scan"),
-      text: marks.filter((item) => item.type === "text"),
-      image: marks.filter((item) => item.type === "image"),
-      link: marks.filter((item) => item.type === "link"),
-      file: marks.filter((item) => item.type === "file")
-    };
-  };
-
-  // 工具函数：构建单个类型的内容
-  const buildTypeContent = (marks: Mark[], type: "scan" | "text" | "image" | "link" | "file") => {
-    if (marks.length === 0) return "";
-
-    return marks
-      .map((item, index) => {
-        let content = "";
-        switch (type) {
-          case "scan":
-          case "text":
-          case "file":
-            content = item.content || "";
-            break;
-          case "image":
-            content = item.desc || item.content || "";
-            break;
-          case "link":
-            content = item.desc || item.url || "";
-            break;
-        }
-        return `${index + 1}. ${content}`;
-      })
-      .join(";\n\n");
-  };
-
-  // 工具函数：构建标签上下文内容
-  const buildTagContext = (marks: Mark[]) => {
-    const categorized = categorizeMarks(marks);
-
-    const scanContent = buildTypeContent(categorized.scan, "scan");
-    const textContent = buildTypeContent(categorized.text, "text");
-    const imageContent = buildTypeContent(categorized.image, "image");
-    const linkContent = buildTypeContent(categorized.link, "link");
-    const fileContent = buildTypeContent(categorized.file, "file");
-
-    return `可以参考以下内容笔记的记录：
-以下是通过截图后，使用OCR识别出的文字片段：
-${scanContent}。
-以下是通过文本复制记录的片段：
-${textContent}。
-以下是图片记录：
-${imageContent}。
-以下是链接记录：
-${linkContent}。
-以下是文件记录：
-${fileContent}。
-
-`;
-  };
 
   // 获取当前选中的配置
   const selectedConfig = currentConfig || getCurrentConfig();
@@ -157,12 +96,8 @@ ${fileContent}。
 
   // 🎯 核心函数：发送消息给AI，在这里处理标签上下文
   const sendMessageToAI = async (userInput: string) => {
-    // 如果关联了标签，构建包含标签上下文的消息
-    let messageToAI = userInput;
-    if (currentAssociatedTagId && marks && marks.length > 0) {
-      const tagContext = buildTagContext(marks);
-      messageToAI = `${tagContext}${userInput}`; // AI收到包含上下文的完整内容
-    }
+    // 构建包含标签上下文的消息（如果有关联标签）
+    const messageToAI = buildAIRequestContent(userInput, marks);
 
     // 🔥 关键：发送包含标签上下文的消息给AI
     sendAIMessage(messageToAI);
