@@ -138,6 +138,7 @@ export interface IpcMethods {
     options?: ScanOptions
   ) => Promise<BaseResponse<FileNode[]>>;
   [IPC_CHANNELS.FILE_SYSTEM.READ_FILE]: (filePath: string) => Promise<BaseResponse<string>>;
+  [IPC_CHANNELS.FILE_SYSTEM.READ_BINARY_FILE]: (filePath: string) => Promise<BaseResponse<ArrayBuffer>>;
   [IPC_CHANNELS.FILE_SYSTEM.WRITE_FILE]: (filePath: string, content: string) => Promise<BaseResponse<void>>;
   [IPC_CHANNELS.FILE_SYSTEM.CREATE_DIRECTORY]: (dirPath: string) => Promise<BaseResponse<void>>;
   [IPC_CHANNELS.FILE_SYSTEM.DELETE_FILE]: (filePath: string) => Promise<BaseResponse<void>>;
