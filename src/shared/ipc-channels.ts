@@ -58,6 +58,7 @@ export const IPC_CHANNELS = {
   FILE_SYSTEM: {
     SCAN_DIRECTORY: "fileSystem:scanDirectory",
     READ_FILE: "fileSystem:readFile",
+    READ_BINARY_FILE: "fileSystem:readBinaryFile",
     WRITE_FILE: "fileSystem:writeFile",
     CREATE_DIRECTORY: "fileSystem:createDirectory",
     DELETE_FILE: "fileSystem:deleteFile",
