@@ -135,6 +135,20 @@ export class FileSystemService {
   }
 
   /**
+   * 读取二进制文件内容
+   */
+  async readBinaryFile(filePath: string): Promise<ArrayBuffer> {
+    try {
+      const buffer = await fs.readFile(filePath);
+      // 确保返回的是 ArrayBuffer 类型
+      return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;
+    } catch (error) {
+      console.error("读取二进制文件失败:", filePath, error);
+      throw new Error(`读取二进制文件失败: ${error instanceof Error ? error.message : "未知错误"}`);
+    }
+  }
+
+  /**
    * 写入文件内容
    */
   async writeFile(filePath: string, content: string): Promise<void> {
@@ -446,6 +460,11 @@ export class FileSystemService {
     // 读取文件
     registerHandler(IPC_CHANNELS.FILE_SYSTEM.READ_FILE, async (filePath: string) => {
       return await this.readFile(filePath);
+    });
+
+    // 读取二进制文件
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.READ_BINARY_FILE, async (filePath: string) => {
+      return await this.readBinaryFile(filePath);
     });
 
     // 写入文件
