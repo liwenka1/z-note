@@ -32,6 +32,17 @@ export const fileSystemApi = {
   },
 
   /**
+   * 读取二进制文件内容
+   */
+  async readBinaryFile(filePath: string): Promise<ArrayBuffer> {
+    const response = await ipcClient.invoke(
+      IPC_CHANNELS.FILE_SYSTEM.READ_BINARY_FILE as keyof import("@renderer/types").IpcMethods,
+      filePath
+    );
+    return handleResponse(response) as ArrayBuffer;
+  },
+
+  /**
    * 写入文件内容
    */
   async writeFile(filePath: string, content: string): Promise<void> {
