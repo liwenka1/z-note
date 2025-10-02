@@ -11,3 +11,4 @@ export * from "./use-note-manager";
 export * from "./use-active-note";
 export * from "./use-streaming-chat";
 export * from "./use-ai-chat";
+export * from "./use-ocr";
