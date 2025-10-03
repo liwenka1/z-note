@@ -1,6 +1,7 @@
 import * as fs from "fs/promises";
 import { watch } from "fs";
 import * as path from "path";
+import * as crypto from "crypto";
 import { app } from "electron";
 import { registerHandler } from "../ipc/registry";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
@@ -131,20 +132,6 @@ export class FileSystemService {
     } catch (error) {
       console.error("读取文件失败:", filePath, error);
       throw new Error(`读取文件失败: ${error instanceof Error ? error.message : "未知错误"}`);
-    }
-  }
-
-  /**
-   * 读取二进制文件内容
-   */
-  async readBinaryFile(filePath: string): Promise<ArrayBuffer> {
-    try {
-      const buffer = await fs.readFile(filePath);
-      // 确保返回的是 ArrayBuffer 类型
-      return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;
-    } catch (error) {
-      console.error("读取二进制文件失败:", filePath, error);
-      throw new Error(`读取二进制文件失败: ${error instanceof Error ? error.message : "未知错误"}`);
     }
   }
 
@@ -297,17 +284,6 @@ export class FileSystemService {
   }
 
   /**
-   * 确保目录存在，不存在则创建
-   */
-  async ensureDirectoryExists(dirPath: string): Promise<void> {
-    try {
-      await fs.access(dirPath);
-    } catch {
-      await fs.mkdir(dirPath, { recursive: true });
-    }
-  }
-
-  /**
    * 获取目录大小（递归计算）
    */
   async getDirectorySize(dirPath: string): Promise<number> {
@@ -449,6 +425,64 @@ export class FileSystemService {
   }
 
   /**
+   * 读取二进制文件内容
+   */
+  async readBinaryFile(filePath: string): Promise<ArrayBuffer> {
+    let fullPath = filePath;
+
+    try {
+      // 如果是相对路径（如 images/xxx.jpg），则构建完整路径
+      if (!path.isAbsolute(filePath)) {
+        // 规范化路径分隔符，确保使用正确的路径分隔符
+        const normalizedPath = filePath.replace(/[/\\]/g, path.sep);
+        fullPath = path.join(app.getPath("userData"), "z-note", normalizedPath);
+      }
+
+      console.log(`[FileSystemService] 读取二进制文件: ${filePath} -> ${fullPath}`);
+
+      const buffer = await fs.readFile(fullPath);
+      // 确保返回的是 ArrayBuffer 类型
+      return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;
+    } catch (error) {
+      console.error("读取二进制文件失败:", filePath, "->", fullPath, error);
+      throw new Error(`读取二进制文件失败: ${error instanceof Error ? error.message : "未知错误"}`);
+    }
+  }
+
+  /**
+   * 保存图片文件
+   */
+  async saveImage(buffer: Buffer, originalName: string): Promise<string> {
+    try {
+      const imagesDir = path.join(app.getPath("userData"), "z-note", "images");
+      await this.ensureDirectoryExists(imagesDir);
+
+      const extension = path.extname(originalName).toLowerCase();
+      const fileName = `${Date.now()}-${crypto.randomUUID()}${extension}`;
+      const filePath = path.join(imagesDir, fileName);
+
+      await fs.writeFile(filePath, buffer);
+
+      // 返回相对路径
+      return `images/${fileName}`;
+    } catch (error) {
+      console.error("保存图片失败:", originalName, error);
+      throw new Error(`保存图片失败: ${error instanceof Error ? error.message : "未知错误"}`);
+    }
+  }
+
+  /**
+   * 确保目录存在
+   */
+  private async ensureDirectoryExists(dirPath: string): Promise<void> {
+    try {
+      await fs.access(dirPath);
+    } catch {
+      await fs.mkdir(dirPath, { recursive: true });
+    }
+  }
+
+  /**
    * 注册文件系统相关的 IPC 处理器
    */
   registerFileSystemHandlers(): void {
@@ -536,5 +570,10 @@ export class FileSystemService {
         return await this.searchFiles(dirPath, searchTerm, options);
       }
     );
+
+    // 保存图片
+    registerHandler(IPC_CHANNELS.FILE_SYSTEM.SAVE_IMAGE, async (buffer: ArrayBuffer, originalName: string) => {
+      return await this.saveImage(Buffer.from(buffer), originalName);
+    });
   }
 }

@@ -8,6 +8,7 @@ import { WorkspaceService } from "./workspace-service";
 import { ConfigService } from "./config-service";
 import { ShellService } from "./shell-service";
 import { AIService } from "./ai-service";
+import { OCRService } from "./ocr-service";
 
 /**
  * 增强的服务管理器
@@ -25,6 +26,7 @@ export class ServiceManager {
   private configService?: ConfigService;
   private shellService?: ShellService;
   private aiService?: AIService;
+  private ocrService?: OCRService;
 
   // 服务状态跟踪
   private readonly serviceStatus = {
@@ -37,7 +39,8 @@ export class ServiceManager {
     workspace: false,
     config: false,
     shell: false,
-    ai: false
+    ai: false,
+    ocr: false
   };
 
   private constructor() {
@@ -225,6 +228,23 @@ export class ServiceManager {
   }
 
   /**
+   * 获取OCR服务
+   */
+  getOCRService(): OCRService {
+    if (!this.ocrService) {
+      try {
+        this.ocrService = new OCRService();
+        this.serviceStatus.ocr = true;
+        console.log("[ServiceManager] OCRService 初始化成功");
+      } catch (error) {
+        console.error("[ServiceManager] OCRService 初始化失败:", error);
+        throw new Error(`OCRService初始化失败: ${error instanceof Error ? error.message : "未知错误"}`);
+      }
+    }
+    return this.ocrService;
+  }
+
+  /**
    * 获取服务状态
    */
   getServiceStatus() {
@@ -252,6 +272,7 @@ export class ServiceManager {
     this.configService = undefined;
     this.shellService = undefined;
     this.aiService = undefined;
+    this.ocrService = undefined;
 
     // 重置状态
     this.serviceStatus.notes = false;
@@ -264,6 +285,7 @@ export class ServiceManager {
     this.serviceStatus.config = false;
     this.serviceStatus.shell = false;
     this.serviceStatus.ai = false;
+    this.serviceStatus.ocr = false;
 
     console.log("[ServiceManager] 所有服务已重置");
   }
