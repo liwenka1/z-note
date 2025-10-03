@@ -133,6 +133,14 @@ export const fileSystemApi = {
   async searchFiles(dirPath: string, searchTerm: string, options?: SearchOptions): Promise<FileNode[]> {
     const response = await ipcClient.invoke(IPC_CHANNELS.FILE_SYSTEM.SEARCH_FILES, dirPath, searchTerm, options);
     return handleResponse(response);
+  },
+
+  /**
+   * 保存图片文件
+   */
+  async saveImage(buffer: ArrayBuffer, originalName: string): Promise<string> {
+    const response = await ipcClient.invoke(IPC_CHANNELS.FILE_SYSTEM.SAVE_IMAGE, buffer, originalName);
+    return handleResponse(response) as string;
   }
 };
 
