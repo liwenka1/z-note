@@ -158,6 +158,7 @@ export interface IpcMethods {
     searchTerm: string,
     options?: SearchOptions
   ) => Promise<BaseResponse<FileNode[]>>;
+  [IPC_CHANNELS.FILE_SYSTEM.SAVE_IMAGE]: (buffer: ArrayBuffer, originalName: string) => Promise<BaseResponse<string>>;
 
   // 工作区相关
   [IPC_CHANNELS.WORKSPACE.GET_DEFAULT_PATH]: () => Promise<BaseResponse<string>>;
@@ -221,6 +222,23 @@ export interface IpcMethods {
     BaseResponse<{
       success: boolean;
       streamId: string;
+      error?: string;
+    }>
+  >;
+
+  // OCR 相关
+  [IPC_CHANNELS.OCR.PROCESS_IMAGE]: (
+    imagePath: string,
+    options?: {
+      language?: string | string[];
+      timeout?: number;
+    }
+  ) => Promise<
+    BaseResponse<{
+      text: string;
+      confidence: number;
+      processingTime: number;
+      success: boolean;
       error?: string;
     }>
   >;
