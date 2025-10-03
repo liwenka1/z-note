@@ -4,6 +4,7 @@ import { Input } from "@renderer/components/ui/input";
 import { Label } from "@renderer/components/ui/label";
 import { Textarea } from "@renderer/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@renderer/components/ui/select";
+import { ImageUpload } from "@renderer/components/ui/image-upload";
 import { useCreateMark } from "@renderer/hooks/mutations";
 import type { MarkFormData } from "@renderer/types";
 
@@ -22,6 +23,7 @@ export function MarkCreateForm({ tagId, onSuccess, onCancel }: MarkCreateFormPro
     desc: ""
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const createMark = useCreateMark();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,8 +52,38 @@ export function MarkCreateForm({ tagId, onSuccess, onCancel }: MarkCreateFormPro
     }
   };
 
+  // 处理 OCR 完成
+  const handleOCRComplete = (text: string, imagePath: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      type: "image",
+      content: text,
+      url: imagePath,
+      desc: prev.desc || `图片识别 - ${new Date().toLocaleString()}`
+    }));
+    setError(null);
+  };
+
+  // 处理错误
+  const handleError = (errorMessage: string) => {
+    setError(errorMessage);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-4" onKeyDown={handleKeyDown}>
+      {error && <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-600">{error}</div>}
+
+      {/* 图片上传组件 */}
+      <div className="space-y-2">
+        <Label>图片上传与识别</Label>
+        <ImageUpload
+          onOCRComplete={handleOCRComplete}
+          onError={handleError}
+          disabled={isLoading}
+          className="rounded-lg border"
+        />
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="type">类型</Label>
         <Select
