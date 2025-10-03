@@ -70,7 +70,8 @@ export const IPC_CHANNELS = {
     CREATE_UNIQUE_FILENAME: "fileSystem:createUniqueFileName",
     GET_DIRECTORY_SIZE: "fileSystem:getDirectorySize",
     WATCH_DIRECTORY: "fileSystem:watchDirectory",
-    SEARCH_FILES: "fileSystem:searchFiles"
+    SEARCH_FILES: "fileSystem:searchFiles",
+    SAVE_IMAGE: "fileSystem:saveImage"
   },
 
   // 工作区相关
@@ -102,5 +103,10 @@ export const IPC_CHANNELS = {
     CHAT: "ai:chat",
     CHAT_STREAM: "ai:chat-stream",
     ABORT_STREAM: "ai:abort-stream"
+  },
+
+  // OCR 相关
+  OCR: {
+    PROCESS_IMAGE: "ocr:processImage"
   }
 } as const;
