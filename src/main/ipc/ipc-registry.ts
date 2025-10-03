@@ -31,6 +31,9 @@ export class IpcRegistry {
     // 注册 AI 处理器
     this.registerAIHandlers();
 
+    // 注册 OCR 处理器
+    this.registerOCRHandlers();
+
     console.log("[IpcRegistry] 所有IPC处理器注册完成");
   }
 
@@ -122,5 +125,13 @@ export class IpcRegistry {
   private static registerAIHandlers(): void {
     const aiService = serviceManager.getAIService();
     aiService.registerAIHandlers();
+  }
+
+  /**
+   * OCR 相关处理器
+   */
+  private static registerOCRHandlers(): void {
+    const ocrService = serviceManager.getOCRService();
+    ocrService.registerOCRHandlers();
   }
 }
