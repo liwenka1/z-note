@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
-import { ocr } from "@renderer/lib/ocr";
-import type { OCROptions, OCRResult, OCRSource } from "@renderer/lib/ocr";
+import { ocrApi, type OCROptions, type OCRResult } from "@renderer/api/ocr";
 
 export interface UseOCRState {
   isLoading: boolean;
@@ -9,18 +8,14 @@ export interface UseOCRState {
 }
 
 export interface UseOCRActions {
-  performOCR: (source: OCRSource, options?: OCROptions) => Promise<OCRResult>;
-  performOCRFromFile: (path: string, options?: OCROptions) => Promise<string>;
-  performOCRFromBlob: (blob: Blob, options?: OCROptions) => Promise<string>;
-  performOCRFromUrl: (url: string, options?: OCROptions) => Promise<string>;
+  processImage: (imagePath: string, options?: OCROptions) => Promise<string>;
   reset: () => void;
 }
 
 export type UseOCRReturn = UseOCRState & UseOCRActions;
 
 /**
- * OCR Hook - 适用于 Electron 架构
- * 提供 OCR 识别功能的 React Hook
+ * OCR Hook - 调用后端服务
  */
 export function useOCR(): UseOCRReturn {
   const [state, setState] = useState<UseOCRState>({
@@ -29,8 +24,8 @@ export function useOCR(): UseOCRReturn {
     error: null
   });
 
-  // 通用 OCR 执行函数
-  const performOCR = useCallback(async (source: OCRSource, options: OCROptions = {}): Promise<OCRResult> => {
+  // 处理图片 OCR
+  const processImage = useCallback(async (imagePath: string, options: OCROptions = {}): Promise<string> => {
     setState((prev) => ({
       ...prev,
       isLoading: true,
@@ -38,15 +33,19 @@ export function useOCR(): UseOCRReturn {
     }));
 
     try {
-      const result = await ocr(source, options);
+      const result = await ocrApi.processImage(imagePath, options);
 
       setState({
         isLoading: false,
         result,
-        error: result.success ? null : result.error || "OCR failed"
+        error: result.success ? null : result.error || "OCR 识别失败"
       });
 
-      return result;
+      if (!result.success) {
+        throw new Error(result.error || "OCR 识别失败");
+      }
+
+      return result.text;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
 
@@ -60,42 +59,6 @@ export function useOCR(): UseOCRReturn {
     }
   }, []);
 
-  // 从文件执行 OCR
-  const performOCRFromFile = useCallback(
-    async (path: string, options: OCROptions = {}): Promise<string> => {
-      const result = await performOCR({ type: "file", path }, options);
-      if (!result.success) {
-        throw new Error(result.error || "OCR failed");
-      }
-      return result.text;
-    },
-    [performOCR]
-  );
-
-  // 从 Blob 执行 OCR
-  const performOCRFromBlob = useCallback(
-    async (blob: Blob, options: OCROptions = {}): Promise<string> => {
-      const result = await performOCR({ type: "blob", data: blob }, options);
-      if (!result.success) {
-        throw new Error(result.error || "OCR failed");
-      }
-      return result.text;
-    },
-    [performOCR]
-  );
-
-  // 从 URL 执行 OCR
-  const performOCRFromUrl = useCallback(
-    async (url: string, options: OCROptions = {}): Promise<string> => {
-      const result = await performOCR({ type: "url", url }, options);
-      if (!result.success) {
-        throw new Error(result.error || "OCR failed");
-      }
-      return result.text;
-    },
-    [performOCR]
-  );
-
   // 重置状态
   const reset = useCallback(() => {
     setState({
@@ -107,10 +70,7 @@ export function useOCR(): UseOCRReturn {
 
   return {
     ...state,
-    performOCR,
-    performOCRFromFile,
-    performOCRFromBlob,
-    performOCRFromUrl,
+    processImage,
     reset
   };
 }
