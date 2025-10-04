@@ -4,27 +4,31 @@ import { useOCR } from "@renderer/hooks/use-ocr";
 import { fileSystemApi } from "@renderer/api/file-system";
 
 export interface ImageUploadProps {
+  onImageUpload?: (imagePath: string, fileName: string) => void;
   onOCRComplete?: (text: string, imagePath: string) => void;
   onError?: (error: string) => void;
   disabled?: boolean;
   className?: string;
-  accept?: string;
   maxSize?: number; // 最大文件大小（字节）
 }
 
 export function ImageUpload({
+  onImageUpload,
   onOCRComplete,
   onError,
   disabled = false,
   className = "",
-  accept = "image/*",
   maxSize = 10 * 1024 * 1024 // 默认 10MB
 }: ImageUploadProps) {
   const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "processing" | "success" | "error">("idle");
   const [statusMessage, setStatusMessage] = useState<string>("");
+  const [uploadedImage, setUploadedImage] = useState<{
+    name: string;
+    path: string;
+  } | null>(null);
   const { processImage } = useOCR();
 
-  // 处理文件选择
+  // 处理图片选择
   const handleFileSelect = useCallback(
     async (files: FileList | null) => {
       if (!files || files.length === 0) return;
@@ -39,7 +43,7 @@ export function ImageUpload({
 
       // 验证文件大小
       if (file.size > maxSize) {
-        onError?.(`文件大小不能超过 ${Math.round(maxSize / 1024 / 1024)}MB`);
+        onError?.(`图片大小不能超过 ${Math.round(maxSize / 1024 / 1024)}MB`);
         return;
       }
 
@@ -52,21 +56,31 @@ export function ImageUpload({
         const buffer = await file.arrayBuffer();
         const savedPath = await fileSystemApi.saveImage(buffer, file.name);
 
-        // 3. OCR 处理状态
-        setUploadStatus("processing");
-        setStatusMessage("正在识别图片内容...");
+        // 3. 设置图片信息
+        setUploadedImage({
+          name: file.name,
+          path: savedPath
+        });
 
-        // 4. 执行 OCR 识别
-        const ocrText = await processImage(savedPath);
+        // 4. 通知图片上传完成
+        onImageUpload?.(savedPath, file.name);
 
-        // 5. 成功状态
-        setUploadStatus("success");
-        setStatusMessage(`识别完成！识别出 ${ocrText.length} 个字符`);
+        // 5. 执行 OCR 识别
+        if (onOCRComplete) {
+          setUploadStatus("processing");
+          setStatusMessage("正在识别图片内容...");
 
-        // 6. 回调通知
-        onOCRComplete?.(ocrText, savedPath);
+          const ocrText = await processImage(savedPath);
 
-        // 7. 3秒后重置状态
+          setUploadStatus("success");
+          setStatusMessage(`识别完成！识别出 ${ocrText.length} 个字符`);
+          onOCRComplete(ocrText, savedPath);
+        } else {
+          setUploadStatus("success");
+          setStatusMessage(`图片上传成功：${file.name}`);
+        }
+
+        // 6. 3秒后重置状态（但保留图片信息）
         setTimeout(() => {
           setUploadStatus("idle");
           setStatusMessage("");
@@ -86,7 +100,7 @@ export function ImageUpload({
         }, 5000);
       }
     },
-    [maxSize, onError, onOCRComplete, processImage]
+    [maxSize, onError, onOCRComplete, onImageUpload, processImage]
   );
 
   // 拖拽处理
@@ -94,7 +108,9 @@ export function ImageUpload({
     (e: React.DragEvent) => {
       e.preventDefault();
       if (disabled || uploadStatus !== "idle") return;
-      handleFileSelect(e.dataTransfer.files);
+
+      const files = e.dataTransfer.files;
+      handleFileSelect(files);
     },
     [disabled, uploadStatus, handleFileSelect]
   );
@@ -109,13 +125,14 @@ export function ImageUpload({
 
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = accept;
+    input.accept = "image/*";
+    input.multiple = false;
     input.onchange = (e) => {
       const target = e.target as HTMLInputElement;
       handleFileSelect(target.files);
     };
     input.click();
-  }, [disabled, uploadStatus, accept, handleFileSelect]);
+  }, [disabled, uploadStatus, handleFileSelect]);
 
   // 获取状态图标
   const getStatusIcon = () => {
@@ -143,7 +160,7 @@ export function ImageUpload({
       case "error":
         return "border-red-300 bg-red-50";
       default:
-        return disabled ? "border-gray-200 bg-gray-50" : "border-gray-300 hover:border-gray-400";
+        return "border-gray-300 hover:border-gray-400";
     }
   };
 
@@ -177,6 +194,28 @@ export function ImageUpload({
           {uploadStatus === "error" && <p className="text-xs text-red-600">{statusMessage}</p>}
         </div>
       </div>
+
+      {/* 图片预览区域 */}
+      {uploadedImage && (
+        <div className="rounded-lg border bg-gray-50 p-4">
+          <div className="flex items-center space-x-3">
+            <div className="flex-shrink-0">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
+                <span className="text-xs font-medium text-blue-600">IMG</span>
+              </div>
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium text-gray-900">{uploadedImage.name}</p>
+              <p className="text-xs text-gray-500">图片已上传并完成 OCR 识别</p>
+            </div>
+
+            <div className="flex-shrink-0">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

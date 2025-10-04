@@ -52,13 +52,21 @@ export function MarkCreateForm({ tagId, onSuccess, onCancel }: MarkCreateFormPro
     }
   };
 
+  // 处理图片上传完成
+  const handleImageUpload = (imagePath: string, fileName: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      url: imagePath,
+      desc: prev.desc || `图片上传 - ${fileName}`
+    }));
+    setError(null);
+  };
+
   // 处理 OCR 完成
   const handleOCRComplete = (text: string, imagePath: string) => {
     setFormData((prev) => ({
       ...prev,
-      type: "image",
       content: text,
-      url: imagePath,
       desc: prev.desc || `图片识别 - ${new Date().toLocaleString()}`
     }));
     setError(null);
@@ -72,17 +80,6 @@ export function MarkCreateForm({ tagId, onSuccess, onCancel }: MarkCreateFormPro
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-4" onKeyDown={handleKeyDown}>
       {error && <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-600">{error}</div>}
-
-      {/* 图片上传组件 */}
-      <div className="space-y-2">
-        <Label>图片上传与识别</Label>
-        <ImageUpload
-          onOCRComplete={handleOCRComplete}
-          onError={handleError}
-          disabled={isLoading}
-          className="rounded-lg border"
-        />
-      </div>
 
       <div className="space-y-2">
         <Label htmlFor="type">类型</Label>
@@ -136,6 +133,19 @@ export function MarkCreateForm({ tagId, onSuccess, onCancel }: MarkCreateFormPro
             onChange={(e) => setFormData((prev) => ({ ...prev, url: e.target.value }))}
             placeholder="https://..."
             disabled={isLoading}
+          />
+        </div>
+      )}
+
+      {formData.type === "image" && (
+        <div className="space-y-2">
+          <Label>图片上传与识别</Label>
+          <ImageUpload
+            onImageUpload={handleImageUpload}
+            onOCRComplete={handleOCRComplete}
+            onError={handleError}
+            disabled={isLoading}
+            className="rounded-lg border"
           />
         </div>
       )}
