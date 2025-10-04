@@ -16,6 +16,15 @@ out
 data/
 storage/
 
+# User uploaded images (stored in app userData directory)
+# These files are saved to app.getPath("userData")/z-note/images/
+# and should not be committed to version control
+images/
+z-note/
+
+# Tesseract.js language training data files
+*.traineddata
+
 # Development phase: ignore migrations until schema is stable
 # TODO: Remove this when ready for production
 src/main/database/migrations/
