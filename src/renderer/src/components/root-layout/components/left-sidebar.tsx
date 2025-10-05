@@ -1,4 +1,5 @@
 import { FilesPanel } from "@renderer/components/files";
+import { TagsPanel } from "@renderer/components/tags";
 
 interface LeftSidebarProps {
   activePanel: string | null;
@@ -9,6 +10,8 @@ export function LeftSidebar({ activePanel }: LeftSidebarProps) {
     switch (activePanel) {
       case "files":
         return <FilesPanel />;
+      case "tags":
+        return <TagsPanel />;
       default:
         return <FilesPanel />;
     }

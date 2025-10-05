@@ -3,6 +3,7 @@ import { FolderOpen, Search, Settings, BookOpen, Tag, BarChart3, MessageSquare }
 // 左侧活动栏按钮配置
 export const leftActivityButtons = [
   { id: "files", icon: FolderOpen, tooltip: "笔记" },
+  { id: "tags", icon: Tag, tooltip: "标签管理" },
   { id: "search", icon: Search, tooltip: "搜索" }
 ];
 
@@ -13,6 +14,5 @@ export const leftBottomButtons = [{ id: "settings", icon: Settings, tooltip: "�
 export const rightActivityButtons = [
   { id: "chat", icon: MessageSquare, tooltip: "AI 助手" },
   { id: "outline", icon: BookOpen, tooltip: "文档大纲" },
-  { id: "tags", icon: Tag, tooltip: "标签管理" },
   { id: "stats", icon: BarChart3, tooltip: "统计信息" }
 ];

@@ -25,7 +25,7 @@ export function TagList({ tags, onSelectTag }: TagListProps) {
     <div className="flex h-full flex-col">
       {/* Header */}
       <div className="border-border/50 flex shrink-0 items-center justify-between border-b p-4">
-        <h2 className="text-sm font-medium">知识标签</h2>
+        <h2 className="text-sm font-medium">标签</h2>
         <Button variant="ghost" size="sm" onClick={() => setShowCreateForm(true)} className="h-7 w-7 p-0">
           <Plus className="h-4 w-4" />
         </Button>
