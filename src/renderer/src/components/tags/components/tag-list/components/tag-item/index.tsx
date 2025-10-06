@@ -60,8 +60,10 @@ export function TagItem({ tag, onClick }: TagItemProps) {
         <div className="flex flex-1 items-center gap-2">
           <TagIcon className="h-4 w-4 text-blue-500" />
           <div className="flex-1">
-            <div className="text-sm font-medium">{tag.name}</div>
-            {markCount > 0 && <div className="text-muted-foreground text-xs">{markCount} 条记录</div>}
+            <div className="text-sm font-medium">
+              {tag.name}
+              <span className="text-muted-foreground ml-1">({markCount})</span>
+            </div>
           </div>
         </div>
 
