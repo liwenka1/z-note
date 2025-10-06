@@ -41,8 +41,10 @@ export function MarkList({ tagId, onBack }: MarkListProps) {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="min-w-0 flex-1">
-          <div className="truncate text-sm font-medium">{currentTag?.name || "未知标签"}</div>
-          <div className="text-muted-foreground text-xs">{marks?.length || 0} 条记录</div>
+          <div className="truncate text-sm font-medium">
+            {currentTag?.name || "未知标签"}
+            <span className="text-muted-foreground ml-1">({marks?.length || 0})</span>
+          </div>
         </div>
         <Button variant="ghost" size="sm" onClick={() => setShowCreateForm(true)} className="h-7 w-7 p-0">
           <Plus className="h-4 w-4" />
