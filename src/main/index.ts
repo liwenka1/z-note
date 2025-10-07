@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from "electron";
+import { app, shell, BrowserWindow, ipcMain, protocol, net } from "electron";
 import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import icon from "../../resources/icon.png?asset";
@@ -83,6 +83,25 @@ app.whenReady().then(async () => {
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on("browser-window-created", (_, window) => {
     optimizer.watchWindowShortcuts(window);
+  });
+
+  // 注册自定义协议
+  protocol.handle("z-note-image", (request) => {
+    try {
+      // z-note-image://images/filename.jpg -> images/filename.jpg
+      const relativePath = request.url.replace("z-note-image://", "");
+      // 拼接完整路径：userData/z-note/images/filename.jpg
+      const fullPath = join(app.getPath("userData"), "z-note", relativePath);
+
+      console.log("自定义协议请求:", request.url, "->", fullPath);
+
+      // 使用 net.fetch 返回文件
+      return net.fetch(`file://${fullPath}`);
+    } catch (error) {
+      console.error("自定义协议错误:", error);
+      // 返回一个错误响应
+      return new Response("File not found", { status: 404 });
+    }
   });
 
   // 初始化后端服务

@@ -80,6 +80,21 @@ export function MarkItem({ mark }: MarkItemProps) {
             {/* Preview/Description */}
             <div className="text-sm">{mark.desc || mark.content || "无内容"}</div>
 
+            {/* Image Thumbnail (if image type) */}
+            {mark.type === "image" && mark.url && (
+              <div className="mt-2">
+                <img
+                  src={`z-note-image://${mark.url}`}
+                  alt="缩略图"
+                  className="border-border/50 h-16 w-16 rounded border object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = "none";
+                  }}
+                />
+              </div>
+            )}
+
             {/* URL (if exists) */}
             {mark.url && mark.type === "link" && (
               <div className="text-muted-foreground mt-1 truncate text-xs">🔗 {mark.url}</div>
