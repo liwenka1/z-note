@@ -4,6 +4,7 @@
  */
 import { useState } from "react";
 import { Button } from "@renderer/components/ui/button";
+import { ScrollArea } from "@renderer/components/ui/scroll-area";
 import { ArrowLeft, Plus } from "lucide-react";
 import { MarkItem } from "./components/mark-item";
 import { MarkCreateForm } from "./components/mark-create-form";
@@ -59,7 +60,7 @@ export function MarkList({ tagId, onBack }: MarkListProps) {
       )}
 
       {/* Marks List */}
-      <div className="flex-1 overflow-y-auto">
+      <ScrollArea className="flex-1">
         {!marks || marks.length === 0 ? (
           <div className="flex h-full items-center justify-center">
             <div className="text-center">
@@ -74,7 +75,7 @@ export function MarkList({ tagId, onBack }: MarkListProps) {
             ))}
           </div>
         )}
-      </div>
+      </ScrollArea>
     </div>
   );
 }

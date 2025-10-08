@@ -4,6 +4,7 @@
  */
 import { useState } from "react";
 import { Button } from "@renderer/components/ui/button";
+import { ScrollArea } from "@renderer/components/ui/scroll-area";
 import { Plus } from "lucide-react";
 import { TagItem } from "./components/tag-item";
 import { TagCreateForm } from "./components/tag-create-form";
@@ -39,7 +40,7 @@ export function TagList({ tags, onSelectTag }: TagListProps) {
       )}
 
       {/* Tags List */}
-      <div className="flex-1 overflow-y-auto">
+      <ScrollArea className="flex-1">
         {tags.length === 0 ? (
           <div className="flex h-full items-center justify-center">
             <div className="text-center">
@@ -54,7 +55,7 @@ export function TagList({ tags, onSelectTag }: TagListProps) {
             ))}
           </div>
         )}
-      </div>
+      </ScrollArea>
     </div>
   );
 }
