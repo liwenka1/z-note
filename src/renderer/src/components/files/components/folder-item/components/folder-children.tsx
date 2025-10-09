@@ -37,15 +37,10 @@ export function FolderChildren({ childNodes, level, isExpanded, renderFolder }: 
               delay: 0.1
             }}
           >
-            {childNodes.map((child, index) => (
-              <motion.div
-                key={child.path}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.15, delay: index * 0.03 }}
-              >
+            {childNodes.map((child) => (
+              <div key={child.path}>
                 {child.isDirectory ? renderFolder(child, level + 1) : <NoteItem file={child} level={level + 1} />}
-              </motion.div>
+              </div>
             ))}
           </motion.div>
         </motion.div>
