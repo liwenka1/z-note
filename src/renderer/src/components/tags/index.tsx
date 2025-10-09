@@ -39,12 +39,14 @@ export function TagsPanel() {
   }
 
   return (
-    <div className="h-full">
-      {selectedTagId ? (
-        <MarkList tagId={selectedTagId} onBack={handleBackToTags} />
-      ) : (
-        <TagList tags={tags || []} onSelectTag={handleSelectTag} />
-      )}
+    <div className="bg-background flex h-full flex-col">
+      <div className="flex-1 overflow-hidden">
+        {selectedTagId ? (
+          <MarkList tagId={selectedTagId} onBack={handleBackToTags} />
+        ) : (
+          <TagList tags={tags || []} onSelectTag={handleSelectTag} />
+        )}
+      </div>
     </div>
   );
 }

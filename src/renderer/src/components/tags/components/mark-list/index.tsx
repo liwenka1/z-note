@@ -37,7 +37,7 @@ export function MarkList({ tagId, onBack }: MarkListProps) {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="border-border/50 flex shrink-0 items-center gap-2 border-b p-4">
+      <div className="border-border/50 bg-secondary/30 flex shrink-0 items-center gap-2 border-b px-4 py-3">
         <Button variant="ghost" size="sm" onClick={onBack} className="h-7 w-7 p-0">
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -54,7 +54,7 @@ export function MarkList({ tagId, onBack }: MarkListProps) {
 
       {/* Create Form */}
       {showCreateForm && (
-        <div className="border-border/50 shrink-0 border-b p-4">
+        <div className="border-border/50 bg-secondary/30 shrink-0 border-b px-4 py-3">
           <MarkCreateForm tagId={tagId} onSuccess={handleCreateSuccess} onCancel={() => setShowCreateForm(false)} />
         </div>
       )}
