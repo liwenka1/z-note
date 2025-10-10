@@ -1,6 +1,7 @@
 import { useRef, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { MessageItem } from "./components/message-item";
+import { EmptyChat } from "../empty-chat";
 import { useChatStore } from "@renderer/stores/chat-store";
 
 export function ChatMessageList() {
@@ -52,6 +53,11 @@ export function ChatMessageList() {
       });
     }
   }, [messagesContentHash, hasStreamingMessage]);
+
+  // 如果没有消息，显示空状态
+  if (messages.length === 0) {
+    return <EmptyChat />;
+  }
 
   return (
     <div ref={scrollRef} className="h-full overflow-x-hidden overflow-y-auto p-4">
