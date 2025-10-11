@@ -8,9 +8,13 @@ import { ThemeProvider } from "next-themes";
 import { enableMapSet } from "immer";
 
 import { Toaster } from "@renderer/components/ui/sonner";
+import { usePromptStore } from "@renderer/stores/prompt-store";
 
 // 启用 Immer 的 MapSet 插件
 enableMapSet();
+
+// 初始化 prompt store
+usePromptStore.getState().loadPrompts();
 
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
