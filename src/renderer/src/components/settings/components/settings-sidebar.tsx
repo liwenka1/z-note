@@ -1,9 +1,9 @@
 import { Button } from "@renderer/components/ui/button";
-import { Bot, Settings } from "lucide-react";
+import { Bot, Settings, MessageSquare } from "lucide-react";
 
 interface SettingsSidebarProps {
-  activeTab: "ai" | "general";
-  onTabChange: (tab: "ai" | "general") => void;
+  activeTab: "ai" | "prompt" | "general";
+  onTabChange: (tab: "ai" | "prompt" | "general") => void;
 }
 
 export function SettingsSidebar({ activeTab, onTabChange }: SettingsSidebarProps) {
@@ -19,6 +19,15 @@ export function SettingsSidebar({ activeTab, onTabChange }: SettingsSidebarProps
         >
           <Bot className="mr-2 h-4 w-4" />
           AI 配置
+        </Button>
+
+        <Button
+          variant={activeTab === "prompt" ? "secondary" : "ghost"}
+          className="w-full justify-start"
+          onClick={() => onTabChange("prompt")}
+        >
+          <MessageSquare className="mr-2 h-4 w-4" />
+          Prompt 配置
         </Button>
 
         <Button
