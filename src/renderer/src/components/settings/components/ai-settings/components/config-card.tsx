@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Button } from "@renderer/components/ui/button";
+import { Card, CardContent, CardHeader } from "@renderer/components/ui/card";
+import { Badge } from "@renderer/components/ui/badge";
+import { Edit, Trash2, Check, CheckCircle } from "lucide-react";
 import { AI_PROVIDERS, type AIConfig } from "@renderer/stores/ai-config-store";
 import { EditConfigForm } from "./edit-config-form";
 
@@ -16,49 +19,69 @@ export function ConfigCard({ config, isDefault, onSetDefault, onEdit, onDelete }
 
   if (isEditing) {
     return (
-      <EditConfigForm
-        config={config}
-        onSave={(updates) => {
-          onEdit(updates);
-          setIsEditing(false);
-        }}
-        onCancel={() => setIsEditing(false)}
-      />
+      <Card>
+        <CardContent className="p-4">
+          <EditConfigForm
+            config={config}
+            onSave={(updates) => {
+              onEdit(updates);
+              setIsEditing(false);
+            }}
+            onCancel={() => setIsEditing(false)}
+          />
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="bg-card rounded-lg border p-4">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
+    <Card className="transition-shadow hover:shadow-md">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h4 className="font-medium">{config.name}</h4>
-            {isDefault && <span className="bg-primary/10 text-primary rounded px-2 py-0.5 text-xs">默认</span>}
+            {isDefault && (
+              <Badge variant="default" className="text-xs">
+                默认
+              </Badge>
+            )}
           </div>
-          <p className="text-muted-foreground text-sm">
-            {AI_PROVIDERS.find((p) => p.id === config.provider)?.displayName} · {config.model}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* 设为默认 */}
-          {!isDefault && (
-            <Button size="sm" variant="outline" onClick={onSetDefault}>
-              设为默认
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+              <Edit className="h-4 w-4" />
             </Button>
-          )}
-
-          {/* 编辑 */}
-          <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
-            编辑
-          </Button>
-
-          {/* 删除 */}
-          <Button size="sm" variant="outline" onClick={onDelete} disabled={isDefault}>
-            删除
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onDelete}
+              disabled={isDefault}
+              className="text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        <p className="text-muted-foreground text-sm">
+          {AI_PROVIDERS.find((p) => p.id === config.provider)?.displayName} · {config.model}
+        </p>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <div className="mt-3 flex items-center justify-between">
+          <Button variant={isDefault ? "default" : "outline"} size="sm" onClick={onSetDefault} disabled={isDefault}>
+            {isDefault ? (
+              <>
+                <CheckCircle className="mr-1 h-3 w-3" />
+                当前使用
+              </>
+            ) : (
+              <>
+                <Check className="mr-1 h-3 w-3" />
+                设为默认
+              </>
+            )}
           </Button>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
