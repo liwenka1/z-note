@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useChatStore } from "@renderer/stores/chat-store";
 import { useAIConfigStore } from "@renderer/stores/ai-config-store";
+import { usePromptStore } from "@renderer/stores/prompt-store";
 import { useChatTagStore } from "@renderer/stores/chat-tag-store";
 import { useStreamingChat } from "@renderer/hooks";
 import { useMarksByTag } from "@renderer/hooks/queries";
@@ -13,6 +14,7 @@ export function ChatInput() {
   const [input, setInput] = useState("");
   const [isComposing, setIsComposing] = useState(false);
   const { configs, currentConfig, getCurrentConfig, setDefaultConfig } = useAIConfigStore();
+  const { currentPrompt } = usePromptStore();
 
   // 标签关联相关
   const { currentAssociatedTagId } = useChatTagStore();
@@ -29,11 +31,38 @@ export function ChatInput() {
   const isTyping = useChatStore((state) => state.isTyping);
 
   // 准备上下文消息：将会话中的消息转换为AI API格式
-  const contextMessages =
-    currentSession?.messages.map((msg) => ({
-      role: msg.role as "user" | "assistant" | "system",
-      content: msg.content
-    })) || [];
+  const contextMessages = (() => {
+    const messages =
+      currentSession?.messages.map((msg) => ({
+        role: msg.role as "user" | "assistant" | "system",
+        content: msg.content
+      })) || [];
+
+    // 如果有当前选中的 prompt，将其作为 system 消息添加到消息列表的开头
+    if (currentPrompt && currentPrompt.content.trim()) {
+      // 检查是否已经有 system 消息，如果有则替换，否则添加
+      const hasSystemMessage = messages.some((msg) => msg.role === "system");
+
+      if (hasSystemMessage) {
+        // 替换第一个 system 消息
+        const systemIndex = messages.findIndex((msg) => msg.role === "system");
+        if (systemIndex !== -1) {
+          messages[systemIndex] = {
+            role: "system",
+            content: currentPrompt.content
+          };
+        }
+      } else {
+        // 在开头添加 system 消息
+        messages.unshift({
+          role: "system",
+          content: currentPrompt.content
+        });
+      }
+    }
+
+    return messages;
+  })();
 
   // 流式AI Chat Hook
   const streamingChatResult = useStreamingChat({
@@ -112,6 +141,16 @@ export function ChatInput() {
     let sessionId = currentSession?.id;
     if (!sessionId) {
       sessionId = await createSession();
+    }
+
+    // 如果是新会话且有当前选中的 prompt，先添加 system 消息
+    if (currentPrompt && currentPrompt.content.trim() && currentSession?.messages.length === 0) {
+      await addMessage(sessionId, {
+        role: "system",
+        content: currentPrompt.content,
+        isStreaming: false,
+        isLoading: false
+      });
     }
 
     // 🎯 新架构：先添加用户消息（显示原始问题），然后发送给AI

@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Bot, User } from "lucide-react";
+import { Bot, User, Settings } from "lucide-react";
 import { Avatar, AvatarFallback } from "@renderer/components/ui/avatar";
 import { MessageContent } from "./components/message-content";
 import { MessageActions } from "./components/message-actions";
@@ -37,6 +37,21 @@ export function MessageItem({ message }: MessageItemProps) {
               <User className="h-4 w-4" />
             </AvatarFallback>
           </Avatar>
+        </div>
+      </div>
+    );
+  }
+
+  // System 消息 - 显示为系统提示
+  if (message.role === "system") {
+    return (
+      <div className="flex justify-center">
+        <div className="bg-muted/50 border-muted-foreground/20 max-w-[90%] rounded-lg border px-3 py-2">
+          <div className="flex items-center gap-2">
+            <Settings className="text-muted-foreground h-4 w-4" />
+            <span className="text-muted-foreground text-xs font-medium">系统提示</span>
+          </div>
+          <div className="text-muted-foreground mt-1 text-sm whitespace-pre-wrap">{message.content}</div>
         </div>
       </div>
     );
