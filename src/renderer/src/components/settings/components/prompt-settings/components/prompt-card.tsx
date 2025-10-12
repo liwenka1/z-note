@@ -79,7 +79,13 @@ export function PromptCard({ prompt, onSetCurrent, onEdit, onDelete }: PromptCar
           <p className="text-sm whitespace-pre-wrap">{prompt.content}</p>
         </div>
         <div className="mt-3 flex items-center justify-between">
-          <Button variant={isCurrent ? "default" : "outline"} size="sm" onClick={onSetCurrent} disabled={isCurrent}>
+          <Button
+            variant={isCurrent ? "default" : "outline"}
+            size="sm"
+            onClick={onSetCurrent}
+            disabled={isCurrent}
+            className="!transition-none"
+          >
             {isCurrent ? (
               <>
                 <CheckCircle className="mr-1 h-3 w-3" />

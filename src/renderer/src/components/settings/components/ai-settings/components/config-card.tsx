@@ -67,7 +67,13 @@ export function ConfigCard({ config, isDefault, onSetDefault, onEdit, onDelete }
       </CardHeader>
       <CardContent className="pt-0">
         <div className="mt-3 flex items-center justify-between">
-          <Button variant={isDefault ? "default" : "outline"} size="sm" onClick={onSetDefault} disabled={isDefault}>
+          <Button
+            variant={isDefault ? "default" : "outline"}
+            size="sm"
+            onClick={onSetDefault}
+            disabled={isDefault}
+            className="!transition-none"
+          >
             {isDefault ? (
               <>
                 <CheckCircle className="mr-1 h-3 w-3" />
