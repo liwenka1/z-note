@@ -2,6 +2,7 @@ import { Outlet, useNavigate } from "@tanstack/react-router";
 import { TabBar } from "@renderer/components/tab-bar";
 import { useTabStore } from "@renderer/stores/tab-store";
 import { SettingsPage } from "@renderer/pages/settings-page";
+import { TagDetailPage } from "@renderer/pages/tag-detail-page";
 import { useEffect } from "react";
 
 export function EditorLayout() {
@@ -22,6 +23,11 @@ export function EditorLayout() {
     // 如果有激活的 tab 且是设置页面，直接渲染设置页面
     if (activeTab?.type === "settings") {
       return <SettingsPage />;
+    }
+
+    // 如果有激活的 tab 且是tag页面，直接渲染tag详情页面
+    if (activeTab?.type === "tag" && activeTab.tagId) {
+      return <TagDetailPage tagId={activeTab.tagId.toString()} />;
     }
 
     // 其他情况（包括笔记 tab 或没有 tab）都显示路由内容
