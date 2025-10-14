@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import type { BaseResponse } from "../../renderer/src/types/common";
+import type { BaseResponse } from "@shared/types";
 
 // 生成唯一ID
 export function generateId(): string {

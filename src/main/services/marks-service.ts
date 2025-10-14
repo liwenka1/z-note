@@ -1,5 +1,5 @@
 import { MarksRepository } from "../repositories/marks-repository";
-import type { MarkFormData, MarkEntity } from "../repositories/types";
+import type { Mark, MarkFormData } from "@shared/types";
 import { registerHandler } from "../ipc/registry";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
 
@@ -16,28 +16,28 @@ export class MarksService {
   /**
    * 根据标签获取标记
    */
-  async getMarksByTag(tagId: number): Promise<MarkEntity[]> {
+  async getMarksByTag(tagId: number): Promise<Mark[]> {
     return await this.marksRepository.findByTag(tagId);
   }
 
   /**
    * 获取所有标记（包括回收站）
    */
-  async getAllMarks(includeDeleted: boolean = false): Promise<MarkEntity[]> {
+  async getAllMarks(includeDeleted: boolean = false): Promise<Mark[]> {
     return await this.marksRepository.findAll(includeDeleted);
   }
 
   /**
    * 创建标记
    */
-  async createMark(data: MarkFormData): Promise<MarkEntity> {
+  async createMark(data: MarkFormData): Promise<Mark> {
     return await this.marksRepository.create(data);
   }
 
   /**
    * 更新标记
    */
-  async updateMark(id: number, data: Partial<MarkFormData>): Promise<MarkEntity> {
+  async updateMark(id: number, data: Partial<MarkFormData>): Promise<Mark> {
     return await this.marksRepository.update(id, data);
   }
 
@@ -51,7 +51,7 @@ export class MarksService {
   /**
    * 恢复标记
    */
-  async restoreMark(id: number): Promise<MarkEntity> {
+  async restoreMark(id: number): Promise<Mark> {
     return await this.marksRepository.restore(id);
   }
 

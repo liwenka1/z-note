@@ -1,17 +1,7 @@
 import { eq } from "drizzle-orm";
 import { tags } from "../database/schema";
 import { BaseRepository } from "./base-repository";
-
-export interface TagFormData {
-  name: string;
-}
-
-export interface TagEntity {
-  id: number;
-  name: string;
-  isLocked: boolean;
-  isPin: boolean;
-}
+import type { Tag, TagFormData } from "@shared/types";
 
 /**
  * 标签数据访问层 - 简化版
@@ -20,7 +10,7 @@ export class TagsRepository extends BaseRepository {
   /**
    * 获取所有标签
    */
-  async findAll(): Promise<TagEntity[]> {
+  async findAll(): Promise<Tag[]> {
     const result = await this.db
       .select({
         id: tags.id,
@@ -37,33 +27,35 @@ export class TagsRepository extends BaseRepository {
   /**
    * 创建标签
    */
-  async create(data: TagFormData): Promise<TagEntity> {
+  async create(data: TagFormData): Promise<Tag> {
     const result = await this.db
       .insert(tags)
       .values({
         name: data.name,
-        isLocked: false,
-        isPin: false
+        isLocked: data.isLocked,
+        isPin: data.isPin
       })
       .returning();
 
-    return result[0] as TagEntity;
+    return result[0] as Tag;
   }
 
   /**
    * 更新标签
    */
-  async update(id: number, data: Partial<TagFormData>): Promise<TagEntity> {
+  async update(id: number, data: Partial<TagFormData>): Promise<Tag> {
     await this.checkExists(tags, tags.id, id, "标签不存在");
 
     const updateData: Record<string, unknown> = {};
     if (data.name !== undefined) updateData.name = data.name;
+    if (data.isLocked !== undefined) updateData.isLocked = data.isLocked;
+    if (data.isPin !== undefined) updateData.isPin = data.isPin;
 
     await this.db.update(tags).set(updateData).where(eq(tags.id, id));
 
     const result = await this.db.select().from(tags).where(eq(tags.id, id)).limit(1);
 
-    return result[0] as TagEntity;
+    return result[0] as Tag;
   }
 
   /**

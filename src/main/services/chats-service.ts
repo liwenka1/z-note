@@ -1,5 +1,5 @@
 import { ChatsRepository } from "../repositories/chats-repository";
-import type { ChatFormData, ChatEntity } from "../repositories/types";
+import type { Chat, ChatFormData } from "@shared/types";
 import { registerHandler } from "../ipc/registry";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
 
@@ -16,21 +16,21 @@ export class ChatsService {
   /**
    * 根据标签获取聊天记录
    */
-  async getChatsByTag(tagId: number): Promise<ChatEntity[]> {
+  async getChatsByTag(tagId: number): Promise<Chat[]> {
     return await this.chatsRepository.findByTag(tagId);
   }
 
   /**
    * 创建聊天记录
    */
-  async createChat(data: ChatFormData): Promise<ChatEntity> {
+  async createChat(data: ChatFormData): Promise<Chat> {
     return await this.chatsRepository.create(data);
   }
 
   /**
    * 更新聊天记录
    */
-  async updateChat(id: number, data: Partial<ChatFormData>): Promise<ChatEntity> {
+  async updateChat(id: number, data: Partial<ChatFormData>): Promise<Chat> {
     return await this.chatsRepository.update(id, data);
   }
 
@@ -51,7 +51,7 @@ export class ChatsService {
   /**
    * 更新插入状态
    */
-  async updateInserted(id: number, inserted: boolean): Promise<ChatEntity> {
+  async updateInserted(id: number, inserted: boolean): Promise<Chat> {
     return await this.chatsRepository.updateInserted(id, inserted);
   }
 

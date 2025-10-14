@@ -1,5 +1,5 @@
 import { TagsRepository } from "../repositories/tags-repository";
-import type { TagFormData, TagEntity } from "../repositories/types";
+import type { Tag, TagFormData } from "@shared/types";
 import { registerHandler } from "../ipc/registry";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
 
@@ -16,21 +16,21 @@ export class TagsService {
   /**
    * 获取所有标签
    */
-  async getAllTags(): Promise<TagEntity[]> {
+  async getAllTags(): Promise<Tag[]> {
     return await this.tagsRepository.findAll();
   }
 
   /**
    * 创建标签
    */
-  async createTag(data: TagFormData): Promise<TagEntity> {
+  async createTag(data: TagFormData): Promise<Tag> {
     return await this.tagsRepository.create(data);
   }
 
   /**
    * 更新标签
    */
-  async updateTag(id: number, data: Partial<TagFormData>): Promise<TagEntity> {
+  async updateTag(id: number, data: Partial<TagFormData>): Promise<Tag> {
     return await this.tagsRepository.update(id, data);
   }
 

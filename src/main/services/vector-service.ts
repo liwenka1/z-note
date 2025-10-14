@@ -1,5 +1,5 @@
 import { VectorRepository } from "../repositories/vector-repository";
-import type { VectorDocumentFormData, VectorDocumentEntity } from "../repositories/types";
+import type { VectorDocument, VectorDocumentFormData } from "@shared/types";
 import { registerHandler } from "../ipc/registry";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
 
@@ -16,14 +16,14 @@ export class VectorService {
   /**
    * 插入或更新向量文档
    */
-  async upsertDocument(data: VectorDocumentFormData): Promise<VectorDocumentEntity> {
+  async upsertDocument(data: VectorDocumentFormData): Promise<VectorDocument> {
     return await this.vectorRepository.upsert(data);
   }
 
   /**
    * 根据文件名获取向量文档
    */
-  async getDocumentsByFilename(filename: string): Promise<VectorDocumentEntity[]> {
+  async getDocumentsByFilename(filename: string): Promise<VectorDocument[]> {
     return await this.vectorRepository.findByFilename(filename);
   }
 

@@ -1,25 +1,7 @@
 import { eq, and } from "drizzle-orm";
 import { marks } from "../database/schema";
 import { BaseRepository } from "./base-repository";
-
-export interface MarkFormData {
-  tagId: number;
-  type: "scan" | "text" | "image" | "link" | "file";
-  content?: string;
-  url?: string;
-  desc?: string;
-}
-
-export interface MarkEntity {
-  id: number;
-  tagId: number;
-  type: "scan" | "text" | "image" | "link" | "file";
-  content: string | null;
-  url: string | null;
-  desc: string | null;
-  deleted: number;
-  createdAt: number;
-}
+import type { Mark, MarkFormData } from "@shared/types";
 
 /**
  * 标记Repository - 简化版
@@ -28,7 +10,7 @@ export class MarksRepository extends BaseRepository {
   /**
    * 根据标签获取标记（不包括已删除的）
    */
-  async findByTag(tagId: number): Promise<MarkEntity[]> {
+  async findByTag(tagId: number): Promise<Mark[]> {
     const result = await this.db
       .select({
         id: marks.id,
@@ -44,13 +26,21 @@ export class MarksRepository extends BaseRepository {
       .where(and(eq(marks.tagId, tagId), eq(marks.deleted, 0)))
       .orderBy(marks.createdAt);
 
-    return result as MarkEntity[];
+    // 将数据库的 null 转换为 undefined，符合共享类型定义
+    return result.map((mark) => ({
+      ...mark,
+      content: mark.content ?? undefined,
+      url: mark.url ?? undefined,
+      desc: mark.desc ?? undefined,
+      createdAt: mark.createdAt ?? undefined,
+      type: mark.type as Mark["type"]
+    }));
   }
 
   /**
    * 获取所有标记（包括回收站）
    */
-  async findAll(includeDeleted: boolean = false): Promise<MarkEntity[]> {
+  async findAll(includeDeleted: boolean = false): Promise<Mark[]> {
     const result = await this.db
       .select({
         id: marks.id,
@@ -66,13 +56,21 @@ export class MarksRepository extends BaseRepository {
       .where(includeDeleted ? undefined : eq(marks.deleted, 0))
       .orderBy(marks.createdAt);
 
-    return result as MarkEntity[];
+    // 将数据库的 null 转换为 undefined，符合共享类型定义
+    return result.map((mark) => ({
+      ...mark,
+      content: mark.content ?? undefined,
+      url: mark.url ?? undefined,
+      desc: mark.desc ?? undefined,
+      createdAt: mark.createdAt ?? undefined,
+      type: mark.type as Mark["type"]
+    }));
   }
 
   /**
    * 创建标记
    */
-  async create(data: MarkFormData): Promise<MarkEntity> {
+  async create(data: MarkFormData): Promise<Mark> {
     const now = this.now();
 
     const result = await this.db
@@ -88,13 +86,21 @@ export class MarksRepository extends BaseRepository {
       })
       .returning();
 
-    return result[0] as MarkEntity;
+    const mark = result[0];
+    return {
+      ...mark,
+      content: mark.content ?? undefined,
+      url: mark.url ?? undefined,
+      desc: mark.desc ?? undefined,
+      createdAt: mark.createdAt ?? undefined,
+      type: mark.type as Mark["type"]
+    };
   }
 
   /**
    * 更新标记
    */
-  async update(id: number, data: Partial<MarkFormData>): Promise<MarkEntity> {
+  async update(id: number, data: Partial<MarkFormData>): Promise<Mark> {
     await this.checkExists(marks, marks.id, id, "标记不存在");
 
     const updateData: Record<string, unknown> = {};
@@ -108,7 +114,15 @@ export class MarksRepository extends BaseRepository {
 
     const result = await this.db.select().from(marks).where(eq(marks.id, id)).limit(1);
 
-    return result[0] as MarkEntity;
+    const mark = result[0];
+    return {
+      ...mark,
+      content: mark.content ?? undefined,
+      url: mark.url ?? undefined,
+      desc: mark.desc ?? undefined,
+      createdAt: mark.createdAt ?? undefined,
+      type: mark.type as Mark["type"]
+    };
   }
 
   /**
@@ -125,14 +139,22 @@ export class MarksRepository extends BaseRepository {
   /**
    * 恢复已删除的标记
    */
-  async restore(id: number): Promise<MarkEntity> {
+  async restore(id: number): Promise<Mark> {
     await this.checkExists(marks, marks.id, id, "标记不存在");
 
     await this.db.update(marks).set({ deleted: 0 }).where(eq(marks.id, id));
 
     const result = await this.db.select().from(marks).where(eq(marks.id, id)).limit(1);
 
-    return result[0] as MarkEntity;
+    const mark = result[0];
+    return {
+      ...mark,
+      content: mark.content ?? undefined,
+      url: mark.url ?? undefined,
+      desc: mark.desc ?? undefined,
+      createdAt: mark.createdAt ?? undefined,
+      type: mark.type as Mark["type"]
+    };
   }
 
   /**

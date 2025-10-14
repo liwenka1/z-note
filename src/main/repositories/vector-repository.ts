@@ -1,22 +1,7 @@
 import { and, eq, count } from "drizzle-orm";
 import { vectorDocuments } from "../database/schema";
 import { BaseRepository } from "./base-repository";
-
-export interface VectorDocumentFormData {
-  filename: string;
-  chunkId: number;
-  content: string;
-  embedding: string; // JSON 字符串
-}
-
-export interface VectorDocumentEntity {
-  id: number;
-  filename: string;
-  chunkId: number;
-  content: string;
-  embedding: string;
-  updatedAt: number;
-}
+import type { VectorDocument, VectorDocumentFormData } from "@shared/types";
 
 /**
  * 向量文档Repository
@@ -25,7 +10,7 @@ export class VectorRepository extends BaseRepository {
   /**
    * 插入或更新向量文档
    */
-  async upsert(data: VectorDocumentFormData): Promise<VectorDocumentEntity> {
+  async upsert(data: VectorDocumentFormData): Promise<VectorDocument> {
     const now = this.now();
 
     // 尝试查找现有记录
@@ -52,7 +37,7 @@ export class VectorRepository extends BaseRepository {
         .where(and(eq(vectorDocuments.filename, data.filename), eq(vectorDocuments.chunkId, data.chunkId)))
         .limit(1);
 
-      return result[0] as VectorDocumentEntity;
+      return result[0] as VectorDocument;
     } else {
       // 插入新记录
       const result = await this.db
@@ -66,21 +51,21 @@ export class VectorRepository extends BaseRepository {
         })
         .returning();
 
-      return result[0] as VectorDocumentEntity;
+      return result[0] as VectorDocument;
     }
   }
 
   /**
    * 根据文件名获取向量文档
    */
-  async findByFilename(filename: string): Promise<VectorDocumentEntity[]> {
+  async findByFilename(filename: string): Promise<VectorDocument[]> {
     const result = await this.db
       .select()
       .from(vectorDocuments)
       .where(eq(vectorDocuments.filename, filename))
       .orderBy(vectorDocuments.chunkId);
 
-    return result as VectorDocumentEntity[];
+    return result as VectorDocument[];
   }
 
   /**

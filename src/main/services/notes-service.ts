@@ -1,5 +1,5 @@
 import { NotesRepository } from "../repositories/notes-repository";
-import type { NoteFormData, NoteEntity } from "../repositories/types";
+import type { Note, NoteFormData } from "@shared/types";
 import { registerHandler } from "../ipc/registry";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
 
@@ -16,21 +16,21 @@ export class NotesService {
   /**
    * 根据标签获取笔记
    */
-  async getNotesByTag(tagId: number): Promise<NoteEntity[]> {
+  async getNotesByTag(tagId: number): Promise<Note[]> {
     return await this.notesRepository.findByTag(tagId);
   }
 
   /**
    * 根据ID获取笔记
    */
-  async getNoteById(id: number): Promise<NoteEntity | null> {
+  async getNoteById(id: number): Promise<Note | null> {
     return await this.notesRepository.findById(id);
   }
 
   /**
    * 创建笔记
    */
-  async createNote(data: NoteFormData): Promise<NoteEntity> {
+  async createNote(data: NoteFormData): Promise<Note> {
     return await this.notesRepository.create(data);
   }
 
