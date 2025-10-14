@@ -5,17 +5,16 @@
 import { useState } from "react";
 import { Button } from "@renderer/components/ui/button";
 import { ScrollArea } from "@renderer/components/ui/scroll-area";
-import { ArrowLeft, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { MarkItem } from "./components/mark-item";
 import { MarkCreateForm } from "./components/mark-create-form";
 import { useMarksByTag, useTags } from "@renderer/hooks/queries";
 
 interface MarkListProps {
   tagId: number;
-  onBack: () => void;
 }
 
-export function MarkList({ tagId, onBack }: MarkListProps) {
+export function MarkList({ tagId }: MarkListProps) {
   const { data: tags } = useTags();
   const { data: marks, isLoading } = useMarksByTag(tagId);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -37,10 +36,7 @@ export function MarkList({ tagId, onBack }: MarkListProps) {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="border-border/50 bg-secondary/30 flex shrink-0 items-center gap-2 border-b px-4 py-3">
-        <Button variant="ghost" size="sm" onClick={onBack} className="h-7 w-7 p-0">
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
+      <div className="border-border/50 bg-secondary/30 flex shrink-0 items-center justify-between border-b px-4 py-3">
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm font-medium">
             {currentTag?.name || "未知标签"}

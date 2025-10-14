@@ -11,6 +11,7 @@ import {
 } from "@renderer/components/ui/alert-dialog";
 import { useDeleteTag } from "@renderer/hooks/mutations";
 import { useMarksByTag } from "@renderer/hooks/queries";
+import { useTabStore } from "@renderer/stores/tab-store";
 import type { Tag } from "@shared/types";
 
 interface TagDeleteDialogProps {
@@ -23,12 +24,15 @@ export function TagDeleteDialog({ tag, open, onClose }: TagDeleteDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const deleteTag = useDeleteTag();
   const { data: marks } = useMarksByTag(tag.id);
+  const { closeTagTabs } = useTabStore();
   const markCount = marks?.length || 0;
 
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
       await deleteTag.mutateAsync(tag.id);
+      // 删除成功后，关闭相关的tag标签页
+      closeTagTabs(tag.id);
       onClose();
     } catch (error) {
       console.error("删除标签失败:", error);

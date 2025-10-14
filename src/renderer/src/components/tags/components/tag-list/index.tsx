@@ -8,18 +8,28 @@ import { ScrollArea } from "@renderer/components/ui/scroll-area";
 import { Plus } from "lucide-react";
 import { TagItem } from "./components/tag-item";
 import { TagCreateForm } from "./components/tag-create-form";
+import { useTabStore } from "@renderer/stores/tab-store";
+import { useNavigate } from "@tanstack/react-router";
 import type { Tag } from "@shared/types";
 
 interface TagListProps {
   tags: Tag[];
-  onSelectTag: (tagId: number) => void;
 }
 
-export function TagList({ tags, onSelectTag }: TagListProps) {
+export function TagList({ tags }: TagListProps) {
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const { openTagTab } = useTabStore();
+  const navigate = useNavigate();
 
   const handleCreateSuccess = () => {
     setShowCreateForm(false);
+  };
+
+  const handleTagClick = (tag: Tag) => {
+    // 打开新的tag标签页
+    openTagTab(tag.id, tag.name);
+    // 导航到tag详情页面
+    navigate({ to: "/tags/$tagId", params: { tagId: tag.id.toString() } });
   };
 
   return (
@@ -51,7 +61,7 @@ export function TagList({ tags, onSelectTag }: TagListProps) {
         ) : (
           <div className="space-y-1 p-2">
             {tags.map((tag) => (
-              <TagItem key={tag.id} tag={tag} onClick={() => onSelectTag(tag.id)} />
+              <TagItem key={tag.id} tag={tag} onClick={() => handleTagClick(tag)} />
             ))}
           </div>
         )}
