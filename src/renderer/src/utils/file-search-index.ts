@@ -123,13 +123,9 @@ class FileSearchIndexManager {
   private async getCurrentWorkspace(): Promise<string | null> {
     try {
       // 首先尝试使用工作区 API 获取路径
-      try {
-        const config = await workspaceApi.getConfig();
-        if (config.workspacePath) {
-          return config.workspacePath;
-        }
-      } catch {
-        // 静默失败，使用默认路径
+      const config = await workspaceApi.getConfig();
+      if (config.workspacePath) {
+        return config.workspacePath;
       }
 
       // 如果 API 失败或没有配置，使用默认工作区路径
@@ -176,27 +172,18 @@ class FileSearchIndexManager {
    * 检查是否需要重建索引
    */
   shouldRebuildIndex(): boolean {
-    // 在调试阶段，如果索引为空总是重建
     if (this.searchIndex.length === 0) {
-      console.log("🔄 索引为空，需要重建");
       return true;
     }
 
     const REBUILD_INTERVAL = 5 * 60 * 1000; // 5分钟
-    const needsRebuild = Date.now() - this.lastIndexTime > REBUILD_INTERVAL;
-
-    if (needsRebuild) {
-      console.log("⏰ 索引过期，需要重建");
-    }
-
-    return needsRebuild;
+    return Date.now() - this.lastIndexTime > REBUILD_INTERVAL;
   }
 
   /**
-   * 强制清空并重建索引（调试用）
+   * 强制清空并重建索引
    */
   forceRebuild(): void {
-    console.log("🧹 强制清空索引");
     this.searchIndex = [];
     this.lastIndexTime = 0;
     this.isIndexing = false;

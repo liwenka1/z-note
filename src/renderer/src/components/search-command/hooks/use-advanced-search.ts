@@ -220,7 +220,6 @@ export function useAdvancedSearch(options: SearchOptions = {}) {
   const rebuildIndex = useCallback(async () => {
     setIsIndexReady(false);
     try {
-      console.log("重建搜索索引，工作区:", DEFAULT_WORKSPACE_PATH);
       await fileSearchIndex.buildIndex(DEFAULT_WORKSPACE_PATH);
       setIsIndexReady(true);
     } catch (error) {
