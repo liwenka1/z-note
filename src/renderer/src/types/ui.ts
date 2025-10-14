@@ -1,6 +1,6 @@
 // ==================== 基础 UI 状态类型 ====================
 
-import type { Note } from "./entities";
+import type { Note } from "@shared/types";
 
 // ==================== 基础状态类型 ====================
 

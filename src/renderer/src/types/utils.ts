@@ -1,6 +1,6 @@
 // ==================== 基础工具类型 ====================
 
-import type { Note, Tag } from "./entities";
+import type { Note, Tag } from "@shared/types";
 
 // ==================== 类型守卫函数 ====================
 
