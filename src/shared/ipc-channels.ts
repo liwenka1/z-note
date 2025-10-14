@@ -108,5 +108,10 @@ export const IPC_CHANNELS = {
   // OCR 相关
   OCR: {
     PROCESS_IMAGE: "ocr:processImage"
+  },
+
+  // 主题相关
+  THEME: {
+    SET_NATIVE_THEME: "theme:setNativeTheme"
   }
 } as const;

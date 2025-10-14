@@ -133,4 +133,9 @@ export interface IpcMethods {
 
   // OCR 相关
   [IPC_CHANNELS.OCR.PROCESS_IMAGE]: (imagePath: string, options?: OCROptions) => Promise<BaseResponse<OCRResult>>;
+
+  // 主题相关
+  [IPC_CHANNELS.THEME.SET_NATIVE_THEME]: (
+    theme: "light" | "dark" | "system"
+  ) => Promise<BaseResponse<{ success: boolean }>>;
 }
