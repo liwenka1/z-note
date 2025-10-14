@@ -2,12 +2,21 @@ import { Moon, Sun } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@renderer/components/ui/tooltip";
 import { useTheme } from "next-themes";
+import { themeApi } from "@renderer/api";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
+  const toggleTheme = async () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+
+    // 同步原生主题到主进程
+    try {
+      await themeApi.setNativeTheme(newTheme);
+    } catch (error) {
+      console.error("设置原生主题失败:", error);
+    }
   };
 
   const Icon = theme === "light" ? Moon : Sun;

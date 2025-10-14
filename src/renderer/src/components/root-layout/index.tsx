@@ -10,6 +10,7 @@ import { RightActivityBar } from "./components/right-activity-bar";
 import { LeftSidebar } from "./components/left-sidebar";
 import { RightSidebar } from "./components/right-sidebar";
 import { useLayoutState } from "./hooks/use-layout-state";
+import { useThemeSync } from "@renderer/hooks/use-theme-sync";
 
 export function RootLayout() {
   const {
@@ -21,6 +22,9 @@ export function RootLayout() {
     toggleRightSidebar,
     handleSettingsClick
   } = useLayoutState();
+
+  // 初始化主题同步
+  useThemeSync();
 
   return (
     <div className="bg-background flex h-screen w-screen flex-col overflow-hidden">
