@@ -9,7 +9,10 @@ import Typography from "@tiptap/extension-typography";
  */
 export function createEditorExtensions(placeholder = "开始写作...") {
   return [
-    StarterKit,
+    StarterKit.configure({
+      // 禁用 StarterKit 中的 Link 扩展，使用我们自定义的
+      link: false
+    }),
     Link.configure({
       openOnClick: false,
       HTMLAttributes: {
