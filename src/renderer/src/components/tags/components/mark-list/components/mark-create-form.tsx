@@ -6,7 +6,7 @@ import { Textarea } from "@renderer/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@renderer/components/ui/select";
 import { ImageUpload } from "@renderer/components/ui/image-upload";
 import { useCreateMark } from "@renderer/hooks/mutations";
-import type { MarkFormData } from "@renderer/types";
+import type { MarkFormData } from "@shared/types";
 
 interface MarkCreateFormProps {
   tagId: number;
@@ -64,6 +64,7 @@ export function MarkCreateForm({ tagId, onSuccess, onCancel }: MarkCreateFormPro
 
   // 处理 OCR 完成
   const handleOCRComplete = (text: string, imagePath: string) => {
+    console.log("handleOCRComplete", text, imagePath);
     setFormData((prev) => ({
       ...prev,
       content: text,

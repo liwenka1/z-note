@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader } from "@renderer/components/ui/card";
 import { X } from "lucide-react";
 
 interface AddPromptFormProps {
-  onSave: (prompt: { name: string; content: string; description?: string }) => void;
+  onSave: (prompt: { name: string; content: string; description?: string; isDefault: boolean }) => void;
   onCancel: () => void;
 }
 
@@ -15,6 +15,7 @@ export function AddPromptForm({ onSave, onCancel }: AddPromptFormProps) {
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
   const [description, setDescription] = useState("");
+  const [isDefault, setIsDefault] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +24,8 @@ export function AddPromptForm({ onSave, onCancel }: AddPromptFormProps) {
     onSave({
       name: name.trim(),
       content: content.trim(),
-      description: description.trim() || undefined
+      description: description.trim() || undefined,
+      isDefault
     });
   };
 
@@ -70,6 +72,17 @@ export function AddPromptForm({ onSave, onCancel }: AddPromptFormProps) {
               rows={6}
               required
             />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="isDefault"
+              checked={isDefault}
+              onChange={(e) => setIsDefault(e.target.checked)}
+              className="rounded border-gray-300"
+            />
+            <Label htmlFor="isDefault">设为默认 Prompt</Label>
           </div>
 
           <div className="flex justify-end gap-2">
