@@ -34,6 +34,9 @@ export class IpcRegistry {
     // 注册 OCR 处理器
     this.registerOCRHandlers();
 
+    // 注册主题处理器
+    this.registerThemeHandlers();
+
     console.log("[IpcRegistry] 所有IPC处理器注册完成");
   }
 
@@ -133,5 +136,13 @@ export class IpcRegistry {
   private static registerOCRHandlers(): void {
     const ocrService = serviceManager.getOCRService();
     ocrService.registerOCRHandlers();
+  }
+
+  /**
+   * 主题相关处理器
+   */
+  private static registerThemeHandlers(): void {
+    const themeService = serviceManager.getThemeService();
+    themeService.registerThemeHandlers();
   }
 }

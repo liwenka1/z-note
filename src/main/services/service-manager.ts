@@ -9,6 +9,7 @@ import { ConfigService } from "./config-service";
 import { ShellService } from "./shell-service";
 import { AIService } from "./ai-service";
 import { OCRService } from "./ocr-service";
+import { ThemeService } from "./theme-service";
 
 /**
  * 增强的服务管理器
@@ -27,6 +28,7 @@ export class ServiceManager {
   private shellService?: ShellService;
   private aiService?: AIService;
   private ocrService?: OCRService;
+  private themeService?: ThemeService;
 
   // 服务状态跟踪
   private readonly serviceStatus = {
@@ -40,7 +42,8 @@ export class ServiceManager {
     config: false,
     shell: false,
     ai: false,
-    ocr: false
+    ocr: false,
+    theme: false
   };
 
   private constructor() {
@@ -245,6 +248,23 @@ export class ServiceManager {
   }
 
   /**
+   * 获取主题服务
+   */
+  getThemeService(): ThemeService {
+    if (!this.themeService) {
+      try {
+        this.themeService = new ThemeService();
+        this.serviceStatus.theme = true;
+        console.log("[ServiceManager] ThemeService 初始化成功");
+      } catch (error) {
+        console.error("[ServiceManager] ThemeService 初始化失败:", error);
+        throw new Error(`ThemeService初始化失败: ${error instanceof Error ? error.message : "未知错误"}`);
+      }
+    }
+    return this.themeService;
+  }
+
+  /**
    * 获取服务状态
    */
   getServiceStatus() {
@@ -273,6 +293,7 @@ export class ServiceManager {
     this.shellService = undefined;
     this.aiService = undefined;
     this.ocrService = undefined;
+    this.themeService = undefined;
 
     // 重置状态
     this.serviceStatus.notes = false;
@@ -286,6 +307,7 @@ export class ServiceManager {
     this.serviceStatus.shell = false;
     this.serviceStatus.ai = false;
     this.serviceStatus.ocr = false;
+    this.serviceStatus.theme = false;
 
     console.log("[ServiceManager] 所有服务已重置");
   }
