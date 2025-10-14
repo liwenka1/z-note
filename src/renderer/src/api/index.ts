@@ -9,3 +9,4 @@ export * from "./vector";
 export * from "./file-system";
 export * from "./shell";
 export * from "./files";
+export * from "./theme";
