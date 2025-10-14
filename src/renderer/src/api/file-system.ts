@@ -9,7 +9,7 @@ import type {
   FileStats,
   SearchOptions,
   WorkspaceValidationResult
-} from "../types/files";
+} from "@shared/types";
 
 /**
  * 文件系统 API

@@ -1,7 +1,7 @@
 // ==================== 聊天记录 API 封装 ====================
 
 import { ipcClient, handleResponse } from "./ipc";
-import type { Chat, ChatFormData } from "@renderer/types";
+import type { Chat, ChatFormData } from "@shared/types";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
 
 export const chatsApi = {

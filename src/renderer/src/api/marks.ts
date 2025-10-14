@@ -1,7 +1,7 @@
 // ==================== 标记收藏 API 封装 ====================
 
 import { ipcClient, handleResponse } from "./ipc";
-import type { Mark, MarkFormData } from "@renderer/types";
+import type { Mark, MarkFormData } from "@shared/types";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
 
 export const marksApi = {

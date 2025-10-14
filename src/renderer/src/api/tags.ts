@@ -1,7 +1,7 @@
 // ==================== 标签 API 封装 ====================
 
 import { ipcClient, handleResponse } from "./ipc";
-import type { Tag, TagFormData } from "@renderer/types";
+import type { Tag, TagFormData } from "@shared/types";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
 
 export const tagsApi = {

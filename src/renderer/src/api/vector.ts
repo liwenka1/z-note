@@ -1,7 +1,7 @@
 // ==================== 向量文档 API 封装 ====================
 
 import { ipcClient, handleResponse } from "./ipc";
-import type { VectorDocument, VectorDocumentFormData } from "@renderer/types";
+import type { VectorDocument, VectorDocumentFormData } from "@shared/types";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
 
 export const vectorApi = {
