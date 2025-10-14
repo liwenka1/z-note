@@ -4,7 +4,8 @@ import { immer } from "zustand/middleware/immer";
 export interface Tab {
   id: string;
   title: string;
-  type: "note" | "settings";
+  type: "note" | "settings" | "tag";
+  tagId?: number; // 对于tag类型的tab，存储tag的ID
 }
 
 interface TabState {
@@ -14,10 +15,12 @@ interface TabState {
 
 interface TabActions {
   openTab: (noteId: string, title: string, type?: "note" | "settings") => void;
+  openTagTab: (tagId: number, tagName: string) => void;
   openSettingsTab: () => void;
   closeTab: (tabId: string) => void;
   closeAllTabs: () => void;
   closeOtherTabs: (keepTabId: string) => void;
+  closeTagTabs: (tagId: number) => void;
   setActiveTab: (tabId: string) => void;
   updateTabTitle: (tabId: string, title: string) => void;
   reorderTabs: (fromIndex: number, toIndex: number) => void;
@@ -52,6 +55,30 @@ export const useTabStore = create<TabStore>()(
 
         // Set as active tab
         state.activeTabId = noteId;
+      });
+    },
+
+    openTagTab: (tagId: number, tagName: string) => {
+      set((state) => {
+        const tabId = `tag-${tagId}`;
+        // Check if tag tab already exists
+        const existingTab = state.openTabs.find((tab) => tab.id === tabId);
+
+        if (!existingTab) {
+          // Add new tag tab
+          state.openTabs.push({
+            id: tabId,
+            title: tagName,
+            type: "tag",
+            tagId: tagId
+          });
+        } else {
+          // Update existing tab title if needed
+          existingTab.title = tagName;
+        }
+
+        // Set as active tab
+        state.activeTabId = tabId;
       });
     },
 
@@ -109,6 +136,29 @@ export const useTabStore = create<TabStore>()(
           state.openTabs = [keepTab];
           state.activeTabId = keepTabId;
         }
+      });
+    },
+
+    closeTagTabs: (tagId: number) => {
+      set((state) => {
+        const tabsToClose = state.openTabs.filter((tab) => tab.type === "tag" && tab.tagId === tagId);
+
+        tabsToClose.forEach((tab) => {
+          const tabIndex = state.openTabs.findIndex((t) => t.id === tab.id);
+          if (tabIndex !== -1) {
+            state.openTabs.splice(tabIndex, 1);
+
+            // If closing active tab, set new active tab
+            if (state.activeTabId === tab.id) {
+              if (state.openTabs.length > 0) {
+                const newActiveIndex = Math.min(tabIndex, state.openTabs.length - 1);
+                state.activeTabId = state.openTabs[newActiveIndex]?.id || null;
+              } else {
+                state.activeTabId = null;
+              }
+            }
+          }
+        });
       });
     },
 
