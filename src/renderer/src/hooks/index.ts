@@ -12,3 +12,4 @@ export * from "./use-active-note";
 export * from "./use-streaming-chat";
 export * from "./use-ai-chat";
 export * from "./use-ocr";
+export * from "./use-theme-sync";
