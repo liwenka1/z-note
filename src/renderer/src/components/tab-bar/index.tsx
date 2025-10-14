@@ -26,10 +26,6 @@ export function TabBar() {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  // 获取当前激活的 tab 类型
-  const activeTab = openTabs.find((tab) => tab.id === activeTabId);
-  const isNoteTab = activeTab?.type === "note" || activeTab?.type === undefined; // 兼容旧数据
-
   // 自动滚动到激活的 tab
   const scrollToActiveTab = () => {
     if (activeTabRef.current && scrollContainerRef.current) {
@@ -64,6 +60,8 @@ export function TabBar() {
       if (activeTab) {
         if (activeTab.id === "settings") {
           navigate({ to: "/settings" });
+        } else if (activeTab.type === "tag" && activeTab.tagId) {
+          navigate({ to: "/tags/$tagId", params: { tagId: activeTab.tagId.toString() } });
         } else {
           navigate({ to: "/notes/$noteId", params: { noteId: activeTab.id } });
         }
@@ -107,8 +105,15 @@ export function TabBar() {
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
-    if (tabId !== "settings") {
-      navigate({ to: "/notes/$noteId", params: { noteId: tabId } });
+    const tab = openTabs.find((t) => t.id === tabId);
+    if (tab) {
+      if (tab.id === "settings") {
+        navigate({ to: "/settings" });
+      } else if (tab.type === "tag" && tab.tagId) {
+        navigate({ to: "/tags/$tagId", params: { tagId: tab.tagId.toString() } });
+      } else {
+        navigate({ to: "/notes/$noteId", params: { noteId: tabId } });
+      }
     }
   };
 
@@ -209,77 +214,73 @@ export function TabBar() {
 
       {/* 右侧操作按钮 */}
       <div className="border-border/30 bg-card flex border-l">
-        {/* 新建笔记 - 只在笔记 tab 时显示 */}
-        {isNoteTab && (
+        {/* 新建笔记 - 一直显示 */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hover:bg-muted/40 text-muted-foreground hover:text-foreground h-full w-8 rounded-none p-0"
+              onClick={handleNewNote}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>新建笔记 (Ctrl+N)</p>
+          </TooltipContent>
+        </Tooltip>
+
+        {/* 更多操作 - 一直显示 */}
+        <DropdownMenu>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="hover:bg-muted/40 text-muted-foreground hover:text-foreground h-full w-8 rounded-none p-0"
-                onClick={handleNewNote}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hover:bg-muted/40 text-muted-foreground hover:text-foreground h-full w-8 rounded-none p-0"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
             </TooltipTrigger>
             <TooltipContent>
-              <p>新建笔记 (Ctrl+N)</p>
+              <p>更多操作</p>
             </TooltipContent>
           </Tooltip>
-        )}
-
-        {/* 更多操作 - 只在笔记 tab 时显示 */}
-        {isNoteTab && (
-          <DropdownMenu>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="hover:bg-muted/40 text-muted-foreground hover:text-foreground h-full w-8 rounded-none p-0"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>更多操作</p>
-              </TooltipContent>
-            </Tooltip>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => {
-                  // 关闭所有标签时清除所有编辑状态
-                  openTabs.forEach((tab) => stopEditing(tab.id));
-                  closeAllTabs();
-                  // 导航到首页
-                  navigate({ to: "/" });
-                }}
-              >
-                关闭所有标签
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  if (activeTabId) {
-                    // 关闭其他标签时清除其他标签的编辑状态
-                    openTabs.forEach((tab) => {
-                      if (tab.id !== activeTabId) {
-                        stopEditing(tab.id);
-                      }
-                    });
-                    closeOtherTabs(activeTabId);
-                  }
-                }}
-                disabled={!activeTabId}
-              >
-                关闭其他标签
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>保存所有标签</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => {
+                // 关闭所有标签时清除所有编辑状态
+                openTabs.forEach((tab) => stopEditing(tab.id));
+                closeAllTabs();
+                // 导航到首页
+                navigate({ to: "/" });
+              }}
+            >
+              关闭所有标签
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                if (activeTabId) {
+                  // 关闭其他标签时清除其他标签的编辑状态
+                  openTabs.forEach((tab) => {
+                    if (tab.id !== activeTabId) {
+                      stopEditing(tab.id);
+                    }
+                  });
+                  closeOtherTabs(activeTabId);
+                }
+              }}
+              disabled={!activeTabId}
+            >
+              关闭其他标签
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>保存所有标签</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
