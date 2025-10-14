@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@renderer/components/ui/button";
 import { Input } from "@renderer/components/ui/input";
 import { useUpdateTag } from "@renderer/hooks/mutations";
-import type { Tag } from "@renderer/types";
+import type { Tag } from "@shared/types";
 
 interface TagEditFormProps {
   tag: Tag;

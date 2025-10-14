@@ -10,7 +10,7 @@ import {
   AlertDialogTitle
 } from "@renderer/components/ui/alert-dialog";
 import { useDeleteMark } from "@renderer/hooks/mutations";
-import type { Mark } from "@renderer/types";
+import type { Mark } from "@shared/types";
 
 interface MarkDeleteDialogProps {
   mark: Mark;

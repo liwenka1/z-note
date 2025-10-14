@@ -3,7 +3,7 @@ import { ScrollArea } from "@renderer/components/ui/scroll-area";
 import { useFilesState } from "../hooks/use-files-state";
 import { FolderItem } from "./folder-item";
 import { NoteItem } from "./note-item";
-import type { FileNode } from "@renderer/types/files";
+import type { FileNode } from "@shared/types";
 
 /**
  * 递归渲染文件树节点

@@ -4,7 +4,7 @@ import { FolderHeader } from "./components/folder-header";
 import { RenameInput } from "./components/rename-input";
 import { FolderActions } from "./components/folder-actions";
 import { FolderChildren } from "./components/folder-children";
-import type { FileNode } from "@renderer/types/files";
+import type { FileNode } from "@shared/types";
 
 interface FolderItemProps {
   folder: FileNode;

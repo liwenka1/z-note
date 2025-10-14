@@ -5,7 +5,7 @@ import { Label } from "@renderer/components/ui/label";
 import { Textarea } from "@renderer/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@renderer/components/ui/select";
 import { useUpdateMark } from "@renderer/hooks/mutations";
-import type { Mark, MarkFormData } from "@renderer/types";
+import type { Mark, MarkFormData } from "@shared/types";
 
 interface MarkEditFormProps {
   mark: Mark;

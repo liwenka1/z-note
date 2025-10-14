@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { notesApi } from "@renderer/api";
 import { queryKeys } from "@renderer/lib/query-client";
 import { ErrorHandler } from "@renderer/lib/error-handler";
-import type { Note, NoteFormData } from "@renderer/types";
+import type { Note, NoteFormData } from "@shared/types";
 
 /**
  * 创建笔记

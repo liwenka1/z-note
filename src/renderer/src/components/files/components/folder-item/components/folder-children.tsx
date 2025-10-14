@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { NoteItem } from "../../note-item";
-import type { FileNode } from "@renderer/types/files";
+import type { FileNode } from "@shared/types";
 
 interface FolderChildrenProps {
   childNodes: FileNode[];

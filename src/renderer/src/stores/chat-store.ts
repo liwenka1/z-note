@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { chatsApi } from "@renderer/api/chats";
 import { tagsApi } from "@renderer/api/tags";
-import type { Chat, ChatFormData, TagFormData } from "@renderer/types";
+import type { Chat, ChatFormData, TagFormData } from "@shared/types";
 
 // 消息类型 - 对应数据库中的Chat记录
 export interface Message {

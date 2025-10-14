@@ -1,4 +1,4 @@
-import type { Mark } from "@renderer/types";
+import type { Mark } from "@shared/types";
 
 /**
  * 按类型分类 marks

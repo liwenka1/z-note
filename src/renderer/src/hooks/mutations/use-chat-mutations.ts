@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { chatsApi } from "@renderer/api";
 import { queryKeys } from "@renderer/lib/query-client";
-import type { ChatFormData } from "@renderer/types";
+import type { ChatFormData } from "@shared/types";
 
 /**
  * 创建聊天记录

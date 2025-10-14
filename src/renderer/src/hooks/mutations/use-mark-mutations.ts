@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { marksApi } from "@renderer/api";
 import { queryKeys } from "@renderer/lib/query-client";
-import type { MarkFormData } from "@renderer/types";
+import type { MarkFormData } from "@shared/types";
 
 /**
  * 创建标记

@@ -1,17 +1,8 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { fileSystemApi, workspaceApi, configApi, CONFIG_KEYS, FILE_EXTENSIONS } from "@renderer/api";
-import type {
-  FileNode,
-  WorkspaceConfig,
-  ScanOptions,
-  SortType,
-  SortDirection,
-  FileTreeState,
-  WorkspaceState,
-  FileEditState,
-  SearchResultItem
-} from "@renderer/types";
+import type { FileNode, WorkspaceConfig, ScanOptions, SortType, SortDirection } from "@shared/types";
+import type { FileTreeState, WorkspaceState, FileEditState, SearchResultItem } from "@renderer/types";
 
 // ==================== Files 状态管理 ====================
 
@@ -528,7 +519,7 @@ export const useFilesStore = create<FilesStore>()(
 
         // 验证工作区路径
         const validation = await workspaceApi.validateWorkspace(config.workspacePath);
-        if (!validation.valid) {
+        if (!validation.isValid) {
           // 使用默认工作区
           const defaultPath = await workspaceApi.getDefaultPath();
           config = {
@@ -567,7 +558,7 @@ export const useFilesStore = create<FilesStore>()(
 
     switchWorkspace: async (workspacePath: string) => {
       const validation = await workspaceApi.validateWorkspace(workspacePath);
-      if (!validation.valid) {
+      if (!validation.isValid) {
         throw new Error(validation.error || "工作区路径无效");
       }
 

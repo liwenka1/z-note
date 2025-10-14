@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { vectorApi } from "@renderer/api";
 import { queryKeys } from "@renderer/lib/query-client";
-import type { VectorDocumentFormData } from "@renderer/types";
+import type { VectorDocumentFormData } from "@shared/types";
 
 /**
  * 初始化向量数据库

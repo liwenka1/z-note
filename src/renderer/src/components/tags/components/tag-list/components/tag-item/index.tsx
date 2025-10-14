@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuItem
 } from "@renderer/components/ui/dropdown-menu";
-import type { Tag } from "@renderer/types";
+import type { Tag } from "@shared/types";
 import { useMarksByTag } from "@renderer/hooks/queries";
 import { TagEditForm } from "./components/tag-edit-form";
 import { TagDeleteDialog } from "./components/tag-delete-dialog";

@@ -15,7 +15,7 @@ import { useTabStore } from "@renderer/stores/tab-store";
 import { shellApi, filesApi } from "@renderer/api";
 import { createFileNoteId } from "@renderer/types/file-content";
 import { cn } from "@renderer/lib/utils";
-import type { FileNode } from "@renderer/types/files";
+import type { FileNode } from "@shared/types";
 
 interface NoteItemProps {
   file: FileNode;

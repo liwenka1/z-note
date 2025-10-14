@@ -11,7 +11,7 @@ import {
 } from "@renderer/components/ui/alert-dialog";
 import { useDeleteTag } from "@renderer/hooks/mutations";
 import { useMarksByTag } from "@renderer/hooks/queries";
-import type { Tag } from "@renderer/types";
+import type { Tag } from "@shared/types";
 
 interface TagDeleteDialogProps {
   tag: Tag;

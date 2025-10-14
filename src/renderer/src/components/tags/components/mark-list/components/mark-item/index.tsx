@@ -13,7 +13,7 @@ import {
 } from "@renderer/components/ui/dropdown-menu";
 import { MarkEditForm } from "./components/mark-edit-form";
 import { MarkDeleteDialog } from "./components/mark-delete-dialog";
-import type { Mark } from "@renderer/types";
+import type { Mark } from "@shared/types";
 
 interface MarkItemProps {
   mark: Mark;
