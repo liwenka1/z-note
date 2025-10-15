@@ -4,9 +4,13 @@ import { Button } from "@renderer/components/ui/button";
 import { ScrollArea } from "@renderer/components/ui/scroll-area";
 import { AI_PLATFORMS, type AIPlatform } from "./constants/ai-platforms";
 import { WebviewContainer } from "./components/webview-container";
+import { AddPlatformDialog } from "./components/add-platform-dialog";
+import { PlatformCard } from "./components/platform-card";
+import { useAIPlatformsStore } from "@renderer/stores";
 
 export function AIPlaygroundPanel() {
   const [selectedPlatform, setSelectedPlatform] = useState<AIPlatform | null>(null);
+  const customPlatforms = useAIPlatformsStore((state) => state.customPlatforms);
 
   // 关闭 webview
   const handleClose = () => {
@@ -21,31 +25,35 @@ export function AIPlaygroundPanel() {
         <div className="border-border/50 bg-secondary/30 border-b">
           <div className="flex items-center justify-between px-4 py-3">
             <h2 className="text-foreground text-sm font-medium">AI 工作台</h2>
+            <AddPlatformDialog />
           </div>
         </div>
 
         {/* 平台列表 */}
-        <ScrollArea className="flex-1">
-          <div className="p-4">
-            <div className="space-y-2">
+        <div className="flex-1 overflow-hidden">
+          <ScrollArea className="h-full">
+            <div className="flex flex-col gap-2 p-4">
+              {/* 默认平台 */}
               {AI_PLATFORMS.map((platform) => (
-                <button
-                  key={platform.id}
-                  onClick={() => setSelectedPlatform(platform)}
-                  className="hover:bg-secondary/50 text-foreground flex w-full items-center gap-3 rounded-lg border p-4 text-left transition-colors"
-                >
-                  <div className="flex-1">
-                    <div className="font-medium">{platform.name}</div>
-                    {platform.description && (
-                      <div className="text-muted-foreground mt-1 text-sm">{platform.description}</div>
-                    )}
-                  </div>
-                  <div className="text-muted-foreground text-xs">{platform.url}</div>
-                </button>
+                <PlatformCard key={platform.id} platform={platform} onSelect={setSelectedPlatform} isCustom={false} />
               ))}
+
+              {/* 自定义平台 */}
+              {customPlatforms.length > 0 && (
+                <>
+                  {customPlatforms.map((platform) => (
+                    <PlatformCard
+                      key={platform.id}
+                      platform={platform}
+                      onSelect={setSelectedPlatform}
+                      isCustom={true}
+                    />
+                  ))}
+                </>
+              )}
             </div>
-          </div>
-        </ScrollArea>
+          </ScrollArea>
+        </div>
       </div>
     );
   }
