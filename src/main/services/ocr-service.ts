@@ -1,5 +1,4 @@
 import { createWorker } from "tesseract.js";
-import { BaseService } from "./base-service";
 import { registerHandler } from "../ipc/registry";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
 import type { OCROptions, OCRResult } from "@shared/ocr-types";
@@ -7,9 +6,10 @@ import * as path from "path";
 import { app } from "electron";
 
 /**
- * OCR 服务 - 在主进程中处理图片识别
+ * OCR 服务 (工具型服务)
+ * 在主进程中处理图片识别
  */
-export class OCRService extends BaseService {
+export class OCRService {
   private worker: Tesseract.Worker | null = null;
   private isInitialized = false;
 

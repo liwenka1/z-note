@@ -1,4 +1,3 @@
-import { BaseService } from "./base-service";
 import { FileSystemService } from "./file-system-service";
 import { app } from "electron";
 import * as path from "path";
@@ -6,15 +5,14 @@ import { registerHandler } from "../ipc/registry";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
 
 /**
- * 配置服务
+ * 配置服务 (工具型服务)
  * 负责管理应用配置的存储和读取
  */
-export class ConfigService extends BaseService {
+export class ConfigService {
   private fileSystemService: FileSystemService;
   private configPath: string;
 
   constructor() {
-    super();
     this.fileSystemService = new FileSystemService();
     this.configPath = path.join(app.getPath("userData"), "app-config.json");
   }

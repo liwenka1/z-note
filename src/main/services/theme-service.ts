@@ -1,17 +1,12 @@
-import { BaseService } from "./base-service";
 import { nativeTheme } from "electron";
 import { registerHandler } from "../ipc/registry";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
 
 /**
- * 主题服务
+ * 主题服务 (工具型服务)
  * 负责管理应用的原生主题
  */
-export class ThemeService extends BaseService {
-  constructor() {
-    super();
-  }
-
+export class ThemeService {
   /**
    * 设置原生主题
    */

@@ -1,4 +1,3 @@
-import { BaseService } from "./base-service";
 import { FileSystemService } from "./file-system-service";
 import { dialog, app } from "electron";
 import * as path from "path";
@@ -16,14 +15,13 @@ export interface WorkspaceConfig {
 }
 
 /**
- * 工作区服务
+ * 工作区服务 (工具型服务)
  * 负责管理工作区配置和相关操作
  */
-export class WorkspaceService extends BaseService {
+export class WorkspaceService {
   private fileSystemService: FileSystemService;
 
   constructor() {
-    super();
     this.fileSystemService = new FileSystemService();
   }
 

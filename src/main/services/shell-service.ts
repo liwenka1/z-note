@@ -1,13 +1,12 @@
-import { BaseService } from "./base-service";
 import { shell } from "electron";
 import { registerHandler } from "../ipc/registry";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
 
 /**
- * 系统Shell操作服务
+ * 系统Shell操作服务 (工具型服务)
  * 负责处理文件管理器、外部链接等系统操作
  */
-export class ShellService extends BaseService {
+export class ShellService {
   /**
    * 在文件管理器中显示文件/文件夹
    */

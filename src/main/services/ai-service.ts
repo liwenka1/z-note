@@ -1,4 +1,3 @@
-import { BaseService } from "./base-service";
 import { ipcMain } from "electron";
 import { registerHandler } from "../ipc/registry";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
@@ -45,10 +44,11 @@ export interface AIStreamResponse {
 }
 
 /**
- * AI 服务
+ * AI 服务 (工具型服务)
  * 负责处理 AI 相关的功能，包括聊天和流式聊天
+ * 不涉及数据库操作，专注于 AI SDK 调用和流式管理
  */
-export class AIService extends BaseService {
+export class AIService {
   // 维护流式请求的 AbortController 映射
   private static streamControllers = new Map<string, AbortController>();
 
