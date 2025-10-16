@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useTabStore, useFilesStore } from "@renderer/stores";
+import { useCreateNoteFile } from "@renderer/hooks/mutations/use-file-mutations";
 import { filesApi } from "@renderer/api";
 import {
   createFileNoteId,
@@ -14,12 +15,13 @@ import { ErrorHandler, AppError, ErrorType } from "@renderer/lib/error-handler";
 
 /**
  * 笔记管理 Hook
- * 提供创建、打开笔记的统一接口
+ * 使用 React Query mutations 处理笔记创建
  */
 export function useNoteManager() {
   const navigate = useNavigate();
   const { openTab } = useTabStore();
   const { workspace } = useFilesStore();
+  const createNoteMutation = useCreateNoteFile();
 
   /**
    * 生成唯一的笔记文件名
@@ -37,49 +39,43 @@ export function useNoteManager() {
     async (options?: { baseName?: string; template?: NoteFileContent; openInNewTab?: boolean }): Promise<string> => {
       const { baseName, template, openInNewTab = true } = options || {};
 
-      try {
-        if (!workspace.config.workspacePath) {
-          throw new AppError("工作区路径未设置", ErrorType.VALIDATION);
-        }
-
-        // 生成文件名
-        const fileName = generateNoteFileName(baseName);
-
-        // 创建笔记内容
-        const noteContent = template || createEmptyNoteFile(getTitleFromFileName(fileName));
-
-        // 创建文件（不刷新文件树以提高性能）
-        const { createNewFileNoRefresh } = useFilesStore.getState();
-        const actualFilePath = await createNewFileNoRefresh(
-          fileName,
-          JSON.stringify(noteContent, null, NOTE_CONSTANTS.JSON_INDENT)
-        );
-
-        // 生成文件 noteId
-        const fileNoteId = createFileNoteId(actualFilePath);
-
-        if (openInNewTab) {
-          // 读取刚创建的笔记文件内容以确保一致性
-          const savedNoteContent = await filesApi.readNoteFile(actualFilePath);
-
-          // 打开标签页
-          openTab(fileNoteId, savedNoteContent.metadata.title, "note");
-
-          // 导航到笔记页面
-          navigate({ to: "/notes/$noteId", params: { noteId: fileNoteId } });
-        }
-
-        // 显示成功提示
-        ErrorHandler.success("笔记创建成功");
-
-        return fileNoteId;
-      } catch (error) {
-        // 使用统一错误处理
-        ErrorHandler.handle(error, "创建笔记");
-        throw error;
+      if (!workspace.config.workspacePath) {
+        throw new AppError("工作区路径未设置", ErrorType.VALIDATION);
       }
+
+      // 生成文件名
+      const fileName = generateNoteFileName(baseName);
+
+      // 创建笔记内容
+      const noteContent = template || createEmptyNoteFile(getTitleFromFileName(fileName));
+
+      // 创建文件（不刷新文件树）
+      const { createNewFileNoRefresh } = useFilesStore.getState();
+      const actualFilePath = await createNewFileNoRefresh(
+        fileName,
+        JSON.stringify(noteContent, null, NOTE_CONSTANTS.JSON_INDENT)
+      );
+
+      // 使用 mutation 更新缓存（不等待完成）
+      createNoteMutation.mutate({ filePath: actualFilePath });
+
+      // 生成文件 noteId
+      const fileNoteId = createFileNoteId(actualFilePath);
+
+      if (openInNewTab) {
+        // 读取刚创建的笔记文件
+        const savedNoteContent = await filesApi.readNoteFile(actualFilePath);
+
+        // 打开标签页
+        openTab(fileNoteId, savedNoteContent.metadata.title, "note");
+
+        // 导航到笔记页面
+        navigate({ to: "/notes/$noteId", params: { noteId: fileNoteId } });
+      }
+
+      return fileNoteId;
     },
-    [workspace.config.workspacePath, generateNoteFileName, openTab, navigate]
+    [workspace.config.workspacePath, generateNoteFileName, openTab, navigate, createNoteMutation]
   );
 
   /**
@@ -124,6 +120,7 @@ export function useNoteManager() {
     createAndOpenNote,
     openNote,
     quickCreateNote,
-    generateNoteFileName
+    generateNoteFileName,
+    isCreating: createNoteMutation.isPending
   };
 }

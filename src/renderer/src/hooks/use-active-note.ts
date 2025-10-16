@@ -1,65 +1,30 @@
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import { useTabStore } from "@renderer/stores";
-import { filesApi } from "@renderer/api";
+import { useNoteFile } from "@renderer/hooks/queries/use-files";
 import { isFileNoteId, getFilePathFromNoteId } from "@renderer/types/file-content";
-import type { NoteFileContent } from "@renderer/types/file-content";
 
 /**
  * 获取当前活跃笔记的 Hook
- * 处理文件模式和数据库模式的笔记加载
+ * 使用 React Query 自动管理加载状态和缓存
  */
 export function useActiveNote() {
   const { activeTabId, openTabs } = useTabStore();
-  const [noteData, setNoteData] = useState<NoteFileContent | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
 
   // 获取当前活跃标签信息
   const currentTab = activeTabId ? openTabs.find((tab) => tab.id === activeTabId) : null;
 
-  useEffect(() => {
-    const loadNote = async () => {
-      if (!activeTabId) {
-        setNoteData(null);
-        setError(null);
-        return;
-      }
+  // 判断是否为文件模式笔记
+  const isFileNote = activeTabId ? isFileNoteId(activeTabId) : false;
+  const isSettingsTab = currentTab?.type === "settings";
 
-      // 如果是设置页面，不需要加载笔记数据
-      if (currentTab?.type === "settings") {
-        setNoteData(null);
-        setError(null);
-        return;
-      }
+  // 获取文件路径
+  const filePath = useMemo(() => {
+    if (!activeTabId || !isFileNote || isSettingsTab) return null;
+    return getFilePathFromNoteId(activeTabId);
+  }, [activeTabId, isFileNote, isSettingsTab]);
 
-      // 处理文件模式的笔记
-      if (isFileNoteId(activeTabId)) {
-        setIsLoading(true);
-        setError(null);
-
-        try {
-          const filePath = getFilePathFromNoteId(activeTabId);
-          const noteContent = await filesApi.readNoteFile(filePath);
-          setNoteData(noteContent);
-        } catch (err) {
-          const error = err instanceof Error ? err : new Error("加载笔记失败");
-          setError(error);
-          setNoteData(null);
-          console.error("加载笔记文件失败:", error);
-        } finally {
-          setIsLoading(false);
-        }
-        return;
-      }
-
-      // 处理数据库模式的笔记（暂时未实现）
-      // TODO: 实现数据库模式的笔记加载逻辑
-      setNoteData(null);
-      setError(null);
-    };
-
-    loadNote();
-  }, [activeTabId, currentTab?.type]);
+  // 使用 React Query 加载笔记文件
+  const { data: noteData, isLoading, error } = useNoteFile(filePath, !!filePath);
 
   return {
     /** 当前活跃的笔记数据 */

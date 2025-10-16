@@ -1,73 +1,30 @@
-import { useState, useCallback } from "react";
-import { ocrApi, type OCROptions, type OCRResult } from "@renderer/api/ocr";
-
-export interface UseOCRState {
-  isLoading: boolean;
-  result: OCRResult | null;
-  error: string | null;
-}
-
-export interface UseOCRActions {
-  processImage: (imagePath: string, options?: OCROptions) => Promise<string>;
-  reset: () => void;
-}
-
-export type UseOCRReturn = UseOCRState & UseOCRActions;
+import { useCallback } from "react";
+import { useOCRMutation } from "@renderer/hooks/mutations/use-ocr-mutations";
+import type { OCROptions } from "@renderer/api/ocr";
 
 /**
- * OCR Hook - 调用后端服务
+ * OCR Hook - 使用 React Query mutation
  */
-export function useOCR(): UseOCRReturn {
-  const [state, setState] = useState<UseOCRState>({
-    isLoading: false,
-    result: null,
-    error: null
-  });
+export function useOCR() {
+  const ocrMutation = useOCRMutation();
 
-  // 处理图片 OCR
-  const processImage = useCallback(async (imagePath: string, options: OCROptions = {}): Promise<string> => {
-    setState((prev) => ({
-      ...prev,
-      isLoading: true,
-      error: null
-    }));
-
-    try {
-      // OCR 成功时返回 OCRResult，失败时抛出异常（由 BaseResponse 处理）
-      const result = await ocrApi.processImage(imagePath, options);
-
-      setState({
-        isLoading: false,
-        result,
-        error: null
-      });
-
+  const processImage = useCallback(
+    async (imagePath: string, options: OCROptions = {}): Promise<string> => {
+      const result = await ocrMutation.mutateAsync({ imagePath, options });
       return result.text;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    },
+    [ocrMutation]
+  );
 
-      setState({
-        isLoading: false,
-        result: null,
-        error: errorMessage
-      });
-
-      throw error;
-    }
-  }, []);
-
-  // 重置状态
   const reset = useCallback(() => {
-    setState({
-      isLoading: false,
-      result: null,
-      error: null
-    });
-  }, []);
+    ocrMutation.reset();
+  }, [ocrMutation]);
 
   return {
-    ...state,
     processImage,
-    reset
+    reset,
+    isLoading: ocrMutation.isPending,
+    result: ocrMutation.data,
+    error: ocrMutation.error?.message || null
   };
 }
