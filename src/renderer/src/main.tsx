@@ -8,7 +8,7 @@ import { ThemeProvider } from "next-themes";
 import { enableMapSet } from "immer";
 
 import { Toaster } from "@renderer/components/ui/sonner";
-import { usePromptStore } from "@renderer/stores/prompt-store";
+import { usePromptStore } from "@renderer/stores";
 
 // 启用 Immer 的 MapSet 插件
 enableMapSet();

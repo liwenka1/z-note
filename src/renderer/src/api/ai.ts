@@ -1,6 +1,6 @@
 import { ipcClient, handleResponse } from "./ipc";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
-import { type AIConfig } from "@renderer/stores/ai-config-store";
+import { type AIConfig } from "@renderer/stores";
 
 export interface ChatMessage {
   role: "user" | "assistant" | "system";
