@@ -1,4 +1,4 @@
-import { FolderOpen, Search, Settings, BookOpen, Tag, BarChart3, MessageSquare, Globe } from "lucide-react";
+import { FolderOpen, Search, Settings, Tag, MessageSquare, Globe } from "lucide-react";
 
 // 左侧活动栏按钮配置
 export const leftActivityButtons = [
@@ -13,7 +13,5 @@ export const leftBottomButtons = [{ id: "settings", icon: Settings, tooltip: "�
 // 右侧活动栏按钮配置
 export const rightActivityButtons = [
   { id: "chat", icon: MessageSquare, tooltip: "AI 助手" },
-  { id: "playground", icon: Globe, tooltip: "AI 工作台" },
-  { id: "outline", icon: BookOpen, tooltip: "文档大纲" },
-  { id: "stats", icon: BarChart3, tooltip: "统计信息" }
+  { id: "playground", icon: Globe, tooltip: "AI 工作台" }
 ];

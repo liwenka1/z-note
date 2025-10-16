@@ -15,18 +15,6 @@ export function RightSidebar({ rightActivePanel }: RightSidebarProps) {
       <div className={`h-full w-full ${rightActivePanel === "playground" ? "block" : "hidden"}`}>
         <AIPlaygroundPanel />
       </div>
-      <div className={`h-full w-full ${rightActivePanel === "outline" ? "block" : "hidden"}`}>
-        <div className="p-4">
-          <h3 className="text-sm font-medium">文档大纲</h3>
-          <p className="text-muted-foreground mt-2 text-xs">功能开发中...</p>
-        </div>
-      </div>
-      <div className={`h-full w-full ${rightActivePanel === "stats" ? "block" : "hidden"}`}>
-        <div className="p-4">
-          <h3 className="text-sm font-medium">统计信息</h3>
-          <p className="text-muted-foreground mt-2 text-xs">功能开发中...</p>
-        </div>
-      </div>
     </div>
   );
 }
