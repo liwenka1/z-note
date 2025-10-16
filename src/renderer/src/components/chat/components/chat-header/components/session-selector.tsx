@@ -1,5 +1,5 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@renderer/components/ui/select";
-import { useChatStore } from "@renderer/stores/chat-store";
+import { useChatStore } from "@renderer/stores";
 import { format } from "date-fns";
 
 export function SessionSelector() {

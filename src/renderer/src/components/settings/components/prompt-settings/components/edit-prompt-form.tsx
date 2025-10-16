@@ -4,7 +4,7 @@ import { Input } from "@renderer/components/ui/input";
 import { Textarea } from "@renderer/components/ui/textarea";
 import { Label } from "@renderer/components/ui/label";
 import { X } from "lucide-react";
-import { type Prompt } from "@renderer/stores/prompt-store";
+import { type Prompt } from "@renderer/stores";
 
 interface EditPromptFormProps {
   prompt: Prompt;

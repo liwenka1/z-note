@@ -1,5 +1,5 @@
 import { Bot } from "lucide-react";
-import { usePromptStore } from "@renderer/stores/prompt-store";
+import { usePromptStore } from "@renderer/stores";
 
 export function EmptyChat() {
   const { currentPrompt } = usePromptStore();

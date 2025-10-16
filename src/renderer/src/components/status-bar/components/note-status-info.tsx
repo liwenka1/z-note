@@ -1,5 +1,4 @@
-import { useTabStore } from "@renderer/stores/tab-store";
-import { useEditorStore } from "@renderer/stores/editor-store";
+import { useTabStore, useEditorStore } from "@renderer/stores";
 import { calculateDocumentStats } from "@renderer/utils/tiptap-content-extractor";
 import { useActiveNote } from "@renderer/hooks";
 

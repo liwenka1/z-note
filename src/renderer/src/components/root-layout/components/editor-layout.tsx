@@ -1,6 +1,6 @@
 import { Outlet, useNavigate } from "@tanstack/react-router";
 import { TabBar } from "@renderer/components/tab-bar";
-import { useTabStore } from "@renderer/stores/tab-store";
+import { useTabStore } from "@renderer/stores";
 import { SettingsPage } from "@renderer/pages/settings-page";
 import { TagDetailPage } from "@renderer/pages/tag-detail-page";
 import { useEffect } from "react";

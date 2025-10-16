@@ -2,7 +2,7 @@ import { useRef, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { MessageItem } from "./components/message-item";
 import { EmptyChat } from "../empty-chat";
-import { useChatStore } from "@renderer/stores/chat-store";
+import { useChatStore } from "@renderer/stores";
 
 export function ChatMessageList() {
   // 直接订阅 store 的状态变化

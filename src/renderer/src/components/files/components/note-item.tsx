@@ -11,7 +11,7 @@ import {
 } from "@renderer/components/ui/dropdown-menu";
 import { Input } from "@renderer/components/ui/input";
 import { useFilesState } from "../hooks/use-files-state";
-import { useTabStore } from "@renderer/stores/tab-store";
+import { useTabStore } from "@renderer/stores";
 import { shellApi, filesApi } from "@renderer/api";
 import { createFileNoteId } from "@renderer/types/file-content";
 import { cn } from "@renderer/lib/utils";

@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@renderer/components/ui/dropdown-menu";
-import { useChatStore } from "@renderer/stores/chat-store";
+import { useChatStore } from "@renderer/stores";
 
 export function SessionActions() {
   const { createSession, clearSession } = useChatStore();

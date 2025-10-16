@@ -3,7 +3,7 @@ import { Button } from "@renderer/components/ui/button";
 import { Card, CardContent, CardHeader } from "@renderer/components/ui/card";
 import { Badge } from "@renderer/components/ui/badge";
 import { Edit, Trash2, Check, CheckCircle } from "lucide-react";
-import { AI_PROVIDERS, type AIConfig } from "@renderer/stores/ai-config-store";
+import { AI_PROVIDERS, type AIConfig } from "@renderer/stores";
 import { EditConfigForm } from "./edit-config-form";
 
 interface ConfigCardProps {

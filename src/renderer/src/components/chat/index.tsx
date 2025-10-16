@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { ChatHeader } from "./components/chat-header";
 import { ChatMessageList } from "./components/message-list";
 import { ChatInput } from "./components/chat-input";
-import { useChatStore } from "@renderer/stores/chat-store";
+import { useChatStore } from "@renderer/stores";
 
 /**
  * Chat 主组件 - 简洁版本，参考 Cursor 设计

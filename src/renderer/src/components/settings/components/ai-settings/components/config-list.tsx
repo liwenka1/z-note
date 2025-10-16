@@ -1,7 +1,7 @@
 import { Button } from "@renderer/components/ui/button";
 import { Card, CardContent } from "@renderer/components/ui/card";
 import { Bot, Plus } from "lucide-react";
-import { type AIConfig } from "@renderer/stores/ai-config-store";
+import { type AIConfig } from "@renderer/stores";
 import { ConfigCard } from "./config-card";
 
 interface ConfigListProps {

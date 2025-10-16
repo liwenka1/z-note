@@ -3,7 +3,7 @@ import { FilesHeader } from "./components/files-header";
 import { FolderTree } from "./components/folder-tree";
 import { EmptyFiles } from "./components/empty-files";
 import { useFilesState } from "./hooks/use-files-state";
-import { useFilesStore } from "@renderer/stores/files-store";
+import { useFilesStore } from "@renderer/stores";
 import { DEFAULT_WORKSPACE_PATH } from "@renderer/config/workspace";
 
 /**

@@ -3,9 +3,9 @@ import { Button } from "@renderer/components/ui/button";
 import { Card, CardContent, CardHeader } from "@renderer/components/ui/card";
 import { Badge } from "@renderer/components/ui/badge";
 import { Edit, Trash2, Check, CheckCircle } from "lucide-react";
-import { type Prompt } from "@renderer/stores/prompt-store";
+import { type Prompt } from "@renderer/stores";
 import { EditPromptForm } from "./edit-prompt-form";
-import { usePromptStore } from "@renderer/stores/prompt-store";
+import { usePromptStore } from "@renderer/stores";
 
 interface PromptCardProps {
   prompt: Prompt;

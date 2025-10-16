@@ -1,5 +1,5 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@renderer/components/ui/select";
-import { type AIConfig } from "@renderer/stores/ai-config-store";
+import { type AIConfig } from "@renderer/stores";
 
 interface ConfigSelectorProps {
   configs: AIConfig[];

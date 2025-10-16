@@ -8,7 +8,7 @@ import { BookmarkPlus, Check } from "lucide-react";
 import { useCreateMark } from "@renderer/hooks/mutations";
 import { chatsApi } from "@renderer/api";
 import { toast } from "sonner";
-import type { Message } from "@renderer/stores/chat-store";
+import type { Message } from "@renderer/stores";
 
 interface RecordButtonProps {
   message: Message;

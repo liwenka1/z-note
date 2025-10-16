@@ -1,8 +1,7 @@
 import { Copy, RotateCcw, Trash } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
-import { useChatStore, type Message, type ChatSession } from "@renderer/stores/chat-store";
+import { useChatStore, type Message, type ChatSession, useChatTagStore } from "@renderer/stores";
 import { RecordButton } from "./components/record-button";
-import { useChatTagStore } from "@renderer/stores/chat-tag-store";
 
 interface MessageActionsProps {
   message: Message;

@@ -1,6 +1,6 @@
 import { Button } from "@renderer/components/ui/button";
 import { MessageSquare, Plus } from "lucide-react";
-import { type Prompt } from "@renderer/stores/prompt-store";
+import { type Prompt } from "@renderer/stores";
 import { PromptCard } from "./prompt-card";
 
 interface PromptListProps {

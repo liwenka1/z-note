@@ -3,7 +3,7 @@ import { Bot, User, Settings } from "lucide-react";
 import { Avatar, AvatarFallback } from "@renderer/components/ui/avatar";
 import { MessageContent } from "./components/message-content";
 import { MessageActions } from "./components/message-actions";
-import { useChatStore, type Message } from "@renderer/stores/chat-store";
+import { useChatStore, type Message } from "@renderer/stores";
 
 interface MessageItemProps {
   message: Message;

@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger
 } from "@renderer/components/ui/dropdown-menu";
 import { useTabStore } from "@renderer/stores";
-import { useEditorStore } from "@renderer/stores/editor-store";
+import { useEditorStore } from "@renderer/stores";
 import { useNoteManager } from "@renderer/hooks";
 
 export function TabBar() {

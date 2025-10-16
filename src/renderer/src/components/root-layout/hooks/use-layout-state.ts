@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSearchStore } from "@renderer/stores";
-import { useTabStore } from "@renderer/stores/tab-store";
+import { useTabStore } from "@renderer/stores";
 
 export function useLayoutState() {
   const { openSearch } = useSearchStore();

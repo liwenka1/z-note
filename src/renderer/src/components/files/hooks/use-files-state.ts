@@ -1,4 +1,4 @@
-import { useFilesStore } from "@renderer/stores/files-store";
+import { useFilesStore } from "@renderer/stores";
 
 /**
  * Files 状态管理 Hook

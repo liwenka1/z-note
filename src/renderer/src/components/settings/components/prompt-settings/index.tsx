@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@renderer/components/ui/button";
 import { Plus } from "lucide-react";
-import { usePromptStore } from "@renderer/stores/prompt-store";
+import { usePromptStore } from "@renderer/stores";
 import { PromptList } from "./components/prompt-list";
 import { AddPromptForm } from "./components/add-prompt-form";
 

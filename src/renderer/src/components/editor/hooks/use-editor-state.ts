@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNote } from "@renderer/hooks";
-import { useEditorStore } from "@renderer/stores/editor-store";
+import { useEditorStore } from "@renderer/stores";
 import { filesApi } from "@renderer/api";
 import { isFileNoteId, getFilePathFromNoteId } from "@renderer/types/file-content";
 import type { JSONContent } from "@tiptap/react";

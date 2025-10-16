@@ -3,7 +3,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { TypingIndicator } from "./components/typing-indicator";
 import { useTheme } from "next-themes";
-import { type Message } from "@renderer/stores/chat-store";
+import { type Message } from "@renderer/stores";
 
 interface MessageContentProps {
   message: Message;

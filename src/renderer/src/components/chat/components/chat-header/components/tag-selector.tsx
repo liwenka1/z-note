@@ -6,8 +6,7 @@ import { Button } from "@renderer/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@renderer/components/ui/select";
 import { Tag, X } from "lucide-react";
 import { useTags } from "@renderer/hooks/queries";
-import { useChatStore } from "@renderer/stores/chat-store";
-import { useChatTagStore } from "@renderer/stores/chat-tag-store";
+import { useChatStore, useChatTagStore } from "@renderer/stores";
 
 export function TagSelector() {
   const { data: tags } = useTags();

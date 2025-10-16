@@ -1,8 +1,5 @@
 import { useState, useEffect } from "react";
-import { useChatStore } from "@renderer/stores/chat-store";
-import { useAIConfigStore } from "@renderer/stores/ai-config-store";
-import { usePromptStore } from "@renderer/stores/prompt-store";
-import { useChatTagStore } from "@renderer/stores/chat-tag-store";
+import { useChatStore, useAIConfigStore, usePromptStore, useChatTagStore } from "@renderer/stores";
 import { useStreamingChat } from "@renderer/hooks";
 import { useMarksByTag } from "@renderer/hooks/queries";
 import { buildAIRequestContent } from "@renderer/lib/tag-context";

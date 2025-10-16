@@ -8,7 +8,7 @@ import { ScrollArea } from "@renderer/components/ui/scroll-area";
 import { Plus } from "lucide-react";
 import { TagItem } from "./components/tag-item";
 import { TagCreateForm } from "./components/tag-create-form";
-import { useTabStore } from "@renderer/stores/tab-store";
+import { useTabStore } from "@renderer/stores";
 import { useNavigate } from "@tanstack/react-router";
 import type { Tag } from "@shared/types";
 

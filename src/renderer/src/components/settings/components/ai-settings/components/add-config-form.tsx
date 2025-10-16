@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from "@renderer/components/ui/card";
 import { Input } from "@renderer/components/ui/input";
 import { Label } from "@renderer/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@renderer/components/ui/select";
-import { AI_PROVIDERS, type AIConfig } from "@renderer/stores/ai-config-store";
+import { AI_PROVIDERS, type AIConfig } from "@renderer/stores";
 
 interface AddConfigFormProps {
   onSave: (config: Omit<AIConfig, "id">) => void;

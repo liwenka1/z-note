@@ -3,7 +3,7 @@ import { Button } from "@renderer/components/ui/button";
 import { Card, CardContent, CardHeader } from "@renderer/components/ui/card";
 import { Input } from "@renderer/components/ui/input";
 import { Label } from "@renderer/components/ui/label";
-import { type AIConfig } from "@renderer/stores/ai-config-store";
+import { type AIConfig } from "@renderer/stores";
 
 interface EditConfigFormProps {
   config: AIConfig;

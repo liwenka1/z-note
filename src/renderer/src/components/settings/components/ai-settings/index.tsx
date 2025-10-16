@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@renderer/components/ui/button";
 import { Plus } from "lucide-react";
-import { useAIConfigStore } from "@renderer/stores/ai-config-store";
+import { useAIConfigStore } from "@renderer/stores";
 import { ConfigList } from "./components/config-list";
 import { AddConfigForm } from "./components/add-config-form";
 
