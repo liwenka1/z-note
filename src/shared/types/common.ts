@@ -9,8 +9,9 @@ export interface AppError {
 // 基础响应类型
 export interface BaseResponse<T> {
   success: boolean;
-  data: T;
+  data: T | null; // 允许 null（错误时返回 null）
   message?: string;
+  timestamp: number; // IPC 调用时间戳
 }
 
 // 分页类型

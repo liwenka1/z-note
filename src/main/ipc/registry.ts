@@ -1,4 +1,5 @@
 import { ipcMain } from "electron";
+import type { BaseResponse } from "@shared/types";
 
 /**
  * 增强的IPC错误类
@@ -15,20 +16,10 @@ export class IPCError extends Error {
 }
 
 /**
- * 标准化的API响应接口
- */
-export interface APIResponse<T = unknown> {
-  success: boolean;
-  data: T | null;
-  message?: string;
-  timestamp: number;
-}
-
-/**
  * 增强的错误处理包装器
  */
 export function withErrorHandling<T extends unknown[], R>(fn: (...args: T) => Promise<R>, context?: string) {
-  return async (_event: Electron.IpcMainInvokeEvent, ...args: T): Promise<APIResponse<R>> => {
+  return async (_event: Electron.IpcMainInvokeEvent, ...args: T): Promise<BaseResponse<R>> => {
     const startTime = Date.now();
 
     try {

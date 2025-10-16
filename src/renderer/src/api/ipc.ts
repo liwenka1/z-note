@@ -30,7 +30,8 @@ class IpcClient {
       return {
         success: false,
         data: null,
-        message: error instanceof Error ? error.message : "未知错误"
+        message: error instanceof Error ? error.message : "未知错误",
+        timestamp: Date.now()
       } as ReturnType<IpcMethods[T]>;
     }
   }
@@ -60,6 +61,10 @@ export const ipcClient = new IpcClient();
 export function handleResponse<T>(response: BaseResponse<T>): T {
   if (!response.success) {
     throw new Error(response.message || "请求失败");
+  }
+  // 类型断言：成功时 data 不应该是 null
+  if (response.data === null) {
+    throw new Error("响应成功但数据为空");
   }
   return response.data;
 }
