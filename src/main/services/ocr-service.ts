@@ -1,7 +1,7 @@
 import { createWorker } from "tesseract.js";
 import { registerHandler } from "../ipc/registry";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
-import type { OCROptions, OCRResult } from "@shared/ocr-types";
+import type { OCROptions, OCRResult } from "@shared/types";
 import * as path from "path";
 import { app } from "electron";
 
@@ -50,60 +50,46 @@ export class OCRService {
 
   /**
    * 处理图片 OCR 识别
+   * 注意：错误会被抛出，由 withErrorHandling 统一处理
    */
   async processImage(imagePath: string, options: OCROptions = {}): Promise<OCRResult> {
     const startTime = Date.now();
 
-    try {
-      // 构建完整路径
-      let fullPath = imagePath;
-      if (!path.isAbsolute(imagePath)) {
-        // 如果是相对路径，构建完整路径
-        fullPath = path.join(app.getPath("userData"), "z-note", imagePath);
-      }
-
-      console.log(`[OCRService] 开始处理图片: ${imagePath} -> ${fullPath}`);
-
-      // 获取语言配置
-      const languages = options.language
-        ? Array.isArray(options.language)
-          ? options.language
-          : [options.language]
-        : ["eng"];
-
-      // 初始化 Worker
-      await this.initializeWorker(languages);
-
-      if (!this.worker) {
-        throw new Error("OCR Worker 未初始化");
-      }
-
-      // 执行 OCR 识别
-      const result = await this.worker.recognize(fullPath);
-      const processingTime = Date.now() - startTime;
-
-      console.log(`[OCRService] OCR 识别完成，耗时: ${processingTime}ms`);
-
-      return {
-        text: result.data.text.trim(),
-        confidence: result.data.confidence,
-        processingTime,
-        success: true
-      };
-    } catch (error) {
-      const processingTime = Date.now() - startTime;
-      const errorMessage = error instanceof Error ? error.message : String(error);
-
-      console.error(`[OCRService] OCR 识别失败:`, error);
-
-      return {
-        text: "",
-        confidence: 0,
-        processingTime,
-        success: false,
-        error: errorMessage
-      };
+    // 构建完整路径
+    let fullPath = imagePath;
+    if (!path.isAbsolute(imagePath)) {
+      // 如果是相对路径，构建完整路径
+      fullPath = path.join(app.getPath("userData"), "z-note", imagePath);
     }
+
+    console.log(`[OCRService] 开始处理图片: ${imagePath} -> ${fullPath}`);
+
+    // 获取语言配置
+    const languages = options.language
+      ? Array.isArray(options.language)
+        ? options.language
+        : [options.language]
+      : ["eng"];
+
+    // 初始化 Worker
+    await this.initializeWorker(languages);
+
+    if (!this.worker) {
+      throw new Error("OCR Worker 未初始化");
+    }
+
+    // 执行 OCR 识别
+    const result = await this.worker.recognize(fullPath);
+    const processingTime = Date.now() - startTime;
+
+    console.log(`[OCRService] OCR 识别完成，耗时: ${processingTime}ms`);
+
+    // 只返回业务数据，不包含 success/error
+    return {
+      text: result.data.text.trim(),
+      confidence: result.data.confidence,
+      processingTime
+    };
   }
 
   /**
