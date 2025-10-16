@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useTabStore } from "@renderer/stores/tab-store";
+import { useTabStore } from "@renderer/stores";
 import { filesApi } from "@renderer/api";
 import { isFileNoteId, getFilePathFromNoteId } from "@renderer/types/file-content";
 import type { NoteFileContent } from "@renderer/types/file-content";

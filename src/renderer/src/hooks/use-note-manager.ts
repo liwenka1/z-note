@@ -1,7 +1,6 @@
 import { useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { useTabStore } from "@renderer/stores/tab-store";
-import { useFilesStore } from "@renderer/stores/files-store";
+import { useTabStore, useFilesStore } from "@renderer/stores";
 import { filesApi } from "@renderer/api";
 import { createFileNoteId } from "@renderer/types/file-content";
 import type { NoteFileContent } from "@renderer/types/file-content";

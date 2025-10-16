@@ -1,7 +1,6 @@
 import { useCallback, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { type AIConfig } from "@renderer/stores/ai-config-store";
-import { type Message } from "@renderer/stores/chat-store";
+import { type AIConfig, type Message } from "@renderer/stores";
 import { AIService } from "@renderer/api/ai";
 import { ErrorHandler } from "@renderer/lib/error-handler";
 

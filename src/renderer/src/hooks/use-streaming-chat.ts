@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState, useEffect } from "react";
-import { type AIConfig } from "@renderer/stores/ai-config-store";
+import { type AIConfig } from "@renderer/stores";
 import { AIService, type StreamChunk, type ChatMessage } from "@renderer/api/ai";
 import { ErrorHandler } from "@renderer/lib/error-handler";
 import { ipcClient, handleResponse } from "@renderer/api/ipc";
