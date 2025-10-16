@@ -20,12 +20,18 @@ export function RecordButton({ message, associatedTagId }: RecordButtonProps) {
   const [isRecording, setIsRecording] = useState(false);
   const createMark = useCreateMark();
 
-  // 只有AI回复且有关联标签时才显示记录按钮
-  if (message.role !== "assistant" || !associatedTagId) {
+  // 只有AI回复才显示记录按钮
+  if (message.role !== "assistant") {
     return null;
   }
 
+  // 如果没有关联标签，显示禁用状态的按钮
+  const isDisabled = !associatedTagId || isRecording || isRecorded;
+
   const handleRecord = async () => {
+    if (!associatedTagId) {
+      return;
+    }
     setIsRecording(true);
     try {
       // 1. 创建Mark记录
@@ -63,8 +69,8 @@ export function RecordButton({ message, associatedTagId }: RecordButtonProps) {
       size="sm"
       className="h-6 w-6 p-0"
       onClick={handleRecord}
-      disabled={isRecording || isRecorded}
-      title={isRecorded ? "已记录" : "记录到标签"}
+      disabled={isDisabled}
+      title={!associatedTagId ? "请先为会话关联标签" : isRecorded ? "已记录" : "记录到标签"}
     >
       {isRecorded ? (
         <Check className="h-3 w-3 text-green-500" />

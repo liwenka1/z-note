@@ -24,7 +24,7 @@ export function MessageItem({ message }: MessageItemProps) {
 
   if (message.role === "user") {
     return (
-      <AIMessage from="user" className="justify-end">
+      <AIMessage from="user">
         {/* 操作按钮 - 在用户消息左侧 */}
         <MessageActions message={message} currentSession={currentSession} position="left" />
 
@@ -59,11 +59,9 @@ export function MessageItem({ message }: MessageItemProps) {
 
   // AI 消息
   return (
-    <AIMessage from="assistant" className="justify-start">
-      {/* AI 头像 */}
-      <MessageAvatar src="" name="AI">
-        <Bot className="h-4 w-4" />
-      </MessageAvatar>
+    <AIMessage from="assistant">
+      {/* 操作按钮 - 在AI消息右侧 */}
+      {!isPending && <MessageActions message={message} currentSession={currentSession} position="right" />}
 
       {/* 消息内容 */}
       <AIMessageContent variant="contained">
@@ -71,8 +69,10 @@ export function MessageItem({ message }: MessageItemProps) {
         {!isPending && <div className="text-muted-foreground mt-1 text-xs">{format(message.timestamp, "HH:mm")}</div>}
       </AIMessageContent>
 
-      {/* 操作按钮 - 在AI消息右侧 */}
-      {!isPending && <MessageActions message={message} currentSession={currentSession} position="right" />}
+      {/* AI 头像 */}
+      <MessageAvatar src="" name="AI">
+        <Bot className="h-4 w-4" />
+      </MessageAvatar>
     </AIMessage>
   );
 }
