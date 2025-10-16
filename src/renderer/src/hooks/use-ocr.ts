@@ -33,17 +33,14 @@ export function useOCR(): UseOCRReturn {
     }));
 
     try {
+      // OCR 成功时返回 OCRResult，失败时抛出异常（由 BaseResponse 处理）
       const result = await ocrApi.processImage(imagePath, options);
 
       setState({
         isLoading: false,
         result,
-        error: result.success ? null : result.error || "OCR 识别失败"
+        error: null
       });
-
-      if (!result.success) {
-        throw new Error(result.error || "OCR 识别失败");
-      }
 
       return result.text;
     } catch (error) {

@@ -1,6 +1,6 @@
 import { ipcClient, handleResponse } from "./ipc";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
-import type { OCROptions, OCRResult } from "@shared/ocr-types";
+import type { OCROptions, OCRResult } from "@shared/types";
 
 // 重新导出类型，方便其他模块使用
 export type { OCROptions, OCRResult };

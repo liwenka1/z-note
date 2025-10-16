@@ -1,27 +1,15 @@
 import { ipcClient, handleResponse } from "./ipc";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
 import { type AIConfig } from "@renderer/stores";
+import type { AIResponse, AIStreamResponse } from "@shared/types";
 
+// 前端简化的消息类型（与 AIMessage 类似但更简洁）
 export interface ChatMessage {
   role: "user" | "assistant" | "system";
   content: string;
 }
 
-interface ChatResponse {
-  content: string;
-  model: string;
-  usage?: {
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-  };
-}
-
-interface StreamResponse {
-  streamId: string;
-  model: string;
-}
-
+// 流式数据块类型（前端特有，用于事件监听）
 export interface StreamChunk {
   type: "chunk" | "end" | "error";
   content?: string;
@@ -40,7 +28,7 @@ export class AIService {
   /**
    * 发送聊天消息并获取 AI 响应
    */
-  static async chat(config: AIConfig, messages: ChatMessage[]): Promise<ChatResponse> {
+  static async chat(config: AIConfig, messages: ChatMessage[]): Promise<AIResponse> {
     if (!config.apiKey) {
       throw new Error("API 密钥未配置");
     }
@@ -87,7 +75,7 @@ export class AIService {
       messages
     );
 
-    const streamResponse = handleResponse(response) as StreamResponse;
+    const streamResponse = handleResponse(response) as AIStreamResponse;
     const { streamId } = streamResponse;
 
     // 监听流式数据
