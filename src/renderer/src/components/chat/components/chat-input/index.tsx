@@ -4,12 +4,17 @@ import { useStreamingChat } from "@renderer/hooks";
 import { useMarksByTag } from "@renderer/hooks/queries";
 import { buildAIRequestContent } from "@renderer/lib/tag-context";
 import { ConfigSelector } from "./components/config-selector";
-import { InputArea } from "./components/input-area";
-import { InputControls } from "./components/input-controls";
+import {
+  PromptInput,
+  PromptInputBody,
+  PromptInputTextarea,
+  PromptInputFooter,
+  PromptInputTools,
+  PromptInputSubmit
+} from "@renderer/components/ai-elements/prompt-input";
 
 export function ChatInput() {
   const [input, setInput] = useState("");
-  const [isComposing, setIsComposing] = useState(false);
   const { configs, currentConfig, getCurrentConfig, setDefaultConfig } = useAIConfigStore();
   const { currentPrompt } = usePromptStore();
 
@@ -171,22 +176,29 @@ export function ChatInput() {
 
   return (
     <div className="p-4">
-      <div className="w-full">
-        <div className="bg-background relative rounded-xl border shadow-sm">
+      <PromptInput
+        className="w-full"
+        onSubmit={(message) => {
+          if (message.text) {
+            handleSend();
+          }
+        }}
+      >
+        <PromptInputBody>
           {/* 主要输入区域 */}
-          <InputArea
-            input={input}
-            setInput={setInput}
-            isComposing={isComposing}
-            setIsComposing={setIsComposing}
-            onSend={handleSend}
+          <PromptInputTextarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
             disabled={isTyping || isAILoading}
             placeholder={isTyping || isAILoading ? "AI 正在回复中..." : "输入消息..."}
+            className="max-h-[200px] min-h-[80px]"
           />
+        </PromptInputBody>
 
-          {/* 底部操作栏 */}
-          <div className="bg-background flex items-center justify-between rounded-b-xl border-t p-3">
-            {/* 左侧：AI 配置选择器 */}
+        {/* 底部操作栏 */}
+        <PromptInputFooter>
+          {/* 左侧工具：AI 配置选择器 */}
+          <PromptInputTools>
             <ConfigSelector
               configs={configs}
               selectedConfigId={currentConfig?.id || ""}
@@ -194,12 +206,21 @@ export function ChatInput() {
               onConfigChange={(configId) => setDefaultConfig(configId)}
               disabled={isTyping || isAILoading}
             />
+          </PromptInputTools>
 
-            {/* 右侧：发送/停止按钮 */}
-            <InputControls canSend={!!input.trim()} isAILoading={isAILoading} onSend={handleSend} onStop={handleStop} />
-          </div>
-        </div>
-      </div>
+          {/* 右侧：发送/停止按钮 */}
+          <PromptInputSubmit
+            status={isAILoading ? "streaming" : undefined}
+            disabled={!input.trim()}
+            onClick={(e) => {
+              if (isAILoading) {
+                e.preventDefault();
+                handleStop();
+              }
+            }}
+          />
+        </PromptInputFooter>
+      </PromptInput>
     </div>
   );
 }
