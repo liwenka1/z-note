@@ -1,6 +1,7 @@
 // ==================== 文件内容类型定义 ====================
 
 import type { JSONContent } from "@tiptap/react";
+import { NOTE_CONSTANTS } from "@renderer/constants/note-constants";
 
 /**
  * z-note 标准笔记文件格式
@@ -38,7 +39,7 @@ export function createEmptyNoteFile(title: string): NoteFileContent {
   const now = new Date().toISOString();
 
   return {
-    version: "1.0",
+    version: NOTE_CONSTANTS.DEFAULT_VERSION,
     content: {
       type: "doc",
       content: []
@@ -114,5 +115,12 @@ export function createFileNoteId(filePath: string): string {
  * 从文件名提取标题（去掉 .json 扩展名）
  */
 export function getTitleFromFileName(fileName: string): string {
-  return fileName.replace(/\.json$/, "");
+  return fileName.replace(new RegExp(`\\${NOTE_CONSTANTS.FILE_EXTENSION}$`), "");
+}
+
+/**
+ * 生成唯一的笔记文件名
+ */
+export function generateUniqueFileName(prefix: string = NOTE_CONSTANTS.DEFAULT_NOTE_PREFIX): string {
+  return `${prefix}_${Date.now()}${NOTE_CONSTANTS.FILE_EXTENSION}`;
 }

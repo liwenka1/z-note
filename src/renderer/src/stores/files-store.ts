@@ -3,6 +3,8 @@ import { immer } from "zustand/middleware/immer";
 import { fileSystemApi, workspaceApi, configApi, CONFIG_KEYS, FILE_EXTENSIONS } from "@renderer/api";
 import type { FileNode, WorkspaceConfig, ScanOptions, SortType, SortDirection } from "@shared/types";
 import type { FileTreeState, WorkspaceState, FileEditState, SearchResultItem } from "@renderer/types";
+import { createEmptyNoteFile, getTitleFromFileName } from "@renderer/types/file-content";
+import { NOTE_CONSTANTS } from "@renderer/constants/note-constants";
 
 // ==================== Files 状态管理 ====================
 
@@ -333,21 +335,9 @@ export const useFilesStore = create<FilesStore>()(
 
         // 如果是 .json 文件，需要创建符合笔记格式的内容
         if (uniqueName.endsWith(".json")) {
-          const noteTitle = uniqueName.replace(/\.json$/, "");
-          const noteFileContent = {
-            version: "1.0",
-            content: {
-              type: "doc",
-              content: []
-            },
-            metadata: {
-              title: noteTitle,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              characterCount: 0
-            }
-          };
-          const jsonContent = JSON.stringify(noteFileContent, null, 2);
+          const noteTitle = getTitleFromFileName(uniqueName);
+          const noteFileContent = createEmptyNoteFile(noteTitle);
+          const jsonContent = JSON.stringify(noteFileContent, null, NOTE_CONSTANTS.JSON_INDENT);
           await fileSystemApi.writeFile(filePath, jsonContent);
         }
 

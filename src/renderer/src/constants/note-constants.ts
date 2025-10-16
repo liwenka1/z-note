@@ -1,7 +1,7 @@
-import type { NoteFileContent } from "@renderer/types/file-content";
-
 /**
  * 笔记相关常量配置
+ *
+ * 注意：笔记创建和文件名处理等工具函数已移至 @renderer/types/file-content
  */
 export const NOTE_CONSTANTS = {
   /**
@@ -29,52 +29,3 @@ export const NOTE_CONSTANTS = {
    */
   JSON_INDENT: 2
 } as const;
-
-/**
- * 创建默认的空笔记内容
- */
-export function createEmptyNoteContent(): NoteFileContent["content"] {
-  return {
-    type: "doc",
-    content: []
-  };
-}
-
-/**
- * 创建默认的笔记元数据
- */
-export function createDefaultMetadata(title: string): NoteFileContent["metadata"] {
-  const now = new Date().toISOString();
-
-  return {
-    title,
-    createdAt: now,
-    updatedAt: now,
-    characterCount: 0
-  };
-}
-
-/**
- * 创建完整的笔记模板
- */
-export function createNoteTemplate(title: string): NoteFileContent {
-  return {
-    version: NOTE_CONSTANTS.DEFAULT_VERSION,
-    content: createEmptyNoteContent(),
-    metadata: createDefaultMetadata(title)
-  };
-}
-
-/**
- * 生成唯一的文件名
- */
-export function generateUniqueFileName(prefix: string = NOTE_CONSTANTS.DEFAULT_NOTE_PREFIX): string {
-  return `${prefix}_${Date.now()}${NOTE_CONSTANTS.FILE_EXTENSION}`;
-}
-
-/**
- * 从文件名提取标题（移除扩展名）
- */
-export function extractTitleFromFileName(fileName: string): string {
-  return fileName.replace(new RegExp(`\\${NOTE_CONSTANTS.FILE_EXTENSION}$`), "");
-}

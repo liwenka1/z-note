@@ -2,14 +2,14 @@ import { useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useTabStore, useFilesStore } from "@renderer/stores";
 import { filesApi } from "@renderer/api";
-import { createFileNoteId } from "@renderer/types/file-content";
-import type { NoteFileContent } from "@renderer/types/file-content";
 import {
-  createNoteTemplate,
+  createFileNoteId,
+  createEmptyNoteFile,
   generateUniqueFileName,
-  extractTitleFromFileName,
-  NOTE_CONSTANTS
-} from "@renderer/constants/note-constants";
+  getTitleFromFileName
+} from "@renderer/types/file-content";
+import type { NoteFileContent } from "@renderer/types/file-content";
+import { NOTE_CONSTANTS } from "@renderer/constants/note-constants";
 import { ErrorHandler, AppError, ErrorType } from "@renderer/lib/error-handler";
 
 /**
@@ -46,7 +46,7 @@ export function useNoteManager() {
         const fileName = generateNoteFileName(baseName);
 
         // 创建笔记内容
-        const noteContent = template || createNoteTemplate(extractTitleFromFileName(fileName));
+        const noteContent = template || createEmptyNoteFile(getTitleFromFileName(fileName));
 
         // 创建文件（不刷新文件树以提高性能）
         const { createNewFileNoRefresh } = useFilesStore.getState();
