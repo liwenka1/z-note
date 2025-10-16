@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { ScrollArea } from "@renderer/components/ui/scroll-area";
 import { useFilesState } from "../hooks/use-files-state";
 import { FolderItem } from "./folder-item";
@@ -23,12 +22,7 @@ function renderFileNode(node: FileNode, level: number = 0): React.ReactNode {
  * 支持嵌套显示文件夹和文件
  */
 export function FolderTree() {
-  const { fileTree, hasContent, isLoading, loadFileTree } = useFilesState();
-
-  // 初始化时加载文件树
-  useEffect(() => {
-    loadFileTree();
-  }, [loadFileTree]);
+  const { fileTree, hasContent, isLoading } = useFilesState();
 
   // 加载中状态
   if (isLoading) {

@@ -115,7 +115,7 @@ export interface IpcMethods {
   ) => Promise<BaseResponse<WorkspaceValidationResult>>;
 
   // 应用配置相关
-  [IPC_CHANNELS.CONFIG.GET]: (key: string) => Promise<BaseResponse<unknown>>;
+  [IPC_CHANNELS.CONFIG.GET]: (key: string) => Promise<BaseResponse<unknown | null>>;
   [IPC_CHANNELS.CONFIG.SET]: (key: string, value: unknown) => Promise<BaseResponse<{ success: boolean }>>;
   [IPC_CHANNELS.CONFIG.REMOVE]: (key: string) => Promise<BaseResponse<{ success: boolean }>>;
   [IPC_CHANNELS.CONFIG.GET_ALL]: () => Promise<BaseResponse<Record<string, unknown>>>;

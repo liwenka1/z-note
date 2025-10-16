@@ -5,6 +5,7 @@ import type { FileNode, WorkspaceConfig, ScanOptions, SortType, SortDirection } 
 import type { FileTreeState, WorkspaceState, FileEditState, SearchResultItem } from "@renderer/types";
 import { createEmptyNoteFile, getTitleFromFileName } from "@renderer/types/file-content";
 import { NOTE_CONSTANTS } from "@renderer/constants/note-constants";
+import { DEFAULT_WORKSPACE_PATH } from "@renderer/config/workspace";
 
 // ==================== Files 状态管理 ====================
 
@@ -143,7 +144,7 @@ const defaultFileTreeState: FileTreeState = {
 
 const defaultWorkspaceState: WorkspaceState = {
   config: {
-    workspacePath: "",
+    workspacePath: DEFAULT_WORKSPACE_PATH,
     recentFiles: [],
     excludePatterns: ["node_modules", ".git", ".DS_Store"],
     includeExtensions: [".md", ".markdown", ".txt"],

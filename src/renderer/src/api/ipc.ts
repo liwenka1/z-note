@@ -62,19 +62,6 @@ export function handleResponse<T>(response: BaseResponse<T>): T {
   if (!response.success) {
     throw new Error(response.message || "请求失败");
   }
-  // 类型断言：成功时 data 不应该是 null
-  if (response.data === null) {
-    throw new Error("响应成功但数据为空");
-  }
-  return response.data;
-}
 
-/**
- * 响应处理工具函数（支持可能为 null 的返回值）
- */
-export function handleResponseNullable<T>(response: BaseResponse<T | null>): T | null {
-  if (!response.success) {
-    throw new Error(response.message || "请求失败");
-  }
-  return response.data;
+  return response.data as T;
 }

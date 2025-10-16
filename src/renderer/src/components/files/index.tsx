@@ -1,57 +1,22 @@
-import { useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import { FilesHeader } from "./components/files-header";
 import { FolderTree } from "./components/folder-tree";
 import { EmptyFiles } from "./components/empty-files";
 import { useFilesState } from "./hooks/use-files-state";
 import { useFilesStore } from "@renderer/stores";
-import { DEFAULT_WORKSPACE_PATH } from "@renderer/config/workspace";
 
 /**
  * Files 主组件
  * 参考 chat 的模式，组合所有子组件
  */
 export function FilesPanel() {
-  const { hasContent, workspacePath } = useFilesState();
-  const { loadFileTree, workspace } = useFilesStore();
+  const { hasContent } = useFilesState();
+  const loadFileTree = useFilesStore.getState().loadFileTree;
 
-  // 初始化工作区
-  const initializeWorkspace = useCallback(async () => {
-    // 如果没有设置工作区路径，设置默认路径
-    if (!workspacePath) {
-      // 使用统一的默认工作区路径配置
-      const defaultWorkspacePath = DEFAULT_WORKSPACE_PATH;
-
-      // 使用immer方式更新状态
-      useFilesStore.setState((state) => ({
-        ...state,
-        workspace: {
-          ...state.workspace,
-          config: {
-            ...state.workspace.config,
-            workspacePath: defaultWorkspacePath
-          },
-          initialized: true
-        }
-      }));
-
-      // 延迟加载文件树，确保状态更新完成，初始化时恢复保存的展开状态
-      setTimeout(() => loadFileTree(true), 100);
-    } else if (!workspace.initialized) {
-      // 如果有路径但未初始化，则初始化并恢复保存的展开状态
-      await loadFileTree(true);
-      useFilesStore.setState((state) => ({
-        ...state,
-        workspace: {
-          ...state.workspace,
-          initialized: true
-        }
-      }));
-    }
-  }, [workspacePath, workspace.initialized, loadFileTree]);
-
+  // 初始化工作区 - 组件首次挂载时加载文件树
   useEffect(() => {
-    initializeWorkspace();
-  }, [initializeWorkspace]);
+    loadFileTree(true);
+  }, [loadFileTree]);
 
   return (
     <div className="bg-background flex h-full flex-col">
