@@ -14,7 +14,3 @@ export * from "./files";
 
 // IPC 相关类型
 export * from "./ipc";
-
-// 重新导出现有的共享类型
-export * from "../ocr-types";
-export { IPC_CHANNELS } from "../ipc-channels";

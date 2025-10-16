@@ -146,3 +146,16 @@ export interface AIAbortResponse {
   streamId: string;
   error?: string;
 }
+
+// ==================== OCR 相关类型 ====================
+
+export interface OCROptions {
+  language?: string | string[];
+  timeout?: number;
+}
+
+export interface OCRResult {
+  text: string;
+  confidence: number;
+  processingTime: number;
+}

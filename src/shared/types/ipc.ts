@@ -25,10 +25,11 @@ import type {
   AIMessage,
   AIResponse,
   AIStreamResponse,
-  AIAbortResponse
+  AIAbortResponse,
+  OCROptions,
+  OCRResult
 } from "./index";
 import { IPC_CHANNELS } from "../ipc-channels";
-import type { OCROptions, OCRResult } from "../ocr-types";
 
 /**
  * 类型安全的IPC方法接口，使用通道常量和共享类型
