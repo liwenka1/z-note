@@ -5,9 +5,11 @@ import { HistoryControls } from "./components/history-controls";
 import { HeadingControls } from "./components/heading-controls";
 import { FormatControls } from "./components/format-controls";
 import { ListControls } from "./components/list-controls";
+import { CodeBlockControl } from "./components/code-block-control";
+import { ExtraControls } from "./components/extra-controls";
 
 interface EditorToolbarProps {
-  editor: Editor;
+  editor: Editor | null;
   className?: string;
 }
 
@@ -41,8 +43,18 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
 
       <Separator orientation="vertical" className="h-6" />
 
+      {/* 代码块 */}
+      <CodeBlockControl editor={editor} />
+
+      <Separator orientation="vertical" className="h-6" />
+
       {/* 列表和引用控件 */}
       <ListControls editor={editor} />
+
+      <Separator orientation="vertical" className="h-6" />
+
+      {/* 额外控件（水平线、硬换行、清除格式） */}
+      <ExtraControls editor={editor} />
     </div>
   );
 }

@@ -3,12 +3,20 @@ import { List, ListOrdered, Quote, Link2 } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@renderer/components/ui/tooltip";
 import { cn } from "@renderer/lib/utils";
+import { useEditorActiveState } from "../../../hooks/use-editor-active-state";
 
 interface ListControlsProps {
-  editor: Editor;
+  editor: Editor | null;
 }
 
 export function ListControls({ editor }: ListControlsProps) {
+  // 使用官方推荐的 useEditorState hook 订阅编辑器状态
+  const editorState = useEditorActiveState(editor);
+
+  if (!editor) {
+    return null;
+  }
+
   const toggleBulletList = () => editor.chain().focus().toggleBulletList().run();
   const toggleOrderedList = () => editor.chain().focus().toggleOrderedList().run();
   const toggleBlockquote = () => editor.chain().focus().toggleBlockquote().run();
@@ -40,7 +48,7 @@ export function ListControls({ editor }: ListControlsProps) {
             variant="ghost"
             size="sm"
             onClick={toggleBulletList}
-            className={cn("h-8 w-8 p-0", editor.isActive("bulletList") && "bg-secondary")}
+            className={cn("h-8 w-8 p-0", editorState.isBulletList && "bg-secondary")}
           >
             <List className="h-4 w-4" />
           </Button>
@@ -54,7 +62,7 @@ export function ListControls({ editor }: ListControlsProps) {
             variant="ghost"
             size="sm"
             onClick={toggleOrderedList}
-            className={cn("h-8 w-8 p-0", editor.isActive("orderedList") && "bg-secondary")}
+            className={cn("h-8 w-8 p-0", editorState.isOrderedList && "bg-secondary")}
           >
             <ListOrdered className="h-4 w-4" />
           </Button>
@@ -68,7 +76,7 @@ export function ListControls({ editor }: ListControlsProps) {
             variant="ghost"
             size="sm"
             onClick={toggleBlockquote}
-            className={cn("h-8 w-8 p-0", editor.isActive("blockquote") && "bg-secondary")}
+            className={cn("h-8 w-8 p-0", editorState.isBlockquote && "bg-secondary")}
           >
             <Quote className="h-4 w-4" />
           </Button>

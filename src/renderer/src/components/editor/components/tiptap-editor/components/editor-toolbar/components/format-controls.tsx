@@ -3,12 +3,20 @@ import { Bold, Italic, Strikethrough, Code } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@renderer/components/ui/tooltip";
 import { cn } from "@renderer/lib/utils";
+import { useEditorActiveState } from "../../../hooks/use-editor-active-state";
 
 interface FormatControlsProps {
-  editor: Editor;
+  editor: Editor | null;
 }
 
 export function FormatControls({ editor }: FormatControlsProps) {
+  // 使用官方推荐的 useEditorState hook 订阅编辑器状态
+  const editorState = useEditorActiveState(editor);
+
+  if (!editor) {
+    return null;
+  }
+
   const toggleBold = () => editor.chain().focus().toggleBold().run();
   const toggleItalic = () => editor.chain().focus().toggleItalic().run();
   const toggleStrike = () => editor.chain().focus().toggleStrike().run();
@@ -22,7 +30,7 @@ export function FormatControls({ editor }: FormatControlsProps) {
             variant="ghost"
             size="sm"
             onClick={toggleBold}
-            className={cn("h-8 w-8 p-0", editor.isActive("bold") && "bg-secondary")}
+            className={cn("h-8 w-8 p-0", editorState.isBold && "bg-secondary")}
           >
             <Bold className="h-4 w-4" />
           </Button>
@@ -36,7 +44,7 @@ export function FormatControls({ editor }: FormatControlsProps) {
             variant="ghost"
             size="sm"
             onClick={toggleItalic}
-            className={cn("h-8 w-8 p-0", editor.isActive("italic") && "bg-secondary")}
+            className={cn("h-8 w-8 p-0", editorState.isItalic && "bg-secondary")}
           >
             <Italic className="h-4 w-4" />
           </Button>
@@ -50,7 +58,7 @@ export function FormatControls({ editor }: FormatControlsProps) {
             variant="ghost"
             size="sm"
             onClick={toggleStrike}
-            className={cn("h-8 w-8 p-0", editor.isActive("strike") && "bg-secondary")}
+            className={cn("h-8 w-8 p-0", editorState.isStrike && "bg-secondary")}
           >
             <Strikethrough className="h-4 w-4" />
           </Button>
@@ -64,7 +72,7 @@ export function FormatControls({ editor }: FormatControlsProps) {
             variant="ghost"
             size="sm"
             onClick={toggleCode}
-            className={cn("h-8 w-8 p-0", editor.isActive("code") && "bg-secondary")}
+            className={cn("h-8 w-8 p-0", editorState.isCode && "bg-secondary")}
           >
             <Code className="h-4 w-4" />
           </Button>
