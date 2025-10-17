@@ -24,9 +24,13 @@ export function TipTapEditor({
 }: TipTapEditorProps) {
   // 用于防止在设置内容时触发 onChange
   const isSettingContentRef = useRef(false);
+  // 用于跟踪编辑器是否已初始化内容
+  const hasInitializedRef = useRef(false);
+
   const editor = useEditor({
     extensions: createEditorExtensions(placeholder),
     editable,
+    content,
     onUpdate: ({ editor }) => {
       // 如果当前正在设置内容，则不触发 onChange
       if (isSettingContentRef.current) {
@@ -51,13 +55,42 @@ export function TipTapEditor({
     }
   });
 
-  // 当外部 content 改变时更新编辑器内容
+  // 标记编辑器已初始化
   useEffect(() => {
-    if (editor && content) {
+    if (editor) {
+      hasInitializedRef.current = true;
+    }
+  }, [editor]);
+
+  // 只在外部内容真正改变时更新编辑器（比如切换笔记）
+  useEffect(() => {
+    if (!editor || !hasInitializedRef.current) {
+      return;
+    }
+
+    // 检查外部内容是否与编辑器当前内容不同
+    const currentContent = editor.getJSON();
+    const contentChanged = JSON.stringify(currentContent) !== JSON.stringify(content);
+
+    if (contentChanged) {
       // 设置标志，防止触发 onChange
       isSettingContentRef.current = true;
 
+      // 保存当前光标位置
+      const { from, to } = editor.state.selection;
+
       editor.commands.setContent(content);
+
+      // 尝试恢复光标位置（如果位置仍然有效）
+      try {
+        const docSize = editor.state.doc.content.size;
+        if (from <= docSize && to <= docSize) {
+          editor.commands.setTextSelection({ from, to });
+        }
+      } catch (e) {
+        // 如果恢复失败，忽略错误
+        console.debug("Could not restore cursor position:", e);
+      }
 
       // 重置标志
       isSettingContentRef.current = false;
