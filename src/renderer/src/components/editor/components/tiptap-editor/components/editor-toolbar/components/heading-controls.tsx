@@ -1,34 +1,61 @@
 import { Editor } from "@tiptap/react";
 import { Button } from "@renderer/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@renderer/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@renderer/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@renderer/lib/utils";
 
 interface HeadingControlsProps {
   editor: Editor;
 }
 
+const levels = [1, 2, 3, 4] as const;
+
 export function HeadingControls({ editor }: HeadingControlsProps) {
-  const setHeading = (level: 1 | 2 | 3 | 4 | 5 | 6) => {
-    editor.chain().focus().toggleHeading({ level }).run();
-  };
+  // 获取当前激活的标题级别
+  const activeLevel = levels.find((level) => editor.isActive("heading", { level }));
 
   return (
-    <div className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5, 6].map((level) => (
-        <Tooltip key={level}>
-          <TooltipTrigger asChild>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setHeading(level as 1 | 2 | 3 | 4 | 5 | 6)}
-              className={cn("h-8 px-2", "text-xs font-medium", editor.isActive("heading", { level }) && "bg-secondary")}
+              className={cn("h-8 w-max gap-1 px-3 font-normal", editor.isActive("heading") && "bg-secondary")}
             >
-              H{level}
+              {activeLevel ? `H${activeLevel}` : "正文"}
+              <ChevronDown className="h-4 w-4" />
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>标题 {level}</TooltipContent>
-        </Tooltip>
-      ))}
-    </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem
+              onClick={() => editor.chain().focus().setParagraph().run()}
+              className={cn("flex items-center gap-2", !editor.isActive("heading") && "bg-secondary")}
+            >
+              正文
+            </DropdownMenuItem>
+            {levels.map((level) => (
+              <DropdownMenuItem
+                key={level}
+                onClick={() => editor.chain().focus().toggleHeading({ level }).run()}
+                className={cn("flex items-center gap-2", editor.isActive("heading", { level }) && "bg-secondary")}
+              >
+                H{level}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </TooltipTrigger>
+      <TooltipContent>
+        <span>标题</span>
+      </TooltipContent>
+    </Tooltip>
   );
 }
