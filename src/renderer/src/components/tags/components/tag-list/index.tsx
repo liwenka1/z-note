@@ -50,22 +50,24 @@ export function TagList({ tags }: TagListProps) {
       )}
 
       {/* Tags List */}
-      <ScrollArea className="flex-1">
-        {tags.length === 0 ? (
-          <div className="flex h-full items-center justify-center">
-            <div className="text-center">
-              <div className="text-muted-foreground text-sm">还没有任何标签</div>
-              <div className="text-muted-foreground mt-1 text-xs">点击右上角 + 号创建第一个标签</div>
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea className="h-full">
+          {tags.length === 0 ? (
+            <div className="flex h-full items-center justify-center">
+              <div className="text-center">
+                <div className="text-muted-foreground text-sm">还没有任何标签</div>
+                <div className="text-muted-foreground mt-1 text-xs">点击右上角 + 号创建第一个标签</div>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="space-y-1 p-2">
-            {tags.map((tag) => (
-              <TagItem key={tag.id} tag={tag} onClick={() => handleTagClick(tag)} />
-            ))}
-          </div>
-        )}
-      </ScrollArea>
+          ) : (
+            <div className="space-y-1 p-2">
+              {tags.map((tag) => (
+                <TagItem key={tag.id} tag={tag} onClick={() => handleTagClick(tag)} />
+              ))}
+            </div>
+          )}
+        </ScrollArea>
+      </div>
     </div>
   );
 }
