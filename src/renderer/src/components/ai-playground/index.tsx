@@ -23,7 +23,7 @@ export function AIPlaygroundPanel() {
       <div className="bg-background flex h-full flex-col">
         {/* Header */}
         <div className="border-border/50 bg-secondary/30 border-b">
-          <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex h-12 items-center justify-between px-4">
             <h2 className="text-foreground text-sm font-medium">AI 工作台</h2>
             <AddPlatformDialog />
           </div>
@@ -63,7 +63,7 @@ export function AIPlaygroundPanel() {
     <div className="bg-background flex h-full flex-col">
       {/* Header with close button */}
       <div className="border-border/50 bg-secondary/30 border-b">
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex h-12 items-center justify-between px-4">
           <h2 className="text-foreground text-sm font-medium">{selectedPlatform.name}</h2>
           <Button variant="ghost" size="sm" onClick={handleClose} className="h-7 w-7 p-0">
             <X className="h-4 w-4" />

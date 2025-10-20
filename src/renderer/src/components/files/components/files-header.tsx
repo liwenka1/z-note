@@ -34,7 +34,7 @@ export function FilesHeader() {
   return (
     <div className="border-border/50 bg-secondary/30 border-b">
       {/* 标题栏 */}
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex h-12 items-center justify-between px-4">
         <h2 className="text-foreground text-sm font-medium">笔记</h2>
         <div className="flex gap-1">
           <Tooltip>

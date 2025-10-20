@@ -4,7 +4,7 @@ import { TagSelector } from "./components/tag-selector";
 
 export function ChatHeader() {
   return (
-    <div className="border-border/50 flex h-11 items-center justify-between border-b px-4">
+    <div className="border-border/50 bg-secondary/30 flex h-12 items-center justify-between border-b px-4">
       {/* 左侧：会话选择器 */}
       <div className="flex-1">
         <SessionSelector />
