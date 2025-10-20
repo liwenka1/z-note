@@ -8,7 +8,7 @@ import {
   createEmptyNoteFile,
   generateUniqueFileName,
   getTitleFromFileName
-} from "@renderer/types/file-content";
+} from "@renderer/utils/file-content";
 import type { NoteFileContent } from "@renderer/types/file-content";
 import { NOTE_CONSTANTS } from "@renderer/constants/note-constants";
 import { ErrorHandler, AppError, ErrorType } from "@renderer/lib/error-handler";

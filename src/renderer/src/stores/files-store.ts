@@ -3,7 +3,7 @@ import { immer } from "zustand/middleware/immer";
 import { fileSystemApi, workspaceApi, configApi, CONFIG_KEYS, FILE_EXTENSIONS } from "@renderer/api";
 import type { FileNode, WorkspaceConfig, ScanOptions, SortType, SortDirection } from "@shared/types";
 import type { FileTreeState, WorkspaceState, FileEditState, SearchResultItem } from "@renderer/types";
-import { createEmptyNoteFile, getTitleFromFileName } from "@renderer/types/file-content";
+import { createEmptyNoteFile, getTitleFromFileName } from "@renderer/utils/file-content";
 import { NOTE_CONSTANTS } from "@renderer/constants/note-constants";
 import { DEFAULT_WORKSPACE_PATH } from "@renderer/config/workspace";
 

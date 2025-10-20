@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useTabStore } from "@renderer/stores";
 import { useNoteFile } from "@renderer/hooks/queries/use-files";
-import { isFileNoteId, getFilePathFromNoteId } from "@renderer/types/file-content";
+import { isFileNoteId, getFilePathFromNoteId } from "@renderer/utils/file-content";
 
 /**
  * 获取当前活跃笔记的 Hook

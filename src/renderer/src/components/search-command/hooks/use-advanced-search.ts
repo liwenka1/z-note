@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import Fuse, { type FuseResultMatch } from "fuse.js";
-import { fileSearchIndex, type SearchIndexItem } from "@renderer/utils/file-search-index";
+import { fileSearchIndex, type SearchIndexItem } from "@renderer/services/file-search-index";
 import { DEFAULT_WORKSPACE_PATH } from "@renderer/config/workspace";
 import type { SearchItem } from "../types";
 

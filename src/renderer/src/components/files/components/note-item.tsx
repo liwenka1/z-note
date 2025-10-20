@@ -13,7 +13,7 @@ import { Input } from "@renderer/components/ui/input";
 import { useFilesState } from "../hooks/use-files-state";
 import { useTabStore } from "@renderer/stores";
 import { shellApi, filesApi } from "@renderer/api";
-import { createFileNoteId } from "@renderer/types/file-content";
+import { createFileNoteId } from "@renderer/utils/file-content";
 import { cn } from "@renderer/lib/utils";
 import type { FileNode } from "@shared/types";
 

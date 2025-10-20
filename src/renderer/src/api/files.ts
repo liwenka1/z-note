@@ -1,14 +1,14 @@
 // ==================== 文件系统 API 封装 ====================
 
 import { fileSystemApi } from "./file-system";
-import { fileSearchIndex } from "@renderer/utils/file-search-index";
+import { fileSearchIndex } from "@renderer/services/file-search-index";
 import type { NoteFileContent, NoteFileMetadata } from "@renderer/types/file-content";
 import {
   createEmptyNoteFile,
   updateNoteFileContent,
   validateNoteFile,
   getTitleFromFileName
-} from "@renderer/types/file-content";
+} from "@renderer/utils/file-content";
 
 /**
  * 文件系统相关的错误类型
