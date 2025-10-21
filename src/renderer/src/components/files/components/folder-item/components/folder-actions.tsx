@@ -54,7 +54,12 @@ export function FolderActions({ folderPath, onRename, onDelete, onCreateSubfolde
     <div className={cn("shrink-0 opacity-0 transition-opacity group-hover:opacity-100")}>
       <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <DropdownMenuTrigger asChild>
-          <Button size="sm" variant="ghost" className={cn("h-6 w-6 p-0")} onClick={(e) => e.stopPropagation()}>
+          <Button
+            size="sm"
+            variant="ghost"
+            className={cn("h-6 w-6 p-0 hover:bg-transparent")}
+            onClick={(e) => e.stopPropagation()}
+          >
             <MoreVertical className={cn("h-3 w-3")} />
           </Button>
         </DropdownMenuTrigger>

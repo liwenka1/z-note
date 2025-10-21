@@ -16,13 +16,7 @@ interface FolderHeaderProps {
  */
 export function FolderHeader({ name, isExpanded, level, onToggleExpand }: FolderHeaderProps) {
   return (
-    <div
-      className={cn(
-        "flex flex-1 cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-sm transition-colors duration-200",
-        "hover:bg-muted/50"
-      )}
-      style={{ paddingLeft: `${level * 20 + 8}px` }}
-    >
+    <div className={cn("flex flex-1 cursor-pointer items-center text-sm")} style={{ paddingLeft: `${level * 20}px` }}>
       {/* 展开/折叠按钮 */}
       <motion.div
         className={cn("flex h-5 w-5 items-center justify-center")}

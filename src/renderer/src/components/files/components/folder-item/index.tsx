@@ -62,7 +62,7 @@ export function FolderItem({ folder, level }: FolderItemProps) {
       {isRenaming ? (
         <RenameInput initialName={folder.name} level={level} onRename={handleRename} onCancel={handleCancelRename} />
       ) : (
-        <div className="group relative flex items-center">
+        <div className="group hover:bg-muted/50 relative flex items-center gap-1 rounded-md px-2 py-1 transition-colors duration-200">
           <FolderHeader name={folder.name} isExpanded={isExpanded} level={level} onToggleExpand={handleToggleExpand} />
 
           <FolderActions
