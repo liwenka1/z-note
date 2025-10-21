@@ -17,7 +17,7 @@ import { useNoteManager } from "@renderer/hooks";
 
 export function TabBar() {
   const { openTabs, activeTabId, closeTab, closeAllTabs, closeOtherTabs, setActiveTab } = useTabStore();
-  const { isNoteModified, stopEditing } = useEditorStore();
+  const { isNoteModified, unregisterEditor } = useEditorStore();
   const { quickCreateNote } = useNoteManager();
   const navigate = useNavigate();
   const [scrollLeft, setScrollLeft] = useState(0);
@@ -119,7 +119,7 @@ export function TabBar() {
 
   const handleTabClose = (e: React.MouseEvent, tabId: string) => {
     e.stopPropagation();
-    stopEditing(tabId);
+    unregisterEditor(tabId);
     closeTab(tabId);
   };
 
@@ -253,7 +253,7 @@ export function TabBar() {
             <DropdownMenuItem
               onClick={() => {
                 // 关闭所有标签时清除所有编辑状态
-                openTabs.forEach((tab) => stopEditing(tab.id));
+                openTabs.forEach((tab) => unregisterEditor(tab.id));
                 closeAllTabs();
                 // 导航到首页
                 navigate({ to: "/" });
@@ -267,7 +267,7 @@ export function TabBar() {
                   // 关闭其他标签时清除其他标签的编辑状态
                   openTabs.forEach((tab) => {
                     if (tab.id !== activeTabId) {
-                      stopEditing(tab.id);
+                      unregisterEditor(tab.id);
                     }
                   });
                   closeOtherTabs(activeTabId);

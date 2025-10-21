@@ -1,103 +1,121 @@
 import { create } from "zustand";
-import { immer } from "zustand/middleware/immer";
+import type { Editor } from "@tiptap/react";
 import type { JSONContent } from "@tiptap/react";
+
+// 编辑器实例信息
+interface EditorInstance {
+  editor: Editor;
+  originalContent: JSONContent;
+}
 
 // 编辑器状态接口
 interface EditorState {
-  // 当前正在编辑的笔记内容（按noteId存储）
-  editingContent: Record<string, JSONContent>;
-  // 原始内容（用于对比是否修改）
-  originalContent: Record<string, JSONContent>;
+  // 实例池：noteId -> 编辑器实例
+  instances: Map<string, EditorInstance>;
+  // 当前激活的笔记 ID
+  activeNoteId: string | null;
+  // 内容版本号：用于触发 React 重新渲染
+  contentVersion: number;
 }
 
 interface EditorActions {
-  // 开始编辑笔记
-  startEditing: (noteId: string, content: JSONContent) => void;
-  // 更新编辑内容
-  updateContent: (noteId: string, content: JSONContent) => void;
-  // 保存笔记
-  saveNote: (noteId: string) => void;
-  // 停止编辑（关闭标签时调用）
-  stopEditing: (noteId: string) => void;
+  // 注册编辑器实例
+  registerEditor: (noteId: string, editor: Editor, initialContent: JSONContent) => void;
+  // 注销编辑器实例（关闭 tab 时）
+  unregisterEditor: (noteId: string) => void;
+  // 设置激活的笔记
+  setActiveNote: (noteId: string) => void;
+  // 获取编辑器实例
+  getEditor: (noteId: string) => Editor | undefined;
   // 检查笔记是否被修改
   isNoteModified: (noteId: string) => boolean;
-  // 获取笔记的编辑内容
-  getEditingContent: (noteId: string) => JSONContent | undefined;
-  // 重置笔记到原始状态
-  resetNote: (noteId: string) => void;
+  // 保存笔记（更新原始内容）
+  saveNote: (noteId: string) => void;
+  // 获取笔记当前内容
+  getNoteContent: (noteId: string) => JSONContent | undefined;
+  // 通知内容已更新（触发重新渲染）
+  notifyContentChanged: () => void;
 }
 
 type EditorStore = EditorState & EditorActions;
 
-export const useEditorStore = create<EditorStore>()(
-  immer((set, get) => ({
-    // Initial state
-    editingContent: {},
-    originalContent: {},
+export const useEditorStore = create<EditorStore>()((set, get) => ({
+  // Initial state
+  instances: new Map(),
+  activeNoteId: null,
+  contentVersion: 0,
 
-    // Actions
-    startEditing: (noteId: string, content: JSONContent) => {
-      set((state) => {
-        // 设置原始内容和当前编辑内容
-        state.originalContent[noteId] = content;
-        state.editingContent[noteId] = content;
+  // Actions
+  registerEditor: (noteId: string, editor: Editor, initialContent: JSONContent) => {
+    set((state) => {
+      const newInstances = new Map(state.instances);
+      newInstances.set(noteId, {
+        editor,
+        originalContent: structuredClone(initialContent)
       });
-    },
+      return { instances: newInstances };
+    });
+  },
 
-    updateContent: (noteId: string, content: JSONContent) => {
+  unregisterEditor: (noteId: string) => {
+    const instance = get().instances.get(noteId);
+    if (instance) {
+      // 销毁编辑器实例
+      instance.editor.destroy();
       set((state) => {
-        // 只更新编辑内容，不设置自动保存
-        state.editingContent[noteId] = content;
-      });
-    },
-
-    saveNote: (noteId: string) => {
-      set((state) => {
-        const content = state.editingContent[noteId];
-        if (content !== undefined) {
-          // 更新原始内容为当前内容，标记为已保存
-          state.originalContent[noteId] = content;
-        }
-      });
-    },
-
-    stopEditing: (noteId: string) => {
-      set((state) => {
-        // 删除编辑状态
-        delete state.editingContent[noteId];
-        delete state.originalContent[noteId];
-      });
-    },
-
-    isNoteModified: (noteId: string) => {
-      const state = get();
-      const original = state.originalContent[noteId];
-      const current = state.editingContent[noteId];
-
-      // 如果没有编辑状态，说明没有修改
-      if (original === undefined || current === undefined) {
-        return false;
-      }
-
-      // 比较 JSON 内容
-      return JSON.stringify(original) !== JSON.stringify(current);
-    },
-
-    getEditingContent: (noteId: string) => {
-      const state = get();
-      return state.editingContent[noteId];
-    },
-
-    resetNote: (noteId: string) => {
-      set((state) => {
-        const original = state.originalContent[noteId];
-        if (original !== undefined) {
-          state.editingContent[noteId] = original;
-        }
+        const newInstances = new Map(state.instances);
+        newInstances.delete(noteId);
+        return { instances: newInstances };
       });
     }
-  }))
-);
+  },
+
+  setActiveNote: (noteId: string) => {
+    set({ activeNoteId: noteId });
+  },
+
+  getEditor: (noteId: string) => {
+    return get().instances.get(noteId)?.editor;
+  },
+
+  isNoteModified: (noteId: string) => {
+    const state = get();
+    const instance = state.instances.get(noteId);
+
+    if (!instance) {
+      return false;
+    }
+
+    const current = instance.editor.getJSON();
+    return JSON.stringify(current) !== JSON.stringify(instance.originalContent);
+  },
+
+  saveNote: (noteId: string) => {
+    const instance = get().instances.get(noteId);
+    if (instance) {
+      const content = instance.editor.getJSON();
+      set((state) => {
+        const newInstances = new Map(state.instances);
+        const updatedInstance = newInstances.get(noteId);
+        if (updatedInstance) {
+          updatedInstance.originalContent = structuredClone(content);
+        }
+        return { instances: newInstances };
+      });
+    }
+  },
+
+  getNoteContent: (noteId: string) => {
+    const instance = get().instances.get(noteId);
+    return instance?.editor.getJSON();
+  },
+
+  notifyContentChanged: () => {
+    set((state) => ({
+      contentVersion: state.contentVersion + 1
+    }));
+  }
+}));
 
 // 导出类型供组件使用
 export type { EditorStore };

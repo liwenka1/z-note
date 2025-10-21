@@ -6,6 +6,9 @@ import type { NoteFileContent } from "@renderer/types/file-content";
 
 /**
  * 创建一个空的笔记文件内容
+ * ⚠️ 注意：不能使用空的 content: []，因为 TipTap 会将其规范化为 [{ type: "paragraph" }]，
+ * 这个规范化过程会被记录到历史栈中，导致新笔记的撤销按钮可用。
+ * 所以直接创建包含一个空段落的文档。
  */
 export function createEmptyNoteFile(title: string): NoteFileContent {
   const now = new Date().toISOString();
@@ -14,7 +17,7 @@ export function createEmptyNoteFile(title: string): NoteFileContent {
     version: NOTE_CONSTANTS.DEFAULT_VERSION,
     content: {
       type: "doc",
-      content: []
+      content: [{ type: "paragraph" }]
     },
     metadata: {
       title,
