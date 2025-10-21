@@ -1,6 +1,11 @@
 import { useEffect, useRef } from "react";
-import type { AIPlatform } from "../constants/ai-platforms";
+import type { AIPlatform } from "../../../constants/ai-platforms";
 
+/**
+ * Webview 容器组件
+ * 职责：Webview 元素的创建和管理
+ * 注意：保持原有逻辑不变
+ */
 interface WebviewContainerProps {
   platform: AIPlatform;
 }
