@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { ScrollArea } from "@renderer/components/ui/scroll-area";
 import { useAIPlatformsStore } from "@renderer/stores";
 import { AI_PLATFORMS } from "../../constants/ai-platforms";
@@ -15,11 +14,6 @@ interface PlatformListProps {
 
 export function PlatformList({ onSelect }: PlatformListProps) {
   const customPlatforms = useAIPlatformsStore((state) => state.customPlatforms);
-
-  // 合并默认平台和自定义平台（保持原有逻辑）
-  const allPlatforms = useMemo(() => {
-    return [...AI_PLATFORMS, ...customPlatforms];
-  }, [customPlatforms]);
 
   return (
     <div className="flex-1 overflow-hidden">
