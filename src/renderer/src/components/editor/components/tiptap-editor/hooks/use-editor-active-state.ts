@@ -96,8 +96,8 @@ export function useEditorActiveState(editor: Editor | null): EditorActiveState {
         isBlockquote: ctx.editor.isActive("blockquote"),
 
         // History states
-        canUndo: ctx.editor.can().chain().undo().run(),
-        canRedo: ctx.editor.can().chain().redo().run()
+        canUndo: ctx.editor.can().undo(),
+        canRedo: ctx.editor.can().redo()
       };
     }
   });

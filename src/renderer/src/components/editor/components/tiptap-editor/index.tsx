@@ -4,107 +4,95 @@ import { cn } from "@renderer/lib/utils";
 import { EditorToolbar } from "./components/editor-toolbar";
 import { EditorContentArea } from "./components/editor-content";
 import { createEditorExtensions } from "./components/editor-extensions";
+import { useEditorStore } from "@renderer/stores/editor-store";
 
 interface TipTapEditorProps {
-  content: JSONContent;
-  onChange: (content: JSONContent) => void;
-  onSave?: () => void; // 添加保存回调
+  noteId: string;
+  initialContent: JSONContent;
+  onSave?: () => void;
   editable?: boolean;
   className?: string;
   placeholder?: string;
 }
 
+/**
+ * TipTap 编辑器组件
+ *
+ * 关键设计：
+ * 1. useEditor 不依赖 noteId - 确保实例不会因 noteId 变化而重建
+ * 2. 每个笔记对应一个独立的组件实例
+ * 3. 通过父组件的 display 控制显示/隐藏
+ *
+ * 参考：VSCode Monaco Editor 的实例管理模式
+ */
 export function TipTapEditor({
-  content,
-  onChange,
+  noteId,
+  initialContent,
   onSave,
   editable = true,
-  className,
+  className = "",
   placeholder = "开始写作..."
 }: TipTapEditorProps) {
-  // 用于防止在设置内容时触发 onChange
-  const isSettingContentRef = useRef(false);
-  // 用于跟踪编辑器是否已初始化内容
-  const hasInitializedRef = useRef(false);
+  const { registerEditor, unregisterEditor, notifyContentChanged } = useEditorStore();
+  const hasRegisteredRef = useRef(false);
+  const isReadyRef = useRef(false); // 标记编辑器是否已完成初始化
 
+  // 🔑 关键：空依赖数组 - 编辑器实例只创建一次，永不重建
   const editor = useEditor({
     extensions: createEditorExtensions(placeholder),
+    content: initialContent,
     editable,
-    content,
-    onUpdate: ({ editor }) => {
-      // 如果当前正在设置内容，则不触发 onChange
-      if (isSettingContentRef.current) {
+    onUpdate: () => {
+      // 🔑 只有在编辑器完成初始化后才通知内容变化
+      if (!isReadyRef.current) {
         return;
       }
-      const json = editor.getJSON();
-      onChange(json);
+      // 通知 store 内容已变化，触发订阅组件重新渲染
+      notifyContentChanged();
     },
     editorProps: {
       attributes: {
         class: "focus:outline-none"
       },
       handleKeyDown: (_view, event) => {
-        // 检测 Ctrl+S (Windows/Linux) 或 Cmd+S (macOS)
         if ((event.ctrlKey || event.metaKey) && event.key === "s") {
           event.preventDefault();
-          onSave?.(); // 调用保存回调
-          return true; // 表示事件已处理
+          onSave?.();
+          return true;
         }
-        return false; // 让其他按键正常处理
+        return false;
       }
     }
-  });
+  }); // ✅ 空依赖 - 这是关键！
 
-  // 标记编辑器已初始化
+  // 注册编辑器实例到 store
   useEffect(() => {
-    if (editor) {
-      hasInitializedRef.current = true;
+    if (editor && !hasRegisteredRef.current) {
+      // 🔑 等待下一个事件循环，确保 TipTap 完成初始化和内容规范化
+      // 然后使用编辑器当前的 JSON 作为 originalContent
+      setTimeout(() => {
+        const normalizedContent = editor.getJSON();
+        registerEditor(noteId, editor, normalizedContent);
+        isReadyRef.current = true; // 标记为已就绪
+      }, 0);
+      hasRegisteredRef.current = true;
     }
-  }, [editor]);
+  }, [editor, noteId, registerEditor]);
 
-  // 只在外部内容真正改变时更新编辑器（比如切换笔记）
-  useEffect(() => {
-    if (!editor || !hasInitializedRef.current) {
-      return;
-    }
-
-    // 检查外部内容是否与编辑器当前内容不同
-    const currentContent = editor.getJSON();
-    const contentChanged = JSON.stringify(currentContent) !== JSON.stringify(content);
-
-    if (contentChanged) {
-      // 设置标志，防止触发 onChange
-      isSettingContentRef.current = true;
-
-      // 保存当前光标位置
-      const { from, to } = editor.state.selection;
-
-      editor.commands.setContent(content);
-
-      // 尝试恢复光标位置（如果位置仍然有效）
-      try {
-        const docSize = editor.state.doc.content.size;
-        if (from <= docSize && to <= docSize) {
-          editor.commands.setTextSelection({ from, to });
-        }
-      } catch (e) {
-        // 如果恢复失败，忽略错误
-        console.debug("Could not restore cursor position:", e);
-      }
-
-      // 重置标志
-      isSettingContentRef.current = false;
-    }
-  }, [content, editor]);
-
-  // 清理资源
+  // 组件卸载时注销编辑器（只在关闭 tab 时触发）
   useEffect(() => {
     return () => {
-      if (editor) {
-        editor.destroy();
+      if (hasRegisteredRef.current) {
+        unregisterEditor(noteId);
+        hasRegisteredRef.current = false;
+        isReadyRef.current = false;
       }
     };
-  }, [editor]);
+  }, [noteId, unregisterEditor]);
+
+  if (!editor) {
+    return <div className="flex h-full items-center justify-center">加载编辑器...</div>;
+  }
 
   return (
     <div className={cn("flex h-full flex-col", className)}>

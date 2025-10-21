@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNote } from "@renderer/hooks";
 import { useEditorStore } from "@renderer/stores";
 import { filesApi } from "@renderer/api";
@@ -17,25 +17,28 @@ interface FileNoteState {
 /**
  * Editor 状态管理 Hook
  * 支持数据库和文件系统双模式
+ *
+ * 职责：
+ * 1. 加载笔记数据（文件/数据库）
+ * 2. 提供初始内容给编辑器
+ * 3. 处理保存逻辑
  */
 export function useEditorState(noteId: string) {
   const [fileNote, setFileNote] = useState<FileNoteState | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const isFileMode = isFileNoteId(noteId);
 
   // 数据库模式：使用原有的查询
   const { data: dbNote, isLoading: dbLoading } = useNote(isFileMode ? 0 : parseInt(noteId) || 0);
 
-  const { startEditing, getEditingContent, updateContent, saveNote } = useEditorStore();
+  const { getNoteContent, saveNote } = useEditorStore();
 
   // 文件模式：加载文件内容
   useEffect(() => {
     if (isFileMode) {
       const loadFileNote = async () => {
         setIsLoading(true);
-        setError(null);
 
         try {
           const filePath = getFilePathFromNoteId(noteId);
@@ -44,13 +47,12 @@ export function useEditorState(noteId: string) {
           setFileNote({
             id: noteId,
             title: noteContent.metadata.title,
-            content: JSON.stringify(noteContent.content), // 临时转换为字符串以兼容现有接口
+            content: JSON.stringify(noteContent.content),
             jsonContent: noteContent.content,
             metadata: noteContent.metadata
           });
         } catch (err) {
           console.error("Failed to load file note:", err);
-          setError("加载笔记失败");
         } finally {
           setIsLoading(false);
         }
@@ -63,43 +65,30 @@ export function useEditorState(noteId: string) {
   // 当前笔记对象
   const note = isFileMode ? fileNote : dbNote;
 
-  // 获取编辑内容
-  const editingContent = getEditingContent(noteId);
+  // 确定初始内容 - 确保总是返回有效的文档结构
+  let initialContent: JSONContent;
 
-  // 确定最终显示的内容
-  let finalContent: JSONContent;
-  if (editingContent) {
-    finalContent = editingContent;
-  } else if (isFileMode && fileNote?.jsonContent) {
-    finalContent = fileNote.jsonContent;
+  if (isFileMode && fileNote?.jsonContent) {
+    // 文件模式：直接使用文件内容（已在 createEmptyNoteFile 中规范化）
+    initialContent = fileNote.jsonContent;
   } else if (!isFileMode && note?.content) {
     // 数据库模式：假设原来存储的是 HTML，需要转换
     // 这里可能需要额外的转换逻辑
-    finalContent = { type: "doc", content: [] }; // 临时的空内容
+    initialContent = {
+      type: "doc",
+      content: [{ type: "paragraph" }]
+    };
   } else {
-    finalContent = { type: "doc", content: [] };
+    // 默认空文档
+    initialContent = {
+      type: "doc",
+      content: [{ type: "paragraph" }]
+    };
   }
 
-  // 初始化编辑状态
-  useEffect(() => {
-    if (note && !editingContent) {
-      if (isFileMode && fileNote?.jsonContent) {
-        // 为文件模式启动编辑，深拷贝确保对象引用独立
-        startEditing(noteId, structuredClone(fileNote.jsonContent));
-      } else if (!isFileMode && note?.content) {
-        // 对于数据库模式，需要将 HTML 转换为 JSON
-        // 临时使用空内容，后续可以实现 HTML 到 JSON 的转换
-        startEditing(noteId, { type: "doc", content: [] });
-      }
-    }
-  }, [note, noteId, editingContent, startEditing, isFileMode, fileNote]);
-
-  const handleContentChange = (content: JSONContent) => {
-    updateContent(noteId, content);
-  };
-
-  const handleSave = async () => {
-    const currentContent = getEditingContent(noteId);
+  const handleSave = useCallback(async () => {
+    // 从 store 获取当前编辑器的内容
+    const currentContent = getNoteContent(noteId);
     if (!currentContent) return;
 
     if (isFileMode) {
@@ -116,14 +105,12 @@ export function useEditorState(noteId: string) {
       // 这里需要将 JSON 转换回 HTML 并调用原有的保存 API
       saveNote(noteId);
     }
-  };
+  }, [noteId, isFileMode, getNoteContent, saveNote]);
 
   return {
     note,
-    editingContent: finalContent,
-    handleContentChange,
+    initialContent,
     handleSave,
-    isLoading: isFileMode ? isLoading : dbLoading,
-    error
+    isLoading: isFileMode ? isLoading : dbLoading
   };
 }
