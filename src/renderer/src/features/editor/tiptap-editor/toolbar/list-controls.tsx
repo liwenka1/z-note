@@ -22,22 +22,7 @@ export function ListControls({ editor }: ListControlsProps) {
   const toggleBlockquote = () => editor.chain().focus().toggleBlockquote().run();
 
   const setLink = () => {
-    const previousUrl = editor.getAttributes("link").href;
-    const url = window.prompt("URL", previousUrl);
-
-    // 如果用户取消或者输入空 URL，则移除链接
-    if (url === null) {
-      return;
-    }
-
-    // 如果 URL 为空，则移除链接
-    if (url === "") {
-      editor.chain().focus().extendMarkRange("link").unsetLink().run();
-      return;
-    }
-
-    // 更新链接
-    editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+    editor.chain().focus();
   };
 
   return (

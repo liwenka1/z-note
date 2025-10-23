@@ -36,6 +36,10 @@ export function HeadingControls({ editor }: HeadingControlsProps) {
           ? 4
           : null;
 
+  const toggleHeading = (level: (typeof levels)[number]) => {
+    editor.chain().focus().toggleHeading({ level }).run();
+  };
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -46,7 +50,13 @@ export function HeadingControls({ editor }: HeadingControlsProps) {
               <ChevronDown className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
+          <DropdownMenuContent
+            align="start"
+            onCloseAutoFocus={(e) => {
+              e.preventDefault(); // 阻止默认的焦点恢复
+              editor.chain().focus(); // 手动恢复到编辑器
+            }}
+          >
             {levels.map((level) => {
               const isActive =
                 level === 1
@@ -60,7 +70,7 @@ export function HeadingControls({ editor }: HeadingControlsProps) {
               return (
                 <DropdownMenuItem
                   key={level}
-                  onClick={() => editor.chain().focus().toggleHeading({ level }).run()}
+                  onClick={() => toggleHeading(level)}
                   className={cn("flex items-center gap-2", isActive && "bg-secondary")}
                 >
                   <span className="w-8 font-semibold">H{level}</span>
