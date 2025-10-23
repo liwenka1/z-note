@@ -1,13 +1,9 @@
-import { NoteEditor } from "@renderer/components/editor";
+import { NoteEditor } from "@renderer/features/editor";
 
-interface NoteDetailPageProps {
-  noteId: string;
-}
-
-export function NoteDetailPage({ noteId }: NoteDetailPageProps) {
+export function NoteDetailPage() {
   return (
     <div className="h-full">
-      <NoteEditor noteId={noteId} />
+      <NoteEditor />
     </div>
   );
 }
