@@ -1,5 +1,5 @@
-import { NoteStatusInfo } from "./components/note-status-info";
-import { HelpButton } from "./components/help-button";
+import { NoteStatusInfo } from "./note-status-info";
+import { HelpButton } from "./help-button";
 
 export function StatusBar() {
   return (
