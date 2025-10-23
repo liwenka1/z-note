@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { AIPlatform } from "@renderer/components/ai-playground/constants/ai-platforms";
+import type { AIPlatform } from "@renderer/features/ai-playground/constants/ai-platforms";
 
 interface AIPlatformsState {
   customPlatforms: AIPlatform[];
