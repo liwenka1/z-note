@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@renderer/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Heading } from "lucide-react";
 import { cn } from "@renderer/lib/utils";
 import { useEditorActiveState } from "../../hooks/use-editor-active-state";
 
@@ -41,22 +41,12 @@ export function HeadingControls({ editor }: HeadingControlsProps) {
       <TooltipTrigger asChild>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn("h-8 w-max gap-1 px-3 font-normal", activeLevel && "bg-secondary")}
-            >
-              {activeLevel ? `H${activeLevel}` : "正文"}
-              <ChevronDown className="h-4 w-4" />
+            <Button variant="ghost" size="sm" className={cn("h-8 w-max gap-1 px-2", activeLevel && "bg-secondary")}>
+              {activeLevel ? <span className="font-semibold">H{activeLevel}</span> : <Heading className="h-4 w-4" />}
+              <ChevronDown className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
-            <DropdownMenuItem
-              onClick={() => editor.chain().focus().setParagraph().run()}
-              className={cn("flex items-center gap-2", editorState.isParagraph && "bg-secondary")}
-            >
-              正文
-            </DropdownMenuItem>
             {levels.map((level) => {
               const isActive =
                 level === 1
@@ -73,7 +63,8 @@ export function HeadingControls({ editor }: HeadingControlsProps) {
                   onClick={() => editor.chain().focus().toggleHeading({ level }).run()}
                   className={cn("flex items-center gap-2", isActive && "bg-secondary")}
                 >
-                  H{level}
+                  <span className="w-8 font-semibold">H{level}</span>
+                  <span className="text-muted-foreground text-xs">标题 {level}</span>
                 </DropdownMenuItem>
               );
             })}
