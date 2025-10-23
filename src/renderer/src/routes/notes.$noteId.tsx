@@ -6,7 +6,5 @@ export const Route = createFileRoute("/notes/$noteId")({
 });
 
 function NoteDetail() {
-  const { noteId } = Route.useParams();
-
-  return <NoteDetailPage noteId={noteId} />;
+  return <NoteDetailPage />;
 }
