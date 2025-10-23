@@ -1,0 +1,59 @@
+import { Plus, Trash2, MoreHorizontal } from "lucide-react";
+import { Button } from "@renderer/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@renderer/components/ui/dropdown-menu";
+import { useChatStore } from "@renderer/stores";
+
+export function SessionActions() {
+  const { createSession, clearSession } = useChatStore();
+  const currentSession = useChatStore((state) => {
+    const current = state.sessions.find((s) => s.id === state.currentSessionId);
+    return current || null;
+  });
+
+  const handleNewSession = () => {
+    createSession();
+  };
+
+  const handleClearSession = () => {
+    if (currentSession) {
+      clearSession(currentSession.id);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-1">
+      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleNewSession} title="新建会话">
+        <Plus className="h-4 w-4" />
+      </Button>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="更多选项">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={handleNewSession}>
+            <Plus className="mr-2 h-4 w-4" />
+            新建会话
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={handleClearSession}
+            disabled={!currentSession || currentSession.messages.length === 0}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            清空当前会话
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem disabled>设置 (开发中)</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
