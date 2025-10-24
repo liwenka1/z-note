@@ -14,7 +14,7 @@ export function EditorContentArea({ editor, className }: EditorContentAreaProps)
   return (
     <div
       className={cn(
-        "prose prose-neutral dark:prose-invert max-w-none",
+        "prose prose-custom dark:prose-invert max-w-none",
         "min-h-full p-6", // 确保最小高度填满容器
         "focus-within:outline-none", // 聚焦时无外边框
         className
