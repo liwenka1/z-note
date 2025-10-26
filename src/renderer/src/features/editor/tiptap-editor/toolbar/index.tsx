@@ -1,11 +1,35 @@
 import { Editor } from "@tiptap/react";
 import { Separator } from "@renderer/components/ui/separator";
 import { cn } from "@renderer/lib/utils";
+
+// 第1组：历史操作
 import { HistoryControls } from "./history-controls";
-import { HeadingControls } from "./heading-controls";
-import { FormatControls } from "./format-controls";
-import { ListControls } from "./list-controls";
-import { CodeBlockControl } from "./code-block-control";
+
+// 第2组：块级元素
+import { HeadingDropdown } from "./block-controls/heading-dropdown";
+import { ListDropdown } from "./block-controls/list-dropdown";
+import { BlockquoteButton } from "./block-controls/blockquote-button";
+import { CodeBlockButton } from "./block-controls/code-block-button";
+
+// 第3组：文本格式
+import { BoldButton } from "./format-controls/bold-button";
+import { ItalicButton } from "./format-controls/italic-button";
+import { StrikeButton } from "./format-controls/strike-button";
+import { CodeButton } from "./format-controls/code-button";
+import { UnderlineButton } from "./format-controls/underline-button";
+import { HighlightDropdown } from "./format-controls/highlight-dropdown";
+import { LinkButton } from "./format-controls/link-button";
+
+// 第4组：上下标
+import { TextScriptControls } from "./text-script-controls";
+
+// 第5组：文本对齐
+import { TextAlignControls } from "./text-align-controls";
+
+// 第6组：媒体插入
+import { MediaControls } from "./media-controls";
+
+// 第7组：额外控件
 import { ExtraControls } from "./extra-controls";
 
 interface EditorToolbarProps {
@@ -21,37 +45,51 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
   return (
     <div
       className={cn(
-        "sticky top-0 z-10", // 添加粘性定位，确保固定在顶部
-        "bg-background border border-t-0", // 完整边框，但去掉顶边框（因为贴着顶部）
+        "sticky top-0 z-10",
+        "bg-background border border-t-0",
         "flex h-full flex-wrap items-center justify-center gap-1 p-1",
-        "shadow-sm", // 添加轻微阴影增强层次感
+        "shadow-sm",
         className
       )}
     >
-      {/* 历史操作控件 */}
+      {/* 第1组：历史操作 */}
       <HistoryControls editor={editor} />
-
       <Separator orientation="vertical" className="max-h-6" />
 
-      {/* 标题控件 */}
-      <HeadingControls editor={editor} />
-
+      {/* 第2组：块级元素 */}
+      <div className="flex items-center gap-1">
+        <HeadingDropdown editor={editor} />
+        <ListDropdown editor={editor} />
+        <BlockquoteButton editor={editor} />
+        <CodeBlockButton editor={editor} />
+      </div>
       <Separator orientation="vertical" className="max-h-6" />
 
-      {/* 格式化控件 */}
-      <FormatControls editor={editor} />
-
-      {/* 代码块 */}
-      <CodeBlockControl editor={editor} />
-
+      {/* 第3组：文本格式 */}
+      <div className="flex items-center gap-1">
+        <BoldButton editor={editor} />
+        <ItalicButton editor={editor} />
+        <StrikeButton editor={editor} />
+        <CodeButton editor={editor} />
+        <UnderlineButton editor={editor} />
+        <HighlightDropdown editor={editor} />
+        <LinkButton editor={editor} />
+      </div>
       <Separator orientation="vertical" className="max-h-6" />
 
-      {/* 列表和引用控件 */}
-      <ListControls editor={editor} />
-
+      {/* 第4组：上下标 */}
+      <TextScriptControls editor={editor} />
       <Separator orientation="vertical" className="max-h-6" />
 
-      {/* 额外控件（水平线、硬换行、清除格式） */}
+      {/* 第5组：文本对齐 */}
+      <TextAlignControls editor={editor} />
+      <Separator orientation="vertical" className="max-h-6" />
+
+      {/* 第6组：媒体插入 */}
+      <MediaControls editor={editor} />
+      <Separator orientation="vertical" className="max-h-6" />
+
+      {/* 第7组：额外控件（保留现有功能） */}
       <ExtraControls editor={editor} />
     </div>
   );
