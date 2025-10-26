@@ -6,6 +6,15 @@ import Typography from "@tiptap/extension-typography";
 /**
  * 编辑器扩展配置
  * 将TipTap编辑器的扩展配置抽离到单独文件
+ *
+ * 🚧 待添加的扩展（占位功能）：
+ * - Underline - 下划线
+ * - Highlight - 高亮颜色
+ * - Superscript - 上标
+ * - Subscript - 下标
+ * - TextAlign - 文本对齐
+ * - Image - 图片上传
+ * - TaskList & TaskItem - 任务列表
  */
 export function createEditorExtensions(placeholder = "开始写作...") {
   return [
@@ -26,5 +35,15 @@ export function createEditorExtensions(placeholder = "开始写作...") {
       placeholder
     }),
     Typography
+
+    // 🚧 待添加扩展示例：
+    // Underline,
+    // Highlight.configure({ multicolor: true }),
+    // Superscript,
+    // Subscript,
+    // TextAlign.configure({ types: ['heading', 'paragraph'] }),
+    // Image,
+    // TaskList,
+    // TaskItem.configure({ nested: true }),
   ];
 }
