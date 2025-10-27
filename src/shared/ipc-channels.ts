@@ -77,8 +77,6 @@ export const IPC_CHANNELS = {
   // 工作区相关
   WORKSPACE: {
     GET_DEFAULT_PATH: "workspace:getDefaultPath",
-    GET_CONFIG: "workspace:getConfig",
-    SET_CONFIG: "workspace:setConfig",
     SELECT_DIRECTORY: "workspace:selectDirectory",
     VALIDATE_WORKSPACE: "workspace:validateWorkspace"
   },

@@ -16,7 +16,6 @@ import type {
   TagUpdateData,
   VectorDocumentFormData,
   FileNode,
-  WorkspaceConfig,
   ScanOptions,
   FileStats,
   SearchOptions,
@@ -107,8 +106,6 @@ export interface IpcMethods {
 
   // 工作区相关
   [IPC_CHANNELS.WORKSPACE.GET_DEFAULT_PATH]: () => Promise<BaseResponse<string>>;
-  [IPC_CHANNELS.WORKSPACE.GET_CONFIG]: () => Promise<BaseResponse<WorkspaceConfig>>;
-  [IPC_CHANNELS.WORKSPACE.SET_CONFIG]: (config: WorkspaceConfig) => Promise<BaseResponse<{ success: boolean }>>;
   [IPC_CHANNELS.WORKSPACE.SELECT_DIRECTORY]: () => Promise<BaseResponse<string | null>>;
   [IPC_CHANNELS.WORKSPACE.VALIDATE_WORKSPACE]: (
     workspacePath: string
