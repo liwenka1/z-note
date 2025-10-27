@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import Fuse, { type FuseResultMatch } from "fuse.js";
 import { fileSearchIndex, type SearchIndexItem } from "@renderer/services/file-search-index";
-import { DEFAULT_WORKSPACE_PATH } from "@renderer/config/workspace";
 import type { SearchItem } from "../types";
 
 /**
@@ -162,7 +161,8 @@ export function useAdvancedSearch(options: SearchOptions = {}) {
 
       setIsIndexReady(false);
       try {
-        await fileSearchIndex.buildIndex(DEFAULT_WORKSPACE_PATH);
+        // 不传递路径参数，让 fileSearchIndex 自己获取当前工作区路径
+        await fileSearchIndex.buildIndex();
 
         if (isStale) return;
 
@@ -220,7 +220,8 @@ export function useAdvancedSearch(options: SearchOptions = {}) {
   const rebuildIndex = useCallback(async () => {
     setIsIndexReady(false);
     try {
-      await fileSearchIndex.buildIndex(DEFAULT_WORKSPACE_PATH);
+      // 不传递路径参数，让 fileSearchIndex 自己获取当前工作区路径
+      await fileSearchIndex.buildIndex();
       setIsIndexReady(true);
     } catch (error) {
       console.error("重建索引失败:", error);

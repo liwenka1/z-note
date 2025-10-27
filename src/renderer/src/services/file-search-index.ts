@@ -4,7 +4,6 @@ import { fileSystemApi, workspaceApi } from "@renderer/api/file-system";
 import { filesApi } from "@renderer/api/files";
 import type { NoteFileContent } from "@renderer/types/file-content";
 import { extractSearchableContent, extractDocumentStructure } from "@renderer/utils/tiptap-content-extractor";
-import { DEFAULT_WORKSPACE_PATH } from "@renderer/config/workspace";
 
 /**
  * 搜索索引项 - 完全效仿 z-note Tauri 项目的数据结构
@@ -128,12 +127,18 @@ class FileSearchIndexManager {
         return config.workspacePath;
       }
 
-      // 如果 API 失败或没有配置，使用默认工作区路径
-      return DEFAULT_WORKSPACE_PATH;
+      // 如果没有配置，获取系统默认路径（跨平台）
+      const defaultPath = await workspaceApi.getDefaultPath();
+      return defaultPath;
     } catch (error) {
       console.error("获取工作区路径失败:", error);
-      // 最后的兜底方案，返回默认路径
-      return DEFAULT_WORKSPACE_PATH;
+      // 最后的兜底方案，尝试获取系统默认路径
+      try {
+        return await workspaceApi.getDefaultPath();
+      } catch (e) {
+        console.error("获取默认工作区路径失败:", e);
+        return null;
+      }
     }
   }
 

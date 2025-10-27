@@ -11,12 +11,14 @@ import { useFilesStore } from "@renderer/stores";
  */
 export function FilesPanel() {
   const { hasContent } = useFilesState();
-  const loadFileTree = useFilesStore.getState().loadFileTree;
+  const { initializeWorkspace, workspace } = useFilesStore();
 
-  // 初始化工作区 - 组件首次挂载时加载文件树
+  // 初始化工作区 - 组件首次挂载时初始化工作区和加载文件树
   useEffect(() => {
-    loadFileTree(true);
-  }, [loadFileTree]);
+    if (!workspace.initialized && !workspace.loading) {
+      initializeWorkspace();
+    }
+  }, [initializeWorkspace, workspace.initialized, workspace.loading]);
 
   return (
     <div className="bg-background flex h-full flex-col">
