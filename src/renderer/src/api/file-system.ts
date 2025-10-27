@@ -2,14 +2,7 @@
 
 import { ipcClient, handleResponse } from "./ipc";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
-import type {
-  FileNode,
-  WorkspaceConfig,
-  ScanOptions,
-  FileStats,
-  SearchOptions,
-  WorkspaceValidationResult
-} from "@shared/types";
+import type { FileNode, ScanOptions, FileStats, SearchOptions, WorkspaceValidationResult } from "@shared/types";
 
 /**
  * 文件系统 API
@@ -146,6 +139,7 @@ export const fileSystemApi = {
 
 /**
  * 工作区 API
+ * 注意：工作区配置现在统一使用 configApi 管理，存储在 app-config.json 中
  */
 export const workspaceApi = {
   /**
@@ -153,22 +147,6 @@ export const workspaceApi = {
    */
   async getDefaultPath(): Promise<string> {
     const response = await ipcClient.invoke(IPC_CHANNELS.WORKSPACE.GET_DEFAULT_PATH);
-    return handleResponse(response);
-  },
-
-  /**
-   * 获取工作区配置
-   */
-  async getConfig(): Promise<WorkspaceConfig> {
-    const response = await ipcClient.invoke(IPC_CHANNELS.WORKSPACE.GET_CONFIG);
-    return handleResponse(response);
-  },
-
-  /**
-   * 设置工作区配置
-   */
-  async setConfig(config: WorkspaceConfig): Promise<{ success: boolean }> {
-    const response = await ipcClient.invoke(IPC_CHANNELS.WORKSPACE.SET_CONFIG, config);
     return handleResponse(response);
   },
 

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { fileSystemApi, workspaceApi, configApi, CONFIG_KEYS, FILE_EXTENSIONS } from "@renderer/api";
-import type { FileNode, WorkspaceConfig, ScanOptions, SortType, SortDirection } from "@shared/types";
+import type { FileNode, ScanOptions, SortType, SortDirection } from "@shared/types";
 import type { FileTreeState, WorkspaceState, FileEditState, SearchResultItem } from "@renderer/types";
 import { createEmptyNoteFile, getTitleFromFileName } from "@renderer/utils/file-content";
 import { NOTE_CONSTANTS } from "@renderer/constants/note-constants";
@@ -504,35 +504,35 @@ export const useFilesStore = create<FilesStore>()(
       });
 
       try {
-        // 获取工作区配置
-        let config = await workspaceApi.getConfig();
+        // 1. 从 configApi 读取工作区路径
+        let workspacePath = await configApi.get<string>("workspace.path");
 
-        // 验证工作区路径
-        const validation = await workspaceApi.validateWorkspace(config.workspacePath);
-        if (!validation.isValid) {
-          // 使用默认工作区
-          const defaultPath = await workspaceApi.getDefaultPath();
-          config = {
-            workspacePath: defaultPath,
-            recentFiles: [],
-            excludePatterns: ["node_modules", ".git", ".DS_Store"],
-            includeExtensions: [".md", ".markdown", ".txt"],
-            watchEnabled: true,
-            maxFileSize: 10 * 1024 * 1024
-          };
-          await workspaceApi.setConfig(config);
+        // 2. 如果没有配置，使用默认路径并保存
+        if (!workspacePath) {
+          workspacePath = await workspaceApi.getDefaultPath();
+          await configApi.set("workspace.path", workspacePath);
         }
 
+        // 3. 验证路径有效性
+        const validation = await workspaceApi.validateWorkspace(workspacePath);
+        if (!validation.isValid) {
+          // 路径无效，回退到默认路径
+          console.warn(`工作区路径无效: ${workspacePath}, 使用默认路径`);
+          workspacePath = await workspaceApi.getDefaultPath();
+          await configApi.set("workspace.path", workspacePath);
+        }
+
+        // 4. 设置到 store
         set((state) => {
-          state.workspace.config = config;
+          state.workspace.config.workspacePath = workspacePath;
           state.workspace.initialized = true;
           state.workspace.loading = false;
         });
 
-        // 加载文件树
-        await get().loadFileTree();
+        // 5. 加载文件树（会自动恢复展开状态）
+        await get().loadFileTree(true);
 
-        // 恢复最后打开的文件
+        // 6. 恢复最后打开的文件
         const lastOpenedFile = await configApi.get<string>(CONFIG_KEYS.LAST_OPENED_FILE);
         if (lastOpenedFile && (await fileSystemApi.exists(lastOpenedFile))) {
           await get().selectFile(lastOpenedFile);
@@ -547,28 +547,23 @@ export const useFilesStore = create<FilesStore>()(
     },
 
     switchWorkspace: async (workspacePath: string) => {
+      // 1. 验证新的工作区路径
       const validation = await workspaceApi.validateWorkspace(workspacePath);
       if (!validation.isValid) {
         throw new Error(validation.error || "工作区路径无效");
       }
 
-      const config: WorkspaceConfig = {
-        workspacePath,
-        recentFiles: [],
-        excludePatterns: ["node_modules", ".git", ".DS_Store"],
-        includeExtensions: [".md", ".markdown", ".txt"],
-        watchEnabled: true,
-        maxFileSize: 10 * 1024 * 1024
-      };
+      // 2. 保存到配置
+      await configApi.set("workspace.path", workspacePath);
 
-      await workspaceApi.setConfig(config);
-
+      // 3. 更新 store
       set((state) => {
-        state.workspace.config = config;
+        state.workspace.config.workspacePath = workspacePath;
         state.currentFile = defaultFileEditState;
         state.fileTree.selectedPath = undefined;
       });
 
+      // 4. 重新加载文件树
       await get().loadFileTree();
     },
 
@@ -580,12 +575,10 @@ export const useFilesStore = create<FilesStore>()(
     },
 
     saveWorkspaceConfig: async () => {
-      const { workspace, fileTree } = get();
+      const { fileTree } = get();
 
       // 保存展开状态到应用配置
       await configApi.set("workspace.expandedPaths", Array.from(fileTree.expandedPaths));
-
-      await workspaceApi.setConfig(workspace.config);
     },
 
     // ==================== 搜索操作 ====================

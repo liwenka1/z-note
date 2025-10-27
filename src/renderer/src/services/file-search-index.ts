@@ -121,24 +121,19 @@ class FileSearchIndexManager {
    */
   private async getCurrentWorkspace(): Promise<string | null> {
     try {
-      // 首先尝试使用工作区 API 获取路径
-      const config = await workspaceApi.getConfig();
-      if (config.workspacePath) {
-        return config.workspacePath;
+      // 从 configApi 读取工作区路径
+      const { configApi } = await import("@renderer/api/file-system");
+      let workspacePath = await configApi.get<string>("workspace.path");
+
+      // 如果没有配置，使用默认路径
+      if (!workspacePath) {
+        workspacePath = await workspaceApi.getDefaultPath();
       }
 
-      // 如果没有配置，获取系统默认路径（跨平台）
-      const defaultPath = await workspaceApi.getDefaultPath();
-      return defaultPath;
+      return workspacePath;
     } catch (error) {
       console.error("获取工作区路径失败:", error);
-      // 最后的兜底方案，尝试获取系统默认路径
-      try {
-        return await workspaceApi.getDefaultPath();
-      } catch (e) {
-        console.error("获取默认工作区路径失败:", e);
-        return null;
-      }
+      return null;
     }
   }
 
