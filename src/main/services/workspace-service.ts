@@ -1,22 +1,16 @@
 import { FileSystemService } from "./file-system-service";
-import { dialog, app } from "electron";
-import * as path from "path";
+import { dialog } from "electron";
 import { registerHandler } from "../ipc/registry";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
 
 /**
- * 工作区配置接口
- */
-export interface WorkspaceConfig {
-  path: string;
-  isDefault: boolean;
-  lastOpenedFile?: string;
-  collapsedFolders: string[];
-}
-
-/**
  * 工作区服务 (工具型服务)
- * 负责管理工作区配置和相关操作
+ * 负责工作区相关的工具方法：
+ * - 获取默认工作区路径
+ * - 选择目录对话框
+ * - 验证工作区路径
+ *
+ * 注意：工作区配置现在统一存储在 app-config.json 中，通过 configApi 访问
  */
 export class WorkspaceService {
   private fileSystemService: FileSystemService;
@@ -30,51 +24,6 @@ export class WorkspaceService {
    */
   getDefaultWorkspacePath(): string {
     return this.fileSystemService.getDefaultWorkspacePath();
-  }
-
-  /**
-   * 获取工作区配置
-   */
-  async getWorkspaceConfig(): Promise<WorkspaceConfig> {
-    try {
-      const configPath = path.join(app.getPath("userData"), "workspace-config.json");
-      const exists = await this.fileSystemService.exists(configPath);
-
-      if (!exists) {
-        // 返回默认配置
-        const defaultConfig: WorkspaceConfig = {
-          path: this.fileSystemService.getDefaultWorkspacePath(),
-          isDefault: true,
-          collapsedFolders: []
-        };
-        return defaultConfig;
-      }
-
-      const configContent = await this.fileSystemService.readFile(configPath);
-      return JSON.parse(configContent) as WorkspaceConfig;
-    } catch (error) {
-      console.error("读取工作区配置失败:", error);
-      // 返回默认配置
-      return {
-        path: this.fileSystemService.getDefaultWorkspacePath(),
-        isDefault: true,
-        collapsedFolders: []
-      } as WorkspaceConfig;
-    }
-  }
-
-  /**
-   * 设置工作区配置
-   */
-  async setWorkspaceConfig(config: WorkspaceConfig): Promise<{ success: boolean }> {
-    try {
-      const configPath = path.join(app.getPath("userData"), "workspace-config.json");
-      await this.fileSystemService.writeFile(configPath, JSON.stringify(config, null, 2));
-      return { success: true };
-    } catch (error) {
-      console.error("保存工作区配置失败:", error);
-      throw error;
-    }
   }
 
   /**
@@ -124,16 +73,6 @@ export class WorkspaceService {
     // 获取默认工作区路径
     registerHandler(IPC_CHANNELS.WORKSPACE.GET_DEFAULT_PATH, async () => {
       return this.getDefaultWorkspacePath();
-    });
-
-    // 获取工作区配置
-    registerHandler(IPC_CHANNELS.WORKSPACE.GET_CONFIG, async () => {
-      return await this.getWorkspaceConfig();
-    });
-
-    // 设置工作区配置
-    registerHandler(IPC_CHANNELS.WORKSPACE.SET_CONFIG, async (config: WorkspaceConfig) => {
-      return await this.setWorkspaceConfig(config);
     });
 
     // 选择目录对话框

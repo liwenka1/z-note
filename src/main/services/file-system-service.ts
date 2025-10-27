@@ -20,16 +20,6 @@ export interface FileNode {
 }
 
 /**
- * 工作区配置接口
- */
-export interface WorkspaceConfig {
-  path: string;
-  isDefault: boolean;
-  lastOpenedFile?: string;
-  collapsedFolders: string[];
-}
-
-/**
  * 扫描选项
  */
 export interface ScanOptions {
