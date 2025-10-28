@@ -18,11 +18,22 @@ export interface EditorActiveState {
   isStrike: boolean;
   isCode: boolean;
   isCodeBlock: boolean;
+  isUnderline: boolean;
+  isSuperscript: boolean;
+  isSubscript: boolean;
+  isHighlight: boolean;
 
   // List states
   isBulletList: boolean;
   isOrderedList: boolean;
+  isTaskList: boolean;
   isBlockquote: boolean;
+
+  // Alignment states
+  isAlignLeft: boolean;
+  isAlignCenter: boolean;
+  isAlignRight: boolean;
+  isAlignJustify: boolean;
 
   // History states
   canUndo: boolean;
@@ -63,11 +74,22 @@ export function useEditorActiveState(editor: Editor | null): EditorActiveState {
           isStrike: false,
           isCode: false,
           isCodeBlock: false,
+          isUnderline: false,
+          isSuperscript: false,
+          isSubscript: false,
+          isHighlight: false,
 
           // List states
           isBulletList: false,
           isOrderedList: false,
+          isTaskList: false,
           isBlockquote: false,
+
+          // Alignment states
+          isAlignLeft: false,
+          isAlignCenter: false,
+          isAlignRight: false,
+          isAlignJustify: false,
 
           // History states
           canUndo: false,
@@ -89,11 +111,26 @@ export function useEditorActiveState(editor: Editor | null): EditorActiveState {
         isStrike: ctx.editor.isActive("strike"),
         isCode: ctx.editor.isActive("code"),
         isCodeBlock: ctx.editor.isActive("codeBlock"),
+        isUnderline: ctx.editor.isActive("underline"),
+        isSuperscript: ctx.editor.isActive("superscript"),
+        isSubscript: ctx.editor.isActive("subscript"),
+        isHighlight: ctx.editor.isActive("highlight"),
 
         // List states
         isBulletList: ctx.editor.isActive("bulletList"),
         isOrderedList: ctx.editor.isActive("orderedList"),
+        isTaskList: ctx.editor.isActive("taskList"),
         isBlockquote: ctx.editor.isActive("blockquote"),
+
+        // Alignment states
+        isAlignLeft:
+          ctx.editor.isActive({ textAlign: "left" }) ||
+          (!ctx.editor.isActive({ textAlign: "center" }) &&
+            !ctx.editor.isActive({ textAlign: "right" }) &&
+            !ctx.editor.isActive({ textAlign: "justify" })),
+        isAlignCenter: ctx.editor.isActive({ textAlign: "center" }),
+        isAlignRight: ctx.editor.isActive({ textAlign: "right" }),
+        isAlignJustify: ctx.editor.isActive({ textAlign: "justify" }),
 
         // History states
         canUndo: ctx.editor.can().undo(),
@@ -116,9 +153,18 @@ export function useEditorActiveState(editor: Editor | null): EditorActiveState {
       isStrike: false,
       isCode: false,
       isCodeBlock: false,
+      isUnderline: false,
+      isSuperscript: false,
+      isSubscript: false,
+      isHighlight: false,
       isBulletList: false,
       isOrderedList: false,
+      isTaskList: false,
       isBlockquote: false,
+      isAlignLeft: false,
+      isAlignCenter: false,
+      isAlignRight: false,
+      isAlignJustify: false,
       canUndo: false,
       canRedo: false
     }

@@ -2,19 +2,17 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import Typography from "@tiptap/extension-typography";
+import Underline from "@tiptap/extension-underline";
+import Superscript from "@tiptap/extension-superscript";
+import Subscript from "@tiptap/extension-subscript";
+import Highlight from "@tiptap/extension-highlight";
+import TextAlign from "@tiptap/extension-text-align";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
 
 /**
  * 编辑器扩展配置
  * 将TipTap编辑器的扩展配置抽离到单独文件
- *
- * 🚧 待添加的扩展（占位功能）：
- * - Underline - 下划线
- * - Highlight - 高亮颜色
- * - Superscript - 上标
- * - Subscript - 下标
- * - TextAlign - 文本对齐
- * - Image - 图片上传
- * - TaskList & TaskItem - 任务列表
  */
 export function createEditorExtensions(placeholder = "开始写作...") {
   return [
@@ -34,16 +32,22 @@ export function createEditorExtensions(placeholder = "开始写作...") {
     Placeholder.configure({
       placeholder
     }),
-    Typography
-
-    // 🚧 待添加扩展示例：
-    // Underline,
-    // Highlight.configure({ multicolor: true }),
-    // Superscript,
-    // Subscript,
-    // TextAlign.configure({ types: ['heading', 'paragraph'] }),
-    // Image,
-    // TaskList,
-    // TaskItem.configure({ nested: true }),
+    Typography,
+    Underline,
+    Superscript,
+    Subscript,
+    Highlight.configure({
+      multicolor: true
+    }),
+    TextAlign.configure({
+      types: ["heading", "paragraph"],
+      alignments: ["left", "center", "right", "justify"],
+      defaultAlignment: "left"
+    }),
+    // 任务列表扩展
+    TaskList,
+    TaskItem.configure({
+      nested: true
+    })
   ];
 }
