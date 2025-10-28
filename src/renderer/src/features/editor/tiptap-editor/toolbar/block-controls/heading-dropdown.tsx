@@ -41,49 +41,49 @@ export function HeadingDropdown({ editor }: HeadingDropdownProps) {
   };
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <DropdownMenu>
+    <DropdownMenu>
+      <Tooltip>
+        <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className={cn("h-8 w-max gap-1 px-2", activeLevel && "bg-secondary")}>
               {activeLevel ? <span className="font-semibold">H{activeLevel}</span> : <Heading className="h-4 w-4" />}
               <ChevronDown className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            onCloseAutoFocus={(e) => {
-              e.preventDefault(); // 阻止默认的焦点恢复
-              editor.chain().focus(); // 手动恢复到编辑器
-            }}
-          >
-            {levels.map((level) => {
-              const isActive =
-                level === 1
-                  ? editorState.isHeading1
-                  : level === 2
-                    ? editorState.isHeading2
-                    : level === 3
-                      ? editorState.isHeading3
-                      : editorState.isHeading4;
+        </TooltipTrigger>
+        <TooltipContent>
+          <span>标题</span>
+        </TooltipContent>
+      </Tooltip>
+      <DropdownMenuContent
+        align="start"
+        onCloseAutoFocus={(e) => {
+          e.preventDefault(); // 阻止默认的焦点恢复
+          editor.chain().focus(); // 手动恢复到编辑器
+        }}
+      >
+        {levels.map((level) => {
+          const isActive =
+            level === 1
+              ? editorState.isHeading1
+              : level === 2
+                ? editorState.isHeading2
+                : level === 3
+                  ? editorState.isHeading3
+                  : editorState.isHeading4;
 
-              return (
-                <DropdownMenuItem
-                  key={level}
-                  onClick={() => toggleHeading(level)}
-                  className={cn("flex items-center gap-2", isActive && "bg-secondary")}
-                >
-                  <span className="w-8 font-semibold">H{level}</span>
-                  <span className="text-muted-foreground text-xs">标题 {level}</span>
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TooltipTrigger>
-      <TooltipContent>
-        <span>标题</span>
-      </TooltipContent>
-    </Tooltip>
+          return (
+            <DropdownMenuItem
+              key={level}
+              onClick={() => toggleHeading(level)}
+              className={cn("flex items-center gap-2", isActive && "bg-secondary")}
+            >
+              <span className="w-8 font-semibold">H{level}</span>
+              <span className="text-muted-foreground text-xs">标题 {level}</span>
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

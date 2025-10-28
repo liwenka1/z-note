@@ -40,38 +40,38 @@ export function HighlightDropdown({ editor }: HighlightDropdownProps) {
   };
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <DropdownMenu>
+    <DropdownMenu>
+      <Tooltip>
+        <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className={cn("h-8 w-8 p-0", editorState.isHighlight && "bg-secondary")}>
               <Highlighter className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            onCloseAutoFocus={(e) => {
-              e.preventDefault();
-              editor.chain().focus();
-            }}
+        </TooltipTrigger>
+        <TooltipContent>高亮颜色</TooltipContent>
+      </Tooltip>
+      <DropdownMenuContent
+        align="start"
+        onCloseAutoFocus={(e) => {
+          e.preventDefault();
+          editor.chain().focus();
+        }}
+      >
+        {highlightColors.map((item) => (
+          <DropdownMenuItem
+            key={item.name}
+            onClick={() => setHighlight(item.color)}
+            className="flex items-center gap-2"
           >
-            {highlightColors.map((item) => (
-              <DropdownMenuItem
-                key={item.name}
-                onClick={() => setHighlight(item.color)}
-                className="flex items-center gap-2"
-              >
-                <div
-                  className={cn("h-4 w-4 rounded border", item.bgColor)}
-                  style={item.color ? { backgroundColor: item.color } : undefined}
-                />
-                <span>{item.name}</span>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TooltipTrigger>
-      <TooltipContent>高亮颜色</TooltipContent>
-    </Tooltip>
+            <div
+              className={cn("h-4 w-4 rounded border", item.bgColor)}
+              style={item.color ? { backgroundColor: item.color } : undefined}
+            />
+            <span>{item.name}</span>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

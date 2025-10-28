@@ -29,50 +29,50 @@ export function ListDropdown({ editor }: ListDropdownProps) {
   const isActive = editorState.isBulletList || editorState.isOrderedList || editorState.isTaskList;
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <DropdownMenu>
+    <DropdownMenu>
+      <Tooltip>
+        <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className={cn("h-8 w-max gap-1 px-2", isActive && "bg-secondary")}>
               <List className="h-4 w-4" />
               <ChevronDown className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            onCloseAutoFocus={(e) => {
-              e.preventDefault();
-              editor.chain().focus();
-            }}
-          >
-            <DropdownMenuItem
-              onClick={toggleBulletList}
-              className={cn("flex items-center gap-2", editorState.isBulletList && "bg-secondary")}
-            >
-              <List className="h-4 w-4" />
-              <span>无序列表</span>
-            </DropdownMenuItem>
+        </TooltipTrigger>
+        <TooltipContent>列表</TooltipContent>
+      </Tooltip>
+      <DropdownMenuContent
+        align="start"
+        onCloseAutoFocus={(e) => {
+          e.preventDefault();
+          editor.chain().focus();
+        }}
+      >
+        <DropdownMenuItem
+          onClick={toggleBulletList}
+          className={cn("flex items-center gap-2", editorState.isBulletList && "bg-secondary")}
+        >
+          <List className="h-4 w-4" />
+          <span>无序列表</span>
+        </DropdownMenuItem>
 
-            <DropdownMenuItem
-              onClick={toggleOrderedList}
-              className={cn("flex items-center gap-2", editorState.isOrderedList && "bg-secondary")}
-            >
-              <ListOrdered className="h-4 w-4" />
-              <span>有序列表</span>
-            </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={toggleOrderedList}
+          className={cn("flex items-center gap-2", editorState.isOrderedList && "bg-secondary")}
+        >
+          <ListOrdered className="h-4 w-4" />
+          <span>有序列表</span>
+        </DropdownMenuItem>
 
-            {/* 任务列表 */}
-            <DropdownMenuItem
-              onClick={toggleTaskList}
-              className={cn("flex items-center gap-2", editorState.isTaskList && "bg-secondary")}
-            >
-              <CheckSquare className="h-4 w-4" />
-              <span>任务列表</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TooltipTrigger>
-      <TooltipContent>列表</TooltipContent>
-    </Tooltip>
+        {/* 任务列表 */}
+        <DropdownMenuItem
+          onClick={toggleTaskList}
+          className={cn("flex items-center gap-2", editorState.isTaskList && "bg-secondary")}
+        >
+          <CheckSquare className="h-4 w-4" />
+          <span>任务列表</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
