@@ -2,20 +2,21 @@ import { Editor } from "@tiptap/react";
 import { Underline } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@renderer/components/ui/tooltip";
+import { cn } from "@renderer/lib/utils";
+import { useEditorActiveState } from "../../../hooks/use-editor-active-state";
 
 interface UnderlineButtonProps {
   editor: Editor | null;
 }
 
 export function UnderlineButton({ editor }: UnderlineButtonProps) {
+  const editorState = useEditorActiveState(editor);
+
   if (!editor) {
     return null;
   }
 
-  // 🚧 占位功能 - 暂未实现
-  const handleClick = () => {
-    console.log("下划线功能即将推出");
-  };
+  const toggleUnderline = () => editor.chain().focus().toggleUnderline().run();
 
   return (
     <Tooltip>
@@ -23,14 +24,13 @@ export function UnderlineButton({ editor }: UnderlineButtonProps) {
         <Button
           variant="ghost"
           size="sm"
-          onClick={handleClick}
-          disabled // 占位状态：禁用
-          className="h-8 w-8 p-0 opacity-50"
+          onClick={toggleUnderline}
+          className={cn("h-8 w-8 p-0", editorState.isUnderline && "bg-secondary")}
         >
           <Underline className="h-4 w-4" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent>下划线 (即将推出)</TooltipContent>
+      <TooltipContent>下划线 (Ctrl+U)</TooltipContent>
     </Tooltip>
   );
 }
