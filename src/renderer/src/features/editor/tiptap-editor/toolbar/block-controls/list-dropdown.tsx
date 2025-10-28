@@ -24,13 +24,9 @@ export function ListDropdown({ editor }: ListDropdownProps) {
 
   const toggleBulletList = () => editor.chain().focus().toggleBulletList().run();
   const toggleOrderedList = () => editor.chain().focus().toggleOrderedList().run();
+  const toggleTaskList = () => editor.chain().focus().toggleTaskList().run();
 
-  // 🚧 任务列表占位
-  const toggleTaskList = () => {
-    console.log("任务列表功能即将推出");
-  };
-
-  const isActive = editorState.isBulletList || editorState.isOrderedList;
+  const isActive = editorState.isBulletList || editorState.isOrderedList || editorState.isTaskList;
 
   return (
     <Tooltip>
@@ -65,10 +61,13 @@ export function ListDropdown({ editor }: ListDropdownProps) {
               <span>有序列表</span>
             </DropdownMenuItem>
 
-            {/* 🚧 任务列表占位 */}
-            <DropdownMenuItem onClick={toggleTaskList} disabled className="flex items-center gap-2 opacity-50">
+            {/* 任务列表 */}
+            <DropdownMenuItem
+              onClick={toggleTaskList}
+              className={cn("flex items-center gap-2", editorState.isTaskList && "bg-secondary")}
+            >
               <CheckSquare className="h-4 w-4" />
-              <span>任务列表 (即将推出)</span>
+              <span>任务列表</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
