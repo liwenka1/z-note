@@ -2,28 +2,17 @@
  * Mark列表组件
  * 显示指定Tag下的所有Marks
  */
-import { useState } from "react";
-import { Button } from "@renderer/components/ui/button";
 import { ScrollArea } from "@renderer/components/ui/scroll-area";
-import { Plus } from "lucide-react";
 import { MarkItem } from "./mark-item";
-import { MarkCreateForm } from "./mark-create-form";
-import { useMarksByTag, useTags } from "@renderer/hooks/queries";
+import { MarkToolbar } from "./toolbar";
+import { useMarksByTag } from "@renderer/hooks/queries";
 
 interface MarkListProps {
   tagId: number;
 }
 
 export function MarkList({ tagId }: MarkListProps) {
-  const { data: tags } = useTags();
   const { data: marks, isLoading } = useMarksByTag(tagId);
-  const [showCreateForm, setShowCreateForm] = useState(false);
-
-  const currentTag = tags?.find((tag) => tag.id === tagId);
-
-  const handleCreateSuccess = () => {
-    setShowCreateForm(false);
-  };
 
   if (isLoading) {
     return (
@@ -35,22 +24,8 @@ export function MarkList({ tagId }: MarkListProps) {
 
   return (
     <div className="flex h-full flex-col">
-      {/* Header */}
-      <div className="border-border/50 bg-secondary/30 flex shrink-0 items-center justify-between border-b px-4 py-3">
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-sm font-medium">{currentTag?.name || "未知标签"}</div>
-        </div>
-        <Button variant="ghost" size="sm" onClick={() => setShowCreateForm(true)} className="h-7 w-7 p-0">
-          <Plus className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {/* Create Form */}
-      {showCreateForm && (
-        <div className="border-border/50 bg-secondary/30 shrink-0 border-b px-4 py-3">
-          <MarkCreateForm tagId={tagId} onSuccess={handleCreateSuccess} onCancel={() => setShowCreateForm(false)} />
-        </div>
-      )}
+      {/* Toolbar */}
+      <MarkToolbar tagId={tagId} />
 
       {/* Marks List */}
       <ScrollArea className="flex-1">
@@ -58,7 +33,7 @@ export function MarkList({ tagId }: MarkListProps) {
           <div className="flex h-full items-center justify-center">
             <div className="text-center">
               <div className="text-muted-foreground text-sm">还没有任何记录</div>
-              <div className="text-muted-foreground mt-1 text-xs">点击右上角 + 号创建第一条记录</div>
+              <div className="text-muted-foreground mt-1 text-xs">点击工具栏中的按钮创建记录</div>
             </div>
           </div>
         ) : (
