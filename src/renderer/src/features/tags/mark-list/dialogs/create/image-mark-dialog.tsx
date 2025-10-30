@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@renderer/components/ui/dialog";
 import { Button } from "@renderer/components/ui/button";
-import { Input } from "@renderer/components/ui/input";
 import { Label } from "@renderer/components/ui/label";
-import { Textarea } from "@renderer/components/ui/textarea";
 import { ImageUpload } from "@renderer/components/ui/image-upload";
 import { useCreateMark } from "@renderer/hooks/mutations";
+import { DescField, ContentField } from "../../components/mark-form-fields";
 
 interface ImageMarkDialogProps {
   open: boolean;
@@ -87,16 +86,7 @@ export function ImageMarkDialog({ open, onOpenChange, tagId }: ImageMarkDialogPr
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-600">{error}</div>}
 
-          <div className="space-y-2">
-            <Label htmlFor="image-desc">描述</Label>
-            <Input
-              id="image-desc"
-              value={desc}
-              onChange={(e) => setDesc(e.target.value)}
-              placeholder="记录描述"
-              autoFocus
-            />
-          </div>
+          <DescField value={desc} onChange={setDesc} autoFocus />
 
           <div className="space-y-2">
             <Label>图片上传与识别</Label>
@@ -109,16 +99,7 @@ export function ImageMarkDialog({ open, onOpenChange, tagId }: ImageMarkDialogPr
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="image-content">识别内容</Label>
-            <Textarea
-              id="image-content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="OCR 识别的文本内容（自动填充）"
-              rows={6}
-            />
-          </div>
+          <ContentField value={content} onChange={setContent} rows={6} />
 
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>

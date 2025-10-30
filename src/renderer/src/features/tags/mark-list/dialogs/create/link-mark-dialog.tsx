@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@renderer/components/ui/dialog";
 import { Button } from "@renderer/components/ui/button";
-import { Input } from "@renderer/components/ui/input";
-import { Label } from "@renderer/components/ui/label";
-import { Textarea } from "@renderer/components/ui/textarea";
 import { useCreateMark } from "@renderer/hooks/mutations";
+import { DescField, ContentField, UrlField } from "../../components/mark-form-fields";
 
 interface LinkMarkDialogProps {
   open: boolean;
@@ -57,36 +55,10 @@ export function LinkMarkDialog({ open, onOpenChange, tagId }: LinkMarkDialogProp
           <DialogTitle>添加链接记录</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="link-desc">描述</Label>
-            <Input
-              id="link-desc"
-              value={desc}
-              onChange={(e) => setDesc(e.target.value)}
-              placeholder="记录描述"
-              autoFocus
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="link-url">链接地址</Label>
-            <Input
-              id="link-url"
-              type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://..."
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="link-content">备注</Label>
-            <Textarea
-              id="link-content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="链接相关的备注信息（可选）"
-              rows={4}
-            />
-          </div>
+          <DescField value={desc} onChange={setDesc} autoFocus />
+          <UrlField value={url} onChange={setUrl} />
+          <ContentField value={content} onChange={setContent} rows={4} />
+
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               取消
