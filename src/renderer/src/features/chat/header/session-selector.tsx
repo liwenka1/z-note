@@ -37,7 +37,7 @@ export function SessionSelector() {
           </SelectItem>
         ))}
 
-        <SelectItem value="new" className="border-border/50 mt-1 border-t pt-2">
+        <SelectItem value="new" className="border-border/30 mt-1 border-t pt-2">
           <span className="text-primary text-sm">+ 新建会话</span>
         </SelectItem>
       </SelectContent>

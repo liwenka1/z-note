@@ -29,7 +29,7 @@ export function MarkItem({ mark }: MarkItemProps) {
 
   return (
     <>
-      <div className="hover:bg-secondary/60 group border-border/40 rounded-md border p-3 transition-colors">
+      <div className="hover:bg-secondary/60 group border-border/30 rounded-md border p-3 transition-colors">
         <div className="flex items-start gap-3">
           {/* Type Icon */}
           <div className={`shrink-0 ${config.color}`}>
@@ -47,7 +47,7 @@ export function MarkItem({ mark }: MarkItemProps) {
                 <img
                   src={`z-note-image://${mark.url}`}
                   alt="缩略图"
-                  className="border-border/50 h-16 w-16 rounded border object-cover"
+                  className="border-border/30 h-16 w-16 rounded border object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.style.display = "none";

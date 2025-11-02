@@ -16,7 +16,7 @@ export function ChatPanel() {
   }, [loadSessions]);
 
   return (
-    <div className="bg-background flex h-full flex-col">
+    <div className="flex h-full flex-col">
       <ChatHeader />
 
       <div className="min-h-0 flex-1">

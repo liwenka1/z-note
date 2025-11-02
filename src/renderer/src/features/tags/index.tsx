@@ -27,7 +27,7 @@ export function TagsPanel() {
   }
 
   return (
-    <div className="bg-background flex h-full flex-col">
+    <div className="flex h-full flex-col">
       <div className="flex-1 overflow-hidden">
         <TagList tags={tags || []} />
       </div>

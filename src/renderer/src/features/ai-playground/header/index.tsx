@@ -14,7 +14,7 @@ interface PlaygroundHeaderProps {
 
 export function PlaygroundHeader({ variant, platform, onBack }: PlaygroundHeaderProps) {
   return (
-    <div className="border-border/50 bg-secondary/30 border-b">
+    <div className="border-border/30 bg-secondary/30 border-b">
       <div className="flex h-12 items-center justify-between px-4">
         {/* 左侧：标题 */}
         <h2 className="text-foreground text-sm font-medium">{variant === "list" ? "AI 工作台" : platform?.name}</h2>

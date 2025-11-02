@@ -21,7 +21,7 @@ export function FilesPanel() {
   }, [initializeWorkspace, workspace.initialized, workspace.loading]);
 
   return (
-    <div className="bg-background flex h-full flex-col">
+    <div className="flex h-full flex-col">
       <FilesHeader />
 
       <div className="flex-1 overflow-hidden">{hasContent ? <FolderTree /> : <EmptyFiles />}</div>
