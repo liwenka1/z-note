@@ -17,6 +17,7 @@ import { ItalicButton } from "./format-controls/italic-button";
 import { StrikeButton } from "./format-controls/strike-button";
 import { CodeButton } from "./format-controls/code-button";
 import { UnderlineButton } from "./format-controls/underline-button";
+import { TextColorPicker } from "./format-controls/text-color-picker";
 import { HighlightDropdown } from "./format-controls/highlight-dropdown";
 import { LinkButton } from "./format-controls/link-button";
 
@@ -71,6 +72,7 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
         <StrikeButton editor={editor} />
         <CodeButton editor={editor} />
         <UnderlineButton editor={editor} />
+        <TextColorPicker editor={editor} />
         <HighlightDropdown editor={editor} />
         <LinkButton editor={editor} />
       </div>
