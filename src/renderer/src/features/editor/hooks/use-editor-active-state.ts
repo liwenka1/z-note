@@ -22,6 +22,7 @@ export interface EditorActiveState {
   isSuperscript: boolean;
   isSubscript: boolean;
   isHighlight: boolean;
+  isLink: boolean;
 
   // List states
   isBulletList: boolean;
@@ -78,6 +79,7 @@ export function useEditorActiveState(editor: Editor | null): EditorActiveState {
           isSuperscript: false,
           isSubscript: false,
           isHighlight: false,
+          isLink: false,
 
           // List states
           isBulletList: false,
@@ -115,6 +117,7 @@ export function useEditorActiveState(editor: Editor | null): EditorActiveState {
         isSuperscript: ctx.editor.isActive("superscript"),
         isSubscript: ctx.editor.isActive("subscript"),
         isHighlight: ctx.editor.isActive("highlight"),
+        isLink: ctx.editor.isActive("link"),
 
         // List states
         isBulletList: ctx.editor.isActive("bulletList"),
@@ -157,6 +160,7 @@ export function useEditorActiveState(editor: Editor | null): EditorActiveState {
       isSuperscript: false,
       isSubscript: false,
       isHighlight: false,
+      isLink: false,
       isBulletList: false,
       isOrderedList: false,
       isTaskList: false,
