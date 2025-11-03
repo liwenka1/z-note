@@ -15,9 +15,8 @@ export function MarkToolbar({ tagId, className }: MarkToolbarProps) {
   return (
     <div
       className={cn(
-        "sticky top-0 z-10",
-        "bg-background border border-t-0",
-        "flex h-12 flex-wrap items-center gap-1 p-1",
+        "bg-background border-b",
+        "flex h-12 shrink-0 flex-wrap items-center gap-1 p-1",
         "shadow-sm",
         className
       )}

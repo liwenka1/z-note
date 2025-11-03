@@ -2,7 +2,6 @@
  * Mark列表组件
  * 显示指定Tag下的所有Marks
  */
-import { ScrollArea } from "@renderer/components/ui/scroll-area";
 import { MarkItem } from "./mark-item";
 import { MarkToolbar } from "./toolbar";
 import { useMarksByTag } from "@renderer/hooks/queries";
@@ -28,7 +27,7 @@ export function MarkList({ tagId }: MarkListProps) {
       <MarkToolbar tagId={tagId} />
 
       {/* Marks List */}
-      <ScrollArea className="flex-1">
+      <div className="flex-1 overflow-auto">
         {!marks || marks.length === 0 ? (
           <div className="flex h-full items-center justify-center">
             <div className="text-center">
@@ -43,7 +42,7 @@ export function MarkList({ tagId }: MarkListProps) {
             ))}
           </div>
         )}
-      </ScrollArea>
+      </div>
     </div>
   );
 }
