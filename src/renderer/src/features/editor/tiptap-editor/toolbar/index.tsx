@@ -45,9 +45,8 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
   return (
     <div
       className={cn(
-        "sticky top-0 z-10",
-        "bg-background border border-t-0",
-        "flex h-full flex-wrap items-center justify-center gap-1 p-1",
+        "bg-background border-b",
+        "flex h-full shrink-0 flex-wrap items-center justify-center gap-1 p-1",
         "shadow-sm",
         className
       )}
