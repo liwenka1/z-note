@@ -9,6 +9,8 @@ import Highlight from "@tiptap/extension-highlight";
 import TextAlign from "@tiptap/extension-text-align";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
+import Color from "@tiptap/extension-color";
+import { TextStyle } from "@tiptap/extension-text-style";
 
 /**
  * 编辑器扩展配置
@@ -48,6 +50,11 @@ export function createEditorExtensions(placeholder = "开始写作...") {
     TaskList,
     TaskItem.configure({
       nested: true
+    }),
+    // 文本颜色扩展
+    TextStyle,
+    Color.configure({
+      types: ["textStyle"]
     })
   ];
 }
