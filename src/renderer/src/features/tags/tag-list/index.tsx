@@ -5,7 +5,8 @@
 import { useState } from "react";
 import { Button } from "@renderer/components/ui/button";
 import { ScrollArea } from "@renderer/components/ui/scroll-area";
-import { Plus } from "lucide-react";
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@renderer/components/ui/empty";
+import { Plus, Tags } from "lucide-react";
 import { TagItem } from "./tag-item";
 import { TagCreateForm } from "./tag-create-form";
 import { useTabStore } from "@renderer/stores";
@@ -53,12 +54,15 @@ export function TagList({ tags }: TagListProps) {
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
           {tags.length === 0 ? (
-            <div className="flex h-full items-center justify-center">
-              <div className="text-center">
-                <div className="text-muted-foreground text-sm">还没有任何标签</div>
-                <div className="text-muted-foreground mt-1 text-xs">点击右上角 + 号创建第一个标签</div>
-              </div>
-            </div>
+            <Empty className="h-full border-0">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Tags className="size-6" />
+                </EmptyMedia>
+                <EmptyTitle>还没有任何标签</EmptyTitle>
+                <EmptyDescription>点击右上角 + 号创建第一个标签</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ) : (
             <div className="space-y-1 p-2">
               {tags.map((tag) => (
