@@ -17,14 +17,12 @@ export function LinkButton({ editor }: LinkButtonProps) {
   const [url, setUrl] = useState("");
   const editorState = useEditorActiveState(editor);
 
-  if (!editor) {
-    return null;
-  }
-
   const isActive = editorState.isLink;
 
   // 当链接激活状态变化时，自动打开/关闭 Popover
   useEffect(() => {
+    if (!editor) return;
+
     if (isActive) {
       // 光标在链接上，自动打开 Popover
       setIsOpen(true);
@@ -38,11 +36,15 @@ export function LinkButton({ editor }: LinkButtonProps) {
 
   // 当 Popover 打开时，获取当前链接
   useEffect(() => {
-    if (isOpen) {
-      const { href } = editor.getAttributes("link");
-      setUrl(href || "");
-    }
+    if (!editor || !isOpen) return;
+
+    const { href } = editor.getAttributes("link");
+    setUrl(href || "");
   }, [isOpen, editor]);
+
+  if (!editor) {
+    return null;
+  }
 
   // 应用链接
   const applyLink = () => {
