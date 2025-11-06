@@ -26,6 +26,9 @@ export function SearchResults({ groupedItems, isSearching, isIndexReady, onSelec
       ) : (
         <>
           <SearchEmpty />
+          {groupedItems.tags.length > 0 && (
+            <SearchGroup heading="🏷️ 标签" items={groupedItems.tags} onSelect={onSelect} />
+          )}
           {groupedItems.notes.length > 0 && (
             <SearchGroup heading="📄 笔记" items={groupedItems.notes} onSelect={onSelect} />
           )}

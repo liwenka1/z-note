@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import Fuse, { type FuseResultMatch } from "fuse.js";
 import { fileSearchIndex, type SearchIndexItem } from "@renderer/services/file-search-index";
+import { useTags } from "@renderer/hooks/queries/use-tags";
 import type { SearchItem } from "../types";
 
 /**
@@ -19,6 +20,21 @@ interface SearchOptions {
   includeMatches?: boolean;
   /** 是否启用高亮 */
   enableHighlight?: boolean;
+}
+
+/**
+ * 扩展的搜索索引项（支持标签）
+ */
+interface ExtendedSearchIndexItem {
+  id: string;
+  title: string;
+  content: string;
+  fullText: string;
+  path: string;
+  type: "note" | "file" | "tag";
+  // 标签特有属性
+  isLocked?: boolean;
+  isPin?: boolean;
 }
 
 /**
@@ -47,6 +63,9 @@ export function useAdvancedSearch(options: SearchOptions = {}) {
   const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
   const [isIndexReady, setIsIndexReady] = useState(false);
 
+  // 获取所有标签
+  const { data: allTags = [] } = useTags();
+
   // 防抖处理
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -64,11 +83,35 @@ export function useAdvancedSearch(options: SearchOptions = {}) {
 
     const searchIndex = fileSearchIndex.getSearchIndex();
 
-    if (!searchIndex || !Array.isArray(searchIndex) || searchIndex.length === 0) {
+    // 将标签转换为搜索索引格式
+    const tagSearchItems: ExtendedSearchIndexItem[] = allTags.map((tag) => ({
+      id: String(tag.id),
+      title: tag.name,
+      content: tag.name,
+      fullText: tag.name,
+      path: `/tags/${tag.id}`,
+      type: "tag" as const,
+      isLocked: tag.isLocked,
+      isPin: tag.isPin
+    }));
+
+    // 合并笔记索引和标签索引
+    const noteSearchItems: ExtendedSearchIndexItem[] = (searchIndex || []).map((item) => ({
+      id: item.id,
+      title: item.title,
+      content: item.content,
+      fullText: item.fullText,
+      path: item.path,
+      type: item.type as "note" | "file"
+    }));
+
+    const combinedIndex = [...noteSearchItems, ...tagSearchItems];
+
+    if (!Array.isArray(combinedIndex) || combinedIndex.length === 0) {
       return null;
     }
 
-    return new Fuse(searchIndex, {
+    return new Fuse(combinedIndex, {
       // 搜索字段配置 - 效仿 ['desc', 'article', 'title', 'path']
       keys: [
         { name: "title", weight: 0.4 }, // 标题权重最高
@@ -88,7 +131,7 @@ export function useAdvancedSearch(options: SearchOptions = {}) {
       ignoreLocation: true,
       ignoreFieldNorm: false
     });
-  }, [threshold, includeMatches, isIndexReady]);
+  }, [threshold, includeMatches, isIndexReady, allTags]);
 
   // 执行搜索
   const performSearch = useCallback(
@@ -122,13 +165,30 @@ export function useAdvancedSearch(options: SearchOptions = {}) {
         const fuseResults = fuseSearch.search(query, { limit: maxResults });
 
         const results: SearchResultItem[] = fuseResults.map((result) => {
-          const item = result.item;
+          const item = result.item as ExtendedSearchIndexItem;
 
+          // 根据类型生成不同的 SearchItem
+          if (item.type === "tag") {
+            return {
+              id: item.id,
+              title: item.title,
+              type: "tag" as const,
+              description: `${item.isPin ? "📌 " : ""}${item.isLocked ? "🔒 " : ""}标签`,
+              icon: item.isPin ? "📌" : "🏷️",
+              path: `/tags/${item.id}`,
+              isLocked: item.isLocked,
+              isPin: item.isPin,
+              matches: result.matches,
+              score: result.score
+            };
+          }
+
+          // 原有的笔记类型处理
           return {
             id: item.id,
             title: item.title,
             type: "note",
-            description: generateDescription(item, result.matches),
+            description: generateDescription(item as SearchIndexItem, result.matches),
             icon: "📝",
             path: item.path,
             matches: result.matches,
@@ -249,9 +309,10 @@ export function useAdvancedSearch(options: SearchOptions = {}) {
     // 搜索结果分组（保持与原接口兼容）
     groupedResults: useMemo(
       () => ({
-        notes: searchResults,
+        notes: searchResults.filter((item) => item.type === "note"),
         pages: [],
-        folders: []
+        folders: [],
+        tags: searchResults.filter((item) => item.type === "tag")
       }),
       [searchResults]
     ),

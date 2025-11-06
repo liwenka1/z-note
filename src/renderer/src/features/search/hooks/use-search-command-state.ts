@@ -12,7 +12,7 @@ interface UseSearchCommandStateOptions {
 export function useSearchCommandState(options: UseSearchCommandStateOptions = {}) {
   const { searchOptions } = options;
   const { isOpen, setIsOpen, closeSearch } = useSearchStore();
-  const { openTab, setActiveTab } = useTabStore();
+  const { openTab, setActiveTab, openTagTab } = useTabStore();
   const navigate = useNavigate();
 
   const { searchTerm, setSearchTerm, groupedResults, isSearching, isIndexReady } = useAdvancedSearch(
@@ -37,14 +37,16 @@ export function useSearchCommandState(options: UseSearchCommandStateOptions = {}
       return {
         notes: allSearchItems.filter((item) => item.type === "note"),
         pages: allSearchItems.filter((item) => item.type === "page"),
-        folders: allSearchItems.filter((item) => item.type === "folder")
+        folders: allSearchItems.filter((item) => item.type === "folder"),
+        tags: [] // 不搜索时不显示标签
       };
     }
 
     return {
       notes: groupedResults.notes || [],
       pages: groupedResults.pages || [],
-      folders: groupedResults.folders || []
+      folders: groupedResults.folders || [],
+      tags: groupedResults.tags || []
     };
   }, [searchTerm, allSearchItems, groupedResults]);
 
@@ -66,11 +68,20 @@ export function useSearchCommandState(options: UseSearchCommandStateOptions = {}
         return;
       }
 
+      // 处理标签选择
+      if (item.type === "tag") {
+        // 打开标签页
+        openTagTab(Number(item.id), item.title);
+        // 导航到标签详情页
+        navigate({ to: "/tags/$tagId", params: { tagId: item.id } });
+        return;
+      }
+
       if (item.path) {
         navigate({ to: item.path });
       }
     },
-    [closeSearch, setSearchTerm, navigate, openTab, setActiveTab]
+    [closeSearch, setSearchTerm, navigate, openTab, setActiveTab, openTagTab]
   );
 
   const handleOpenChange = useCallback(
