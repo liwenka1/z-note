@@ -7,6 +7,7 @@ interface ConfigSelectorProps {
   selectedConfig: AIConfig | null;
   onConfigChange: (configId: string) => void;
   disabled: boolean;
+  hasConfig: boolean;
 }
 
 export function ConfigSelector({
@@ -14,13 +15,14 @@ export function ConfigSelector({
   selectedConfigId,
   selectedConfig,
   onConfigChange,
-  disabled
+  disabled,
+  hasConfig
 }: ConfigSelectorProps) {
   return (
     <div className="flex items-center gap-2">
       <Select value={selectedConfigId} onValueChange={onConfigChange} disabled={disabled}>
         <SelectTrigger className="h-7 border-none bg-transparent text-xs shadow-none focus:ring-0">
-          <SelectValue>{selectedConfig ? selectedConfig.name : "选择配置"}</SelectValue>
+          <SelectValue>{!hasConfig ? "未配置 AI" : selectedConfig ? selectedConfig.name : "选择配置"}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           {configs.map((config) => (

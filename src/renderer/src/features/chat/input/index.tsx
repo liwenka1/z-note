@@ -15,8 +15,11 @@ import {
 
 export function ChatInput() {
   const [input, setInput] = useState("");
-  const { configs, currentConfig, getCurrentConfig, setDefaultConfig } = useAIConfigStore();
+  const { configs, currentConfig, getCurrentConfig, setDefaultConfig, hasAnyConfig } = useAIConfigStore();
   const { currentPrompt } = usePromptStore();
+
+  // 检查是否有任何配置
+  const hasConfig = hasAnyConfig();
 
   // 标签关联相关
   const { currentAssociatedTagId } = useChatTagStore();
@@ -135,7 +138,7 @@ export function ChatInput() {
   };
 
   const handleSend = async () => {
-    if (!input.trim() || isTyping || isAILoading || !selectedConfig) return;
+    if (!input.trim() || isTyping || isAILoading || !selectedConfig || !hasConfig) return;
 
     const userInput = input.trim();
 
@@ -189,8 +192,10 @@ export function ChatInput() {
           <PromptInputTextarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            disabled={isTyping || isAILoading}
-            placeholder={isTyping || isAILoading ? "AI 正在回复中..." : "输入消息..."}
+            disabled={!hasConfig || isTyping || isAILoading}
+            placeholder={
+              !hasConfig ? "请先在设置中配置 AI 服务..." : isTyping || isAILoading ? "AI 正在回复中..." : "输入消息..."
+            }
             className="max-h-[200px] min-h-[80px]"
           />
         </PromptInputBody>
@@ -204,14 +209,15 @@ export function ChatInput() {
               selectedConfigId={currentConfig?.id || ""}
               selectedConfig={selectedConfig}
               onConfigChange={(configId) => setDefaultConfig(configId)}
-              disabled={isTyping || isAILoading}
+              disabled={!hasConfig || isTyping || isAILoading}
+              hasConfig={hasConfig}
             />
           </PromptInputTools>
 
           {/* 右侧：发送/停止按钮 */}
           <PromptInputSubmit
             status={isAILoading ? "streaming" : undefined}
-            disabled={!input.trim()}
+            disabled={!hasConfig || !input.trim()}
             onClick={(e) => {
               if (isAILoading) {
                 e.preventDefault();

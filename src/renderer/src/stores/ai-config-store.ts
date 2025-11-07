@@ -62,6 +62,7 @@ interface AIConfigState {
   deleteConfig: (id: string) => void;
   setDefaultConfig: (id: string) => void;
   getCurrentConfig: () => AIConfig | null;
+  hasAnyConfig: () => boolean;
 }
 
 export const useAIConfigStore = create<AIConfigState>()(
@@ -133,6 +134,10 @@ export const useAIConfigStore = create<AIConfigState>()(
 
       getCurrentConfig: () => {
         return get().currentConfig;
+      },
+
+      hasAnyConfig: () => {
+        return get().configs.length > 0;
       }
     }),
     {
