@@ -6,12 +6,12 @@ import { PromptCard } from "./prompt-card";
 interface PromptListProps {
   prompts: Prompt[];
   onSetCurrent: (id: string) => void;
-  onEdit: (id: string, updates: Partial<Prompt>) => void;
+  onEditClick: (prompt: Prompt) => void;
   onDelete: (id: string) => void;
   onAddPrompt: () => void;
 }
 
-export function PromptList({ prompts, onSetCurrent, onEdit, onDelete, onAddPrompt }: PromptListProps) {
+export function PromptList({ prompts, onSetCurrent, onEditClick, onDelete, onAddPrompt }: PromptListProps) {
   if (prompts.length === 0) {
     return (
       <div className="bg-card rounded-lg border p-8 text-center">
@@ -33,7 +33,7 @@ export function PromptList({ prompts, onSetCurrent, onEdit, onDelete, onAddPromp
           key={prompt.id}
           prompt={prompt}
           onSetCurrent={() => onSetCurrent(prompt.id)}
-          onEdit={(updates) => onEdit(prompt.id, updates)}
+          onEdit={() => onEditClick(prompt)}
           onDelete={() => onDelete(prompt.id)}
         />
       ))}

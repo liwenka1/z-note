@@ -1,43 +1,25 @@
-import { useState } from "react";
 import { Button } from "@renderer/components/ui/button";
 import { Card, CardContent, CardHeader } from "@renderer/components/ui/card";
 import { Badge } from "@renderer/components/ui/badge";
 import { Edit, Trash2, Check, CheckCircle } from "lucide-react";
 import { type Prompt } from "@renderer/stores";
-import { EditPromptForm } from "./edit-prompt-form";
 import { usePromptStore } from "@renderer/stores";
 
 interface PromptCardProps {
   prompt: Prompt;
   onSetCurrent: () => void;
-  onEdit: (updates: Partial<Prompt>) => void;
+  onEdit: () => void;
   onDelete: () => void;
 }
 
 export function PromptCard({ prompt, onSetCurrent, onEdit, onDelete }: PromptCardProps) {
-  const [isEditing, setIsEditing] = useState(false);
   const { currentPrompt } = usePromptStore();
   const isCurrent = currentPrompt?.id === prompt.id;
-
-  const handleEdit = (updates: Partial<Prompt>) => {
-    onEdit(updates);
-    setIsEditing(false);
-  };
 
   const handleDelete = () => {
     if (prompt.isDefault) return; // 保护默认 prompt
     onDelete();
   };
-
-  if (isEditing) {
-    return (
-      <Card>
-        <CardContent className="p-4">
-          <EditPromptForm prompt={prompt} onSave={handleEdit} onCancel={() => setIsEditing(false)} />
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className="transition-shadow hover:shadow-md">
@@ -57,7 +39,7 @@ export function PromptCard({ prompt, onSetCurrent, onEdit, onDelete }: PromptCar
             )}
           </div>
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+            <Button variant="ghost" size="sm" onClick={onEdit}>
               <Edit className="h-4 w-4" />
             </Button>
             {!prompt.isDefault && (

@@ -1,18 +1,32 @@
 import { useState, useEffect } from "react";
 import { Button } from "@renderer/components/ui/button";
 import { Plus } from "lucide-react";
-import { usePromptStore } from "@renderer/stores";
+import { usePromptStore, type Prompt } from "@renderer/stores";
 import { PromptList } from "./prompt-list";
-import { AddPromptForm } from "./add-prompt-form";
+import { AddPromptDialog } from "./add-prompt-dialog";
+import { EditPromptDialog } from "./edit-prompt-dialog";
 
 export function PromptSettingsPanel() {
-  const [isAddingPrompt, setIsAddingPrompt] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
 
   const { prompts, loadPrompts, addPrompt, updatePrompt, deletePrompt, setCurrentPrompt } = usePromptStore();
 
   useEffect(() => {
     loadPrompts();
   }, [loadPrompts]);
+
+  const handleEditClick = (prompt: Prompt) => {
+    setEditingPrompt(prompt);
+    setEditDialogOpen(true);
+  };
+
+  const handleEditSave = (updates: Partial<Prompt>) => {
+    if (editingPrompt) {
+      updatePrompt(editingPrompt.id, updates);
+    }
+  };
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -21,7 +35,7 @@ export function PromptSettingsPanel() {
           <h3 className="text-xl font-semibold">Prompt 配置</h3>
           <p className="text-muted-foreground text-sm">管理你的 AI 对话提示词模板</p>
         </div>
-        <Button onClick={() => setIsAddingPrompt(true)}>
+        <Button onClick={() => setAddDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           添加 Prompt
         </Button>
@@ -31,21 +45,21 @@ export function PromptSettingsPanel() {
       <PromptList
         prompts={prompts}
         onSetCurrent={setCurrentPrompt}
-        onEdit={updatePrompt}
+        onEditClick={handleEditClick}
         onDelete={deletePrompt}
-        onAddPrompt={() => setIsAddingPrompt(true)}
+        onAddPrompt={() => setAddDialogOpen(true)}
       />
 
-      {/* 添加 Prompt 表单 */}
-      {isAddingPrompt && (
-        <AddPromptForm
-          onSave={(prompt) => {
-            addPrompt(prompt);
-            setIsAddingPrompt(false);
-          }}
-          onCancel={() => setIsAddingPrompt(false)}
-        />
-      )}
+      {/* 添加 Prompt 弹窗 */}
+      <AddPromptDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} onSave={addPrompt} />
+
+      {/* 编辑 Prompt 弹窗 */}
+      <EditPromptDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        prompt={editingPrompt}
+        onSave={handleEditSave}
+      />
     </div>
   );
 }

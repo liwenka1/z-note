@@ -1,21 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@renderer/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@renderer/components/ui/dialog";
 import { Input } from "@renderer/components/ui/input";
 import { Textarea } from "@renderer/components/ui/textarea";
 import { Label } from "@renderer/components/ui/label";
-import { Card, CardContent, CardHeader } from "@renderer/components/ui/card";
-import { X } from "lucide-react";
+import { toast } from "sonner";
 
-interface AddPromptFormProps {
+interface AddPromptDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onSave: (prompt: { name: string; content: string; description?: string; isDefault: boolean }) => void;
-  onCancel: () => void;
 }
 
-export function AddPromptForm({ onSave, onCancel }: AddPromptFormProps) {
+export function AddPromptDialog({ open, onOpenChange, onSave }: AddPromptDialogProps) {
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
   const [description, setDescription] = useState("");
   const [isDefault, setIsDefault] = useState(false);
+
+  // 重置表单
+  const resetForm = () => {
+    setName("");
+    setContent("");
+    setDescription("");
+    setIsDefault(false);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,21 +36,29 @@ export function AddPromptForm({ onSave, onCancel }: AddPromptFormProps) {
       description: description.trim() || undefined,
       isDefault
     });
+
+    toast.success("Prompt 添加成功");
+    resetForm();
+    onOpenChange(false);
   };
 
+  // 弹窗关闭时重置表单
+  useEffect(() => {
+    if (!open) {
+      resetForm();
+    }
+  }, [open]);
+
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <h4 className="font-medium">添加新的 Prompt</h4>
-          <Button variant="ghost" size="sm" onClick={onCancel}>
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>添加新的 Prompt</DialogTitle>
+          <DialogDescription>创建一个新的 AI 对话提示词模板</DialogDescription>
+        </DialogHeader>
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="name">名称</Label>
             <Input
               id="name"
@@ -52,7 +69,7 @@ export function AddPromptForm({ onSave, onCancel }: AddPromptFormProps) {
             />
           </div>
 
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="description">描述（可选）</Label>
             <Input
               id="description"
@@ -62,15 +79,16 @@ export function AddPromptForm({ onSave, onCancel }: AddPromptFormProps) {
             />
           </div>
 
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="content">内容</Label>
             <Textarea
               id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="输入 Prompt 内容..."
-              rows={6}
+              rows={10}
               required
+              className="font-mono text-sm"
             />
           </div>
 
@@ -80,13 +98,15 @@ export function AddPromptForm({ onSave, onCancel }: AddPromptFormProps) {
               id="isDefault"
               checked={isDefault}
               onChange={(e) => setIsDefault(e.target.checked)}
-              className="rounded border-gray-300"
+              className="h-4 w-4 rounded border-gray-300"
             />
-            <Label htmlFor="isDefault">设为默认 Prompt</Label>
+            <Label htmlFor="isDefault" className="cursor-pointer">
+              设为默认 Prompt
+            </Label>
           </div>
 
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onCancel}>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               取消
             </Button>
             <Button type="submit" disabled={!name.trim() || !content.trim()}>
@@ -94,7 +114,7 @@ export function AddPromptForm({ onSave, onCancel }: AddPromptFormProps) {
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+      </DialogContent>
+    </Dialog>
   );
 }
