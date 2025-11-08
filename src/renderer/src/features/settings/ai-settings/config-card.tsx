@@ -1,39 +1,18 @@
-import { useState } from "react";
 import { Button } from "@renderer/components/ui/button";
 import { Card, CardContent, CardHeader } from "@renderer/components/ui/card";
 import { Badge } from "@renderer/components/ui/badge";
 import { Edit, Trash2, Check, CheckCircle } from "lucide-react";
 import { AI_PROVIDERS, type AIConfig } from "@renderer/stores";
-import { EditConfigForm } from "./edit-config-form";
 
 interface ConfigCardProps {
   config: AIConfig;
   isDefault: boolean;
   onSetDefault: () => void;
-  onEdit: (updates: Partial<AIConfig>) => void;
+  onEdit: () => void;
   onDelete: () => void;
 }
 
 export function ConfigCard({ config, isDefault, onSetDefault, onEdit, onDelete }: ConfigCardProps) {
-  const [isEditing, setIsEditing] = useState(false);
-
-  if (isEditing) {
-    return (
-      <Card>
-        <CardContent className="p-4">
-          <EditConfigForm
-            config={config}
-            onSave={(updates) => {
-              onEdit(updates);
-              setIsEditing(false);
-            }}
-            onCancel={() => setIsEditing(false)}
-          />
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card className="transition-shadow hover:shadow-md">
       <CardHeader className="pb-3">
@@ -47,7 +26,7 @@ export function ConfigCard({ config, isDefault, onSetDefault, onEdit, onDelete }
             )}
           </div>
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+            <Button variant="ghost" size="sm" onClick={onEdit}>
               <Edit className="h-4 w-4" />
             </Button>
             <Button

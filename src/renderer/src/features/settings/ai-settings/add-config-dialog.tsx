@@ -1,17 +1,19 @@
 import { useState, useEffect } from "react";
 import { Button } from "@renderer/components/ui/button";
-import { Card, CardContent, CardHeader } from "@renderer/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@renderer/components/ui/dialog";
 import { Input } from "@renderer/components/ui/input";
 import { Label } from "@renderer/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@renderer/components/ui/select";
 import { AI_PROVIDERS, type AIConfig } from "@renderer/stores";
+import { toast } from "sonner";
 
-interface AddConfigFormProps {
+interface AddConfigDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onSave: (config: Omit<AIConfig, "id">) => void;
-  onCancel: () => void;
 }
 
-export function AddConfigForm({ onSave, onCancel }: AddConfigFormProps) {
+export function AddConfigDialog({ open, onOpenChange, onSave }: AddConfigDialogProps) {
   const [name, setName] = useState("");
   const [provider, setProvider] = useState<"openai" | "anthropic" | "custom">("openai");
   const [apiKey, setApiKey] = useState("");
@@ -32,6 +34,15 @@ export function AddConfigForm({ onSave, onCancel }: AddConfigFormProps) {
     }
   }, [selectedProvider]);
 
+  // 重置表单
+  const resetForm = () => {
+    setName("");
+    setProvider("openai");
+    setApiKey("");
+    setBaseURL("");
+    setModel("gpt-4");
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -45,14 +56,27 @@ export function AddConfigForm({ onSave, onCancel }: AddConfigFormProps) {
       maxTokens: 4000,
       isDefault: false
     });
+
+    toast.success("配置添加成功");
+    resetForm();
+    onOpenChange(false);
   };
 
+  // 弹窗关闭时重置表单
+  useEffect(() => {
+    if (!open) {
+      resetForm();
+    }
+  }, [open]);
+
   return (
-    <Card>
-      <CardHeader>
-        <h4 className="font-medium">添加 AI 配置</h4>
-      </CardHeader>
-      <CardContent>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>添加 AI 配置</DialogTitle>
+          <DialogDescription>配置你的 AI 模型和 API 密钥，本地存储，不会上传到服务器</DialogDescription>
+        </DialogHeader>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">配置名称</Label>
@@ -111,8 +135,8 @@ export function AddConfigForm({ onSave, onCancel }: AddConfigFormProps) {
             />
           </div>
 
-          <div className="flex gap-4 pt-4">
-            <Button type="button" variant="outline" onClick={onCancel}>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               取消
             </Button>
             <Button type="submit" disabled={!apiKey.trim()}>
@@ -120,7 +144,7 @@ export function AddConfigForm({ onSave, onCancel }: AddConfigFormProps) {
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -1,21 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@renderer/components/ui/button";
-import { Card, CardContent, CardHeader } from "@renderer/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@renderer/components/ui/dialog";
 import { Input } from "@renderer/components/ui/input";
 import { Label } from "@renderer/components/ui/label";
 import { type AIConfig } from "@renderer/stores";
+import { toast } from "sonner";
 
-interface EditConfigFormProps {
-  config: AIConfig;
+interface EditConfigDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  config: AIConfig | null;
   onSave: (updates: Partial<AIConfig>) => void;
-  onCancel: () => void;
 }
 
-export function EditConfigForm({ config, onSave, onCancel }: EditConfigFormProps) {
-  const [name, setName] = useState(config.name);
-  const [apiKey, setApiKey] = useState(config.apiKey);
-  const [baseURL, setBaseURL] = useState(config.baseURL);
-  const [model, setModel] = useState(config.model);
+export function EditConfigDialog({ open, onOpenChange, config, onSave }: EditConfigDialogProps) {
+  const [name, setName] = useState("");
+  const [apiKey, setApiKey] = useState("");
+  const [baseURL, setBaseURL] = useState("");
+  const [model, setModel] = useState("");
+
+  // 当 config 变化时，更新表单
+  useEffect(() => {
+    if (config) {
+      setName(config.name);
+      setApiKey(config.apiKey);
+      setBaseURL(config.baseURL);
+      setModel(config.model);
+    }
+  }, [config]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,14 +38,21 @@ export function EditConfigForm({ config, onSave, onCancel }: EditConfigFormProps
       baseURL,
       model
     });
+
+    toast.success("配置更新成功");
+    onOpenChange(false);
   };
 
+  if (!config) return null;
+
   return (
-    <Card>
-      <CardHeader>
-        <h4 className="font-medium">编辑配置</h4>
-      </CardHeader>
-      <CardContent>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>编辑 AI 配置</DialogTitle>
+          <DialogDescription>修改你的 AI 模型配置信息</DialogDescription>
+        </DialogHeader>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="edit-name">配置名称</Label>
@@ -74,14 +93,14 @@ export function EditConfigForm({ config, onSave, onCancel }: EditConfigFormProps
             />
           </div>
 
-          <div className="flex gap-4 pt-4">
-            <Button type="button" variant="outline" onClick={onCancel}>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               取消
             </Button>
             <Button type="submit">保存更改</Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+      </DialogContent>
+    </Dialog>
   );
 }

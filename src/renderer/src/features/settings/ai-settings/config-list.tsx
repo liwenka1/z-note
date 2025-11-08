@@ -7,12 +7,12 @@ import { ConfigCard } from "./config-card";
 interface ConfigListProps {
   configs: AIConfig[];
   onSetDefault: (id: string) => void;
-  onEdit: (id: string, updates: Partial<AIConfig>) => void;
+  onEditClick: (config: AIConfig) => void;
   onDelete: (id: string) => void;
   onAddConfig: () => void;
 }
 
-export function ConfigList({ configs, onSetDefault, onEdit, onDelete, onAddConfig }: ConfigListProps) {
+export function ConfigList({ configs, onSetDefault, onEditClick, onDelete, onAddConfig }: ConfigListProps) {
   if (configs.length === 0) {
     return (
       <Card>
@@ -37,7 +37,7 @@ export function ConfigList({ configs, onSetDefault, onEdit, onDelete, onAddConfi
           config={config}
           isDefault={config.isDefault}
           onSetDefault={() => onSetDefault(config.id)}
-          onEdit={(updates) => onEdit(config.id, updates)}
+          onEdit={() => onEditClick(config)}
           onDelete={() => onDelete(config.id)}
         />
       ))}
