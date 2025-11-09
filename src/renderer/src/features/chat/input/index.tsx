@@ -16,7 +16,8 @@ import {
 export function ChatInput() {
   const [input, setInput] = useState("");
   const { configs, currentConfig, getCurrentConfig, setDefaultConfig, hasAnyConfig } = useAIConfigStore();
-  const { currentPrompt } = usePromptStore();
+  const { getCurrentPrompt } = usePromptStore();
+  const currentPrompt = getCurrentPrompt();
 
   // 检查是否有任何配置
   const hasConfig = hasAnyConfig();

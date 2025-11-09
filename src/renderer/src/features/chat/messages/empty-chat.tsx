@@ -10,7 +10,8 @@ import {
 } from "@renderer/components/ui/empty";
 
 export function EmptyChat() {
-  const { currentPrompt } = usePromptStore();
+  const { getCurrentPrompt } = usePromptStore();
+  const currentPrompt = getCurrentPrompt();
 
   return (
     <Empty>
