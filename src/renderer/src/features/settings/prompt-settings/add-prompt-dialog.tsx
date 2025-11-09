@@ -9,21 +9,19 @@ import { toast } from "sonner";
 interface AddPromptDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (prompt: { name: string; content: string; description?: string; isDefault: boolean }) => void;
+  onSave: (prompt: { name: string; content: string; description?: string }) => void;
 }
 
 export function AddPromptDialog({ open, onOpenChange, onSave }: AddPromptDialogProps) {
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
   const [description, setDescription] = useState("");
-  const [isDefault, setIsDefault] = useState(false);
 
   // 重置表单
   const resetForm = () => {
     setName("");
     setContent("");
     setDescription("");
-    setIsDefault(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -33,8 +31,7 @@ export function AddPromptDialog({ open, onOpenChange, onSave }: AddPromptDialogP
     onSave({
       name: name.trim(),
       content: content.trim(),
-      description: description.trim() || undefined,
-      isDefault
+      description: description.trim() || undefined
     });
 
     toast.success("Prompt 添加成功");
@@ -90,19 +87,6 @@ export function AddPromptDialog({ open, onOpenChange, onSave }: AddPromptDialogP
               required
               className="font-mono text-sm"
             />
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="isDefault"
-              checked={isDefault}
-              onChange={(e) => setIsDefault(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300"
-            />
-            <Label htmlFor="isDefault" className="cursor-pointer">
-              设为默认 Prompt
-            </Label>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">

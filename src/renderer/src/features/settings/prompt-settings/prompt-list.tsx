@@ -8,10 +8,18 @@ interface PromptListProps {
   onSetCurrent: (id: string) => void;
   onEditClick: (prompt: Prompt) => void;
   onDelete: (id: string) => void;
+  onDuplicate: (id: string) => void;
   onAddPrompt: () => void;
 }
 
-export function PromptList({ prompts, onSetCurrent, onEditClick, onDelete, onAddPrompt }: PromptListProps) {
+export function PromptList({
+  prompts,
+  onSetCurrent,
+  onEditClick,
+  onDelete,
+  onDuplicate,
+  onAddPrompt
+}: PromptListProps) {
   if (prompts.length === 0) {
     return (
       <div className="bg-card rounded-lg border p-8 text-center">
@@ -35,6 +43,7 @@ export function PromptList({ prompts, onSetCurrent, onEditClick, onDelete, onAdd
           onSetCurrent={() => onSetCurrent(prompt.id)}
           onEdit={() => onEditClick(prompt)}
           onDelete={() => onDelete(prompt.id)}
+          onDuplicate={() => onDuplicate(prompt.id)}
         />
       ))}
     </div>
