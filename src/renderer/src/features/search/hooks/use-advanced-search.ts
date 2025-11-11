@@ -62,6 +62,8 @@ export function useAdvancedSearch(options: SearchOptions = {}) {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
   const [isIndexReady, setIsIndexReady] = useState(false);
+  // 强制更新 Fuse 实例的触发器
+  const [fuseUpdateTrigger, setFuseUpdateTrigger] = useState(0);
 
   // 获取所有标签
   const { data: allTags = [] } = useTags();
@@ -107,8 +109,25 @@ export function useAdvancedSearch(options: SearchOptions = {}) {
 
     const combinedIndex = [...noteSearchItems, ...tagSearchItems];
 
+    // 即使没有数据也创建 Fuse 实例（避免后续搜索时为 null）
     if (!Array.isArray(combinedIndex) || combinedIndex.length === 0) {
-      return null;
+      return new Fuse([], {
+        keys: [
+          { name: "title", weight: 0.4 },
+          { name: "content", weight: 0.3 },
+          { name: "fullText", weight: 0.2 },
+          { name: "path", weight: 0.1 }
+        ],
+        includeScore: true,
+        includeMatches: includeMatches,
+        threshold: threshold,
+        location: 0,
+        distance: 100,
+        minMatchCharLength: 1,
+        useExtendedSearch: true,
+        ignoreLocation: true,
+        ignoreFieldNorm: false
+      });
     }
 
     return new Fuse(combinedIndex, {
@@ -131,12 +150,18 @@ export function useAdvancedSearch(options: SearchOptions = {}) {
       ignoreLocation: true,
       ignoreFieldNorm: false
     });
-  }, [threshold, includeMatches, isIndexReady, allTags]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [threshold, includeMatches, isIndexReady, allTags, fuseUpdateTrigger]);
 
   // 执行搜索
   const performSearch = useCallback(
     async (query: string) => {
-      if (!fuseSearch || !query.trim()) {
+      if (!query.trim()) {
+        setSearchResults([]);
+        return;
+      }
+
+      if (!fuseSearch) {
         setSearchResults([]);
         return;
       }
@@ -250,11 +275,9 @@ export function useAdvancedSearch(options: SearchOptions = {}) {
   // 监听文件变化，自动更新 Fuse 实例
   useEffect(() => {
     const unsubscribe = fileSearchIndex.addFileWatcher(() => {
-      // 文件变化时，强制重新创建 Fuse 实例
-      // 通过依赖数组中的 isIndexReady 变化来触发 fuseSearch 的重新计算
-      setIsIndexReady(false);
-      // 短暂延迟后重新设置为 true，触发 Fuse 实例重建
-      setTimeout(() => setIsIndexReady(true), 50);
+      // 文件变化时，通过增加触发器值来强制重新创建 Fuse 实例
+      // 这样避免了 isIndexReady 的快速切换导致的竞态条件
+      setFuseUpdateTrigger((prev) => prev + 1);
     });
 
     return unsubscribe;

@@ -31,34 +31,58 @@ class FileSearchIndexManager {
   private isIndexing = false;
   private lastIndexTime: number = 0;
   private fileWatchers: Set<(filePath: string, operation: "create" | "update" | "delete") => void> = new Set();
+  private indexingPromise: Promise<void> | null = null;
 
   /**
    * 构建完整的文件索引 - 效仿 readDirRecursively + setSearchData
    */
   async buildIndex(workspacePath?: string): Promise<void> {
-    if (this.isIndexing) {
+    // 如果正在构建中，等待当前构建完成
+    if (this.isIndexing && this.indexingPromise) {
+      await this.indexingPromise;
       return;
     }
 
     this.isIndexing = true;
 
-    try {
-      this.searchIndex = [];
+    // 创建并保存构建 promise
+    this.indexingPromise = (async () => {
+      try {
+        // 获取工作区路径
+        const currentWorkspace = workspacePath || (await this.getCurrentWorkspace());
+        if (!currentWorkspace) {
+          console.warn("无法获取工作区路径");
+          return;
+        }
 
-      const currentWorkspace = workspacePath || (await this.getCurrentWorkspace());
-      if (!currentWorkspace) {
-        return;
+        // 创建临时索引数组，在完全扫描完成前不清空当前索引
+        const tempIndex: SearchIndexItem[] = [];
+
+        // 保存原索引的引用，用于扫描过程
+        const originalIndex = this.searchIndex;
+        this.searchIndex = tempIndex;
+
+        try {
+          // 递归扫描所有 JSON 文件 - 效仿 readDirRecursively
+          await this.scanDirectoryRecursively(currentWorkspace);
+
+          // 扫描完成，保留新索引
+          this.lastIndexTime = Date.now();
+        } catch (scanError) {
+          // 扫描失败，恢复原索引
+          console.error("扫描目录失败:", scanError);
+          this.searchIndex = originalIndex;
+          throw scanError;
+        }
+      } catch (error) {
+        console.error("构建文件索引失败:", error);
+      } finally {
+        this.isIndexing = false;
+        this.indexingPromise = null;
       }
+    })();
 
-      // 递归扫描所有 JSON 文件 - 效仿 readDirRecursively
-      await this.scanDirectoryRecursively(currentWorkspace);
-
-      this.lastIndexTime = Date.now();
-    } catch (error) {
-      console.error("构建文件索引失败:", error);
-    } finally {
-      this.isIndexing = false;
-    }
+    await this.indexingPromise;
   }
 
   /**
