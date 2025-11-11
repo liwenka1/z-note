@@ -9,7 +9,7 @@ export function SearchCommand() {
   return (
     <CommandDialog open={isOpen} onOpenChange={handleOpenChange}>
       <CommandInput
-        placeholder={isIndexReady ? "搜索笔记、标签、文件夹..." : "正在构建搜索索引..."}
+        placeholder={isIndexReady ? "搜索笔记、标签..." : "正在构建搜索索引..."}
         className="h-14 text-base"
         value={searchTerm}
         onValueChange={setSearchTerm}

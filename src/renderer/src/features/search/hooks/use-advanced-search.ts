@@ -311,7 +311,6 @@ export function useAdvancedSearch(options: SearchOptions = {}) {
       () => ({
         notes: searchResults.filter((item) => item.type === "note"),
         pages: [],
-        folders: [],
         tags: searchResults.filter((item) => item.type === "tag")
       }),
       [searchResults]

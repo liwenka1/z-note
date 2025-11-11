@@ -37,7 +37,6 @@ export function useSearchCommandState(options: UseSearchCommandStateOptions = {}
       return {
         notes: allSearchItems.filter((item) => item.type === "note"),
         pages: allSearchItems.filter((item) => item.type === "page"),
-        folders: allSearchItems.filter((item) => item.type === "folder"),
         tags: [] // 不搜索时不显示标签
       };
     }
@@ -45,7 +44,6 @@ export function useSearchCommandState(options: UseSearchCommandStateOptions = {}
     return {
       notes: groupedResults.notes || [],
       pages: groupedResults.pages || [],
-      folders: groupedResults.folders || [],
       tags: groupedResults.tags || []
     };
   }, [searchTerm, allSearchItems, groupedResults]);
@@ -59,12 +57,6 @@ export function useSearchCommandState(options: UseSearchCommandStateOptions = {}
         openTab(item.id, item.title, "note");
         setActiveTab(item.id);
         navigate({ to: "/notes/$noteId", params: { noteId: item.id } });
-        return;
-      }
-
-      if (item.type === "folder") {
-        navigate({ to: "/" });
-        console.log("选中文件夹:", item.title);
         return;
       }
 

@@ -35,9 +35,6 @@ export function SearchResults({ groupedItems, isSearching, isIndexReady, onSelec
           {groupedItems.pages.length > 0 && (
             <SearchGroup heading="📄 页面" items={groupedItems.pages} onSelect={onSelect} />
           )}
-          {groupedItems.folders.length > 0 && (
-            <SearchGroup heading="📁 文件夹" items={groupedItems.folders} onSelect={onSelect} />
-          )}
         </>
       )}
     </CommandList>
