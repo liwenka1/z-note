@@ -1,5 +1,3 @@
-// ==================== 文件系统相关类型定义 ====================
-
 /**
  * 文件节点接口
  */
@@ -10,16 +8,14 @@ export interface FileNode {
   path: string;
   /** 是否为目录 */
   isDirectory: boolean;
-  /** 文件大小（字节） */
+  /** 文件大小(字节) */
   size?: number;
   /** 修改时间 */
   modifiedTime?: Date;
   /** 创建时间 */
   createdTime?: Date;
-  /** 子节点（仅目录有效） */
+  /** 子节点(仅目录有效) */
   children?: FileNode[];
-  /** 是否正在编辑状态 */
-  isEditing?: boolean;
   /** 文件扩展名 */
   extension?: string;
 }
@@ -38,28 +34,10 @@ export interface WorkspaceConfig {
   includeExtensions: string[];
   /** 是否监听文件变化 */
   watchEnabled: boolean;
-  /** 最大文件大小（字节） */
+  /** 最大文件大小(字节) */
   maxFileSize: number;
   /** 其他配置 */
   [key: string]: unknown;
-}
-
-/** 工作区验证结果 */
-export interface WorkspaceValidationResult {
-  /** 是否有效 */
-  valid: boolean;
-  /** 路径是否存在 */
-  exists: boolean;
-  /** 是否为目录 */
-  isDirectory: boolean;
-  /** 是否可读 */
-  readable: boolean;
-  /** 是否可写 */
-  writable: boolean;
-  /** 错误信息 */
-  error?: string;
-  /** 建议 */
-  suggestions?: string[];
 }
 
 /**
@@ -78,30 +56,6 @@ export interface ScanOptions {
   excludeFolders?: string[];
   /** 只包含的文件扩展名 */
   includeExtensions?: string[];
-}
-
-/**
- * 文件统计信息
- */
-export interface FileStats {
-  /** 是否为目录 */
-  isDirectory: boolean;
-  /** 是否为文件 */
-  isFile: boolean;
-  /** 文件大小（字节） */
-  size: number;
-  /** 修改时间 */
-  modifiedTime: Date;
-  /** 创建时间 */
-  createdTime: Date;
-  /** 访问时间 */
-  accessedTime?: Date;
-  /** 文件权限 */
-  permissions?: {
-    readable: boolean;
-    writable: boolean;
-    executable: boolean;
-  };
 }
 
 /**
@@ -137,29 +91,6 @@ export interface WorkspaceValidationResult {
 }
 
 /**
- * 文件操作类型
- */
-export type FileOperationType = "create" | "read" | "update" | "delete" | "rename" | "move" | "copy";
-
-/**
- * 文件操作结果
- */
-export interface FileOperationResult {
-  /** 操作是否成功 */
-  success: boolean;
-  /** 操作类型 */
-  operation: FileOperationType;
-  /** 源路径 */
-  sourcePath?: string;
-  /** 目标路径 */
-  targetPath?: string;
-  /** 错误信息 */
-  error?: string;
-  /** 操作时间戳 */
-  timestamp: Date;
-}
-
-/**
  * 排序类型
  */
 export type SortType = "name" | "size" | "modified" | "created" | "type";
@@ -182,54 +113,15 @@ export interface SortOptions {
 }
 
 /**
- * 文件拖拽数据
+ * 选中节点信息(统一文件和文件夹)
  */
-export interface FileDragData {
-  /** 拖拽的文件节点 */
-  node: FileNode;
-  /** 拖拽类型 */
-  type: "move" | "copy";
-  /** 源父路径 */
-  sourceParent?: string;
-}
-
-/**
- * 文件上下文菜单项
- */
-export interface FileContextMenuItem {
-  /** 菜单项ID */
-  id: string;
-  /** 显示标签 */
-  label: string;
-  /** 图标 */
-  icon?: string;
-  /** 是否禁用 */
-  disabled?: boolean;
-  /** 是否为分隔符 */
-  separator?: boolean;
-  /** 子菜单 */
-  submenu?: FileContextMenuItem[];
-  /** 点击处理函数 */
-  onClick?: (node: FileNode) => void;
-}
-
-/**
- * 文件监听事件类型
- */
-export type FileWatchEventType = "add" | "change" | "unlink" | "addDir" | "unlinkDir";
-
-/**
- * 文件监听事件
- */
-export interface FileWatchEvent {
-  /** 事件类型 */
-  type: FileWatchEventType;
-  /** 文件路径 */
+export interface SelectedNode {
+  /** 节点路径 */
   path: string;
-  /** 是否为目录 */
+  /** 节点类型 */
+  type: "file" | "folder";
+  /** 是否是目录(快速判断) */
   isDirectory: boolean;
-  /** 事件时间戳 */
-  timestamp: Date;
 }
 
 /**
@@ -238,8 +130,8 @@ export interface FileWatchEvent {
 export interface FileTreeState {
   /** 文件树数据 */
   nodes: FileNode[];
-  /** 当前选中的文件路径 */
-  selectedPath?: string;
+  /** 当前选中的节点(文件或文件夹) */
+  selectedNode: SelectedNode | null;
   /** 展开的文件夹路径集合 */
   expandedPaths: Set<string>;
   /** 加载状态 */
@@ -283,61 +175,13 @@ export interface FileEditState {
 }
 
 /**
- * 文件历史记录项
- */
-export interface FileHistoryItem {
-  /** 文件路径 */
-  path: string;
-  /** 访问时间 */
-  accessedAt: Date;
-  /** 文件名 */
-  name: string;
-  /** 是否为目录 */
-  isDirectory: boolean;
-}
-
-/**
  * 搜索结果项
  */
 export interface SearchResultItem extends FileNode {
-  /** 匹配的行号（内容搜索时） */
+  /** 匹配的行号(内容搜索时) */
   matchedLines?: number[];
   /** 匹配的文本片段 */
   matchedText?: string;
   /** 匹配分数 */
   score?: number;
-}
-
-/**
- * 文件预览数据
- */
-export interface FilePreview {
-  /** 文件路径 */
-  path: string;
-  /** 预览内容 */
-  content: string;
-  /** 文件类型 */
-  type: "text" | "markdown" | "image" | "binary";
-  /** 文件大小 */
-  size: number;
-  /** 是否可编辑 */
-  editable: boolean;
-}
-
-/**
- * 文件导入/导出选项
- */
-export interface FileImportExportOptions {
-  /** 源路径或目标路径 */
-  path: string;
-  /** 是否递归处理 */
-  recursive?: boolean;
-  /** 是否覆盖现有文件 */
-  overwrite?: boolean;
-  /** 包含的文件类型 */
-  includeTypes?: string[];
-  /** 排除的文件类型 */
-  excludeTypes?: string[];
-  /** 进度回调 */
-  onProgress?: (processed: number, total: number) => void;
 }

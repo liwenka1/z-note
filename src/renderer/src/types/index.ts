@@ -13,19 +13,7 @@ export * from "./utils";
 export * from "./file-content";
 
 // 文件系统类型（UI特定的扩展，避免与共享类型冲突）
-export type {
-  FileTreeState,
-  WorkspaceState,
-  FileEditState,
-  SearchResultItem,
-  FileHistoryItem,
-  FilePreview,
-  FileImportExportOptions,
-  FileDragData,
-  FileContextMenuItem,
-  FileWatchEvent,
-  FileWatchEventType
-} from "./files";
+export type { FileTreeState, WorkspaceState, FileEditState, SearchResultItem } from "./files";
 
 // 全局类型声明
 declare global {
