@@ -4,6 +4,7 @@ import { FolderHeader } from "./folder-header";
 import { RenameInput } from "./rename-input";
 import { FolderActions } from "./folder-actions";
 import { FolderChildren } from "./folder-children";
+import { cn } from "@renderer/lib/utils";
 import type { FileNode } from "@shared/types";
 
 interface FolderItemProps {
@@ -13,18 +14,24 @@ interface FolderItemProps {
 
 /**
  * 文件夹项组件
- * 重构后的主容器，组合各个子组件
+ * 主容器，组合各个子组件
  */
 export function FolderItem({ folder, level }: FolderItemProps) {
   const [isRenaming, setIsRenaming] = useState(false);
 
-  const { expandedFolders, toggleFolderCollapse, renameFile, deleteFile, createFile, createFolder } = useFilesState();
+  const { selectedPath, expandedFolders, selectNode, toggleFolder, renameFile, deleteFile, createFile, createFolder } =
+    useFilesState();
 
-  // 使用正确的展开状态逻辑
+  const isSelected = selectedPath === folder.path;
   const isExpanded = expandedFolders.has(folder.path);
 
-  const handleToggleExpand = () => {
-    toggleFolderCollapse(folder.path);
+  const handleSelect = () => {
+    selectNode(folder.path, true);
+  };
+
+  const handleToggleExpand = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleFolder(folder.path);
   };
 
   const handleRename = async (newName: string) => {
@@ -48,8 +55,7 @@ export function FolderItem({ folder, level }: FolderItemProps) {
 
   const handleCreateFile = async () => {
     const fileName = `新笔记_${Date.now()}.json`;
-    const actualFilePath = await createFile(folder.path, fileName);
-    console.log("文件创建成功:", actualFilePath);
+    await createFile(folder.path, fileName);
   };
 
   const handleStartRename = () => {
@@ -58,11 +64,17 @@ export function FolderItem({ folder, level }: FolderItemProps) {
 
   return (
     <div className="select-none">
-      {/* 文件夹主行 */}
       {isRenaming ? (
         <RenameInput initialName={folder.name} level={level} onRename={handleRename} onCancel={handleCancelRename} />
       ) : (
-        <div className="group hover:bg-muted/50 relative flex items-center gap-1 rounded-md px-2 py-1 transition-colors duration-200">
+        <div
+          className={cn(
+            "group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-sm transition-colors duration-200",
+            "hover:bg-muted/50",
+            isSelected && "bg-accent text-accent-foreground"
+          )}
+          onClick={handleSelect}
+        >
           <FolderHeader name={folder.name} isExpanded={isExpanded} level={level} onToggleExpand={handleToggleExpand} />
 
           <FolderActions
@@ -75,7 +87,6 @@ export function FolderItem({ folder, level }: FolderItemProps) {
         </div>
       )}
 
-      {/* 子项（文件夹展开时显示） */}
       {folder.children && (
         <FolderChildren
           childNodes={folder.children}

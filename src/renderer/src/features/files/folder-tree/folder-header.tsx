@@ -1,13 +1,12 @@
 import { motion } from "framer-motion";
 import { ChevronRight, Folder as FolderIcon, FolderOpen } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
-import { cn } from "@renderer/lib/utils";
 
 interface FolderHeaderProps {
   name: string;
   isExpanded: boolean;
   level: number;
-  onToggleExpand: () => void;
+  onToggleExpand: (e: React.MouseEvent) => void;
 }
 
 /**
@@ -16,30 +15,27 @@ interface FolderHeaderProps {
  */
 export function FolderHeader({ name, isExpanded, level, onToggleExpand }: FolderHeaderProps) {
   return (
-    <div className={cn("flex flex-1 cursor-pointer items-center text-sm")} style={{ paddingLeft: `${level * 20}px` }}>
-      {/* 展开/折叠按钮 */}
+    <div className="flex flex-1 items-center" style={{ paddingLeft: `${level * 20}px` }}>
       <motion.div
-        className={cn("flex h-5 w-5 items-center justify-center")}
+        className="flex h-5 w-5 shrink-0 items-center justify-center"
         animate={{ rotate: isExpanded ? 90 : 0 }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
       >
-        <Button variant="ghost" size="sm" className={cn("hover:bg-muted h-5 w-5 p-0")} onClick={onToggleExpand}>
-          <ChevronRight className={cn("h-3 w-3")} />
+        <Button variant="ghost" size="sm" className="hover:bg-muted h-5 w-5 p-0" onClick={onToggleExpand}>
+          <ChevronRight className="h-3 w-3" />
         </Button>
       </motion.div>
 
-      {/* 文件夹图标 */}
-      <div className={cn("ml-1 shrink-0")}>
-        {isExpanded ? (
-          <FolderOpen className={cn("text-muted-foreground h-4 w-4")} />
-        ) : (
-          <FolderIcon className={cn("text-muted-foreground h-4 w-4")} />
-        )}
-      </div>
+      <div className="flex min-w-0 flex-1 items-center gap-1">
+        <div className="shrink-0">
+          {isExpanded ? (
+            <FolderOpen className="text-muted-foreground h-4 w-4" />
+          ) : (
+            <FolderIcon className="text-muted-foreground h-4 w-4" />
+          )}
+        </div>
 
-      {/* 文件夹名称 */}
-      <div className={cn("min-w-0 flex-1")}>
-        <span className={cn("block truncate font-medium")} title={name}>
+        <span className="block truncate" title={name}>
           {name}
         </span>
       </div>

@@ -3,13 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useTabStore, useFilesStore } from "@renderer/stores";
 import { useCreateNoteFile } from "@renderer/hooks/mutations/use-file-mutations";
 import { filesApi } from "@renderer/api";
-import {
-  createFileNoteId,
-  createEmptyNoteFile,
-  generateUniqueFileName,
-  getTitleFromFileName
-} from "@renderer/utils/file-content";
-import type { NoteFileContent } from "@renderer/types/file-content";
+import { createFileNoteId, generateUniqueFileName } from "@renderer/utils/file-content";
 import { NOTE_CONSTANTS } from "@renderer/constants/note-constants";
 import { ErrorHandler, AppError, ErrorType } from "@renderer/lib/error-handler";
 
@@ -36,25 +30,17 @@ export function useNoteManager() {
    * @returns Promise<string> 返回创建的笔记ID
    */
   const createAndOpenNote = useCallback(
-    async (options?: { baseName?: string; template?: NoteFileContent; openInNewTab?: boolean }): Promise<string> => {
-      const { baseName, template, openInNewTab = true } = options || {};
+    async (options?: { baseName?: string; openInNewTab?: boolean }): Promise<string> => {
+      const { baseName, openInNewTab = true } = options || {};
 
       if (!workspace.config.workspacePath) {
         throw new AppError("工作区路径未设置", ErrorType.VALIDATION);
       }
 
-      // 生成文件名
       const fileName = generateNoteFileName(baseName);
 
-      // 创建笔记内容
-      const noteContent = template || createEmptyNoteFile(getTitleFromFileName(fileName));
-
-      // 创建文件（不刷新文件树）
-      const { createNewFileNoRefresh } = useFilesStore.getState();
-      const actualFilePath = await createNewFileNoRefresh(
-        fileName,
-        JSON.stringify(noteContent, null, NOTE_CONSTANTS.JSON_INDENT)
-      );
+      const { createFile } = useFilesStore.getState();
+      const actualFilePath = await createFile(workspace.config.workspacePath, fileName);
 
       // 使用 mutation 更新缓存（不等待完成）
       createNoteMutation.mutate({ filePath: actualFilePath });

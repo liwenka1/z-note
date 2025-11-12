@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import { Check, X } from "lucide-react";
 import { Button } from "@renderer/components/ui/button";
 import { Input } from "@renderer/components/ui/input";
-import { cn } from "@renderer/lib/utils";
 
 interface RenameInputProps {
   initialName: string;
@@ -32,7 +31,7 @@ export function RenameInput({ initialName, level, onRename, onCancel }: RenameIn
         await onRename(newName.trim());
       } catch (error) {
         console.error("Failed to rename:", error);
-        setNewName(initialName); // Reset on error
+        setNewName(initialName);
       }
     } else {
       onCancel();
@@ -50,54 +49,47 @@ export function RenameInput({ initialName, level, onRename, onCancel }: RenameIn
 
   return (
     <div
-      className={cn(
-        "group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-sm transition-colors duration-200"
-      )}
+      className="group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-sm transition-colors duration-200"
       style={{ paddingLeft: `${level * 20 + 8}px` }}
     >
-      {/* 占位展开按钮位置 */}
-      <div className={cn("flex h-5 w-5 items-center justify-center")} />
+      <div className="flex h-5 w-5 items-center justify-center" />
+      <div className="ml-1 h-4 w-4 shrink-0" />
 
-      {/* 占位图标位置 */}
-      <div className={cn("ml-1 h-4 w-4 shrink-0")} />
-
-      {/* 重命名输入框 */}
-      <div className={cn("min-w-0 flex-1")}>
+      <div className="min-w-0 flex-1">
         <Input
           ref={inputRef}
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={handleKeyDown}
           onBlur={handleRename}
-          className={cn("h-6 px-1 text-sm")}
+          className="h-6 px-1 text-sm"
           onClick={(e) => e.stopPropagation()}
         />
       </div>
 
-      {/* 确认/取消按钮 */}
-      <div className={cn("flex shrink-0 items-center gap-1")}>
+      <div className="flex shrink-0 items-center gap-1">
         <Button
           size="sm"
           variant="ghost"
-          className={cn("h-6 w-6 p-0")}
+          className="h-6 w-6 p-0"
           onClick={(e) => {
             e.stopPropagation();
             handleRename();
           }}
         >
-          <Check className={cn("h-3 w-3")} />
+          <Check className="h-3 w-3" />
         </Button>
         <Button
           size="sm"
           variant="ghost"
-          className={cn("h-6 w-6 p-0")}
+          className="h-6 w-6 p-0"
           onClick={(e) => {
             e.stopPropagation();
             setNewName(initialName);
             onCancel();
           }}
         >
-          <X className={cn("h-3 w-3")} />
+          <X className="h-3 w-3" />
         </Button>
       </div>
     </div>

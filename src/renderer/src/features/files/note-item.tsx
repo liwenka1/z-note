@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { File, MoreVertical, Edit, Trash2, X, Check, FolderOpen } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -14,7 +14,6 @@ import { useFilesState } from "./hooks/use-files-state";
 import { useTabStore } from "@renderer/stores";
 import { shellApi, filesApi } from "@renderer/api";
 import { createFileNoteId } from "@renderer/utils/file-content";
-import { cn } from "@renderer/lib/utils";
 import type { FileNode } from "@shared/types";
 
 interface NoteItemProps {
@@ -28,22 +27,17 @@ export function NoteItem({ file, level }: NoteItemProps) {
   const navigate = useNavigate();
   const { openTab } = useTabStore();
 
-  // 获取显示用的文件名（去掉.json后缀）
   const getDisplayName = (fileName: string) => {
-    // 如果是.json文件，去掉后缀
-    if (fileName.endsWith(".json")) {
-      return fileName.slice(0, -5);
-    }
-    return fileName;
+    return fileName.endsWith(".json") ? fileName.slice(0, -5) : fileName;
   };
 
   const [newName, setNewName] = useState(getDisplayName(file.name));
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { selectedFile, selectFile, renameFile, deleteFile } = useFilesState();
+  const { selectedPath, selectNode, openFile, renameFile, deleteFile } = useFilesState();
 
   const displayName = getDisplayName(file.name);
-  const isSelected = selectedFile === file.path;
+  const isSelected = selectedPath === file.path;
 
   useEffect(() => {
     if (isRenaming && inputRef.current) {
@@ -53,37 +47,26 @@ export function NoteItem({ file, level }: NoteItemProps) {
   }, [isRenaming]);
 
   const handleFileClick = async () => {
-    try {
-      // 首先选中文件（保持现有行为）
-      await selectFile(file.path);
+    selectNode(file.path, false);
 
-      // 如果是 .json 文件，尝试作为笔记打开
-      if (file.name.endsWith(".json")) {
-        try {
-          // 读取笔记文件内容
-          const noteContent = await filesApi.readNoteFile(file.path);
+    if (file.name.endsWith(".json")) {
+      try {
+        await openFile(file.path);
 
-          // 生成文件 noteId
-          const fileNoteId = createFileNoteId(file.path);
+        const fileNoteId = createFileNoteId(file.path);
+        const noteContent = await filesApi.readNoteFile(file.path);
 
-          // 打开标签页
-          openTab(fileNoteId, noteContent.metadata.title, "note");
-
-          // 导航到笔记页面
-          navigate({ to: "/notes/$noteId", params: { noteId: fileNoteId } });
-        } catch (error) {
-          console.error("Failed to open note file:", error);
-          toast.error("无法打开笔记文件");
-        }
+        openTab(fileNoteId, noteContent.metadata.title, "note");
+        navigate({ to: "/notes/$noteId", params: { noteId: fileNoteId } });
+      } catch (error) {
+        console.error("Failed to open note file:", error);
+        toast.error("无法打开笔记文件");
       }
-    } catch (error) {
-      console.error("Failed to select file:", error);
     }
   };
 
   const handleRename = async () => {
     if (newName.trim() && newName.trim() !== getDisplayName(file.name)) {
-      // 如果原文件是.json，确保新名称也添加.json后缀
       let actualNewName = newName.trim();
       if (file.name.endsWith(".json") && !actualNewName.endsWith(".json")) {
         actualNewName += ".json";
@@ -94,7 +77,7 @@ export function NoteItem({ file, level }: NoteItemProps) {
         await renameFile(file.path, newPath);
       } catch (error) {
         console.error("Failed to rename file:", error);
-        setNewName(getDisplayName(file.name)); // Reset on error
+        setNewName(getDisplayName(file.name));
       }
     }
     setIsRenaming(false);
@@ -110,11 +93,9 @@ export function NoteItem({ file, level }: NoteItemProps) {
 
   const handleShowInFolder = async () => {
     try {
-      // 使用shellApi在文件管理器中显示文件
       await shellApi.showItemInFolder(file.path);
     } catch (error) {
       console.error("查看文件位置失败:", error);
-      // 备用方案：打开文件所在目录
       try {
         const dirPath = file.path.substring(0, file.path.lastIndexOf("\\"));
         await shellApi.openPath(dirPath);
@@ -133,26 +114,18 @@ export function NoteItem({ file, level }: NoteItemProps) {
     }
   };
 
-  const getFileIcon = () => {
-    // 所有文件都使用统一的灰色图标，不区分类型
-    return <File className={cn("text-muted-foreground h-4 w-4")} />;
-  };
+  const getFileIcon = () => <File className="text-muted-foreground h-4 w-4" />;
 
   return (
     <div
-      className={cn(
-        "group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-sm transition-colors duration-200",
-        "hover:bg-muted/50",
-        isSelected && "bg-accent text-accent-foreground"
-      )}
-      style={{ paddingLeft: `${level * 20 + 20}px` }} // +20px 是为了与文件夹的展开按钮对齐 (px-2已提供8px)
+      className="hover:bg-muted/50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-sm transition-colors duration-200"
+      data-selected={isSelected}
+      style={{ paddingLeft: `${level * 20 + 20}px` }}
       onClick={handleFileClick}
     >
-      {/* 文件图标 */}
-      <div className={cn("ml-1 shrink-0")}>{getFileIcon()}</div>
+      <div className="ml-1 shrink-0">{getFileIcon()}</div>
 
-      {/* 文件名 / 重命名输入框 */}
-      <div className={cn("min-w-0 flex-1")}>
+      <div className="min-w-0 flex-1">
         {isRenaming ? (
           <Input
             ref={inputRef}
@@ -160,54 +133,53 @@ export function NoteItem({ file, level }: NoteItemProps) {
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={handleKeyDown}
             onBlur={handleRename}
-            className={cn("h-6 px-1 text-sm")}
+            className="h-6 px-1 text-sm"
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <span className={cn("block truncate")} title={displayName}>
+          <span className="block truncate" title={displayName}>
             {displayName}
           </span>
         )}
       </div>
 
-      {/* 操作按钮 */}
       {isRenaming ? (
-        <div className={cn("flex shrink-0 items-center gap-1")}>
+        <div className="flex shrink-0 items-center gap-1">
           <Button
             size="sm"
             variant="ghost"
-            className={cn("h-6 w-6 p-0")}
+            className="h-6 w-6 p-0"
             onClick={(e) => {
               e.stopPropagation();
               handleRename();
             }}
           >
-            <Check className={cn("h-3 w-3")} />
+            <Check className="h-3 w-3" />
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            className={cn("h-6 w-6 p-0")}
+            className="h-6 w-6 p-0"
             onClick={(e) => {
               e.stopPropagation();
               setNewName(file.name);
               setIsRenaming(false);
             }}
           >
-            <X className={cn("h-3 w-3")} />
+            <X className="h-3 w-3" />
           </Button>
         </div>
       ) : (
-        <div className={cn("shrink-0 opacity-0 transition-opacity group-hover:opacity-100")}>
+        <div className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
           <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <DropdownMenuTrigger asChild>
               <Button
                 size="sm"
                 variant="ghost"
-                className={cn("h-6 w-6 p-0 hover:bg-transparent")}
+                className="h-6 w-6 p-0 hover:bg-transparent"
                 onClick={(e) => e.stopPropagation()}
               >
-                <MoreVertical className={cn("h-3 w-3")} />
+                <MoreVertical className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
