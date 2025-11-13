@@ -3,6 +3,7 @@
 import { fileSystemApi } from "./file-system";
 import { fileSearchIndex } from "@renderer/services/file-search-index";
 import type { NoteFileContent, NoteFileMetadata } from "@renderer/types/file-content";
+import type { JSONContent } from "@tiptap/react";
 import {
   createEmptyNoteFile,
   updateNoteFileContent,
@@ -103,11 +104,7 @@ export const filesApi = {
   /**
    * 更新笔记文件内容
    */
-  async updateNoteFile(
-    filePath: string,
-    newContent: import("@tiptap/react").JSONContent,
-    newTitle?: string
-  ): Promise<NoteFileContent> {
+  async updateNoteFile(filePath: string, newContent: JSONContent, newTitle?: string): Promise<NoteFileContent> {
     try {
       const existingFile = await this.readNoteFile(filePath);
       const updatedFile = updateNoteFileContent(existingFile, newContent, newTitle);

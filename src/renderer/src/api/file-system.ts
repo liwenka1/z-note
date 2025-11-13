@@ -2,7 +2,14 @@
 
 import { ipcClient, handleResponse } from "./ipc";
 import { IPC_CHANNELS } from "@shared/ipc-channels";
-import type { FileNode, ScanOptions, FileStats, SearchOptions, WorkspaceValidationResult } from "@shared/types";
+import type {
+  FileNode,
+  ScanOptions,
+  FileStats,
+  SearchOptions,
+  WorkspaceValidationResult,
+  IpcMethods
+} from "@shared/types";
 
 /**
  * 文件系统 API
@@ -28,10 +35,7 @@ export const fileSystemApi = {
    * 读取二进制文件内容
    */
   async readBinaryFile(filePath: string): Promise<ArrayBuffer> {
-    const response = await ipcClient.invoke(
-      IPC_CHANNELS.FILE_SYSTEM.READ_BINARY_FILE as keyof import("@renderer/types").IpcMethods,
-      filePath
-    );
+    const response = await ipcClient.invoke(IPC_CHANNELS.FILE_SYSTEM.READ_BINARY_FILE as keyof IpcMethods, filePath);
     return handleResponse(response) as ArrayBuffer;
   },
 
