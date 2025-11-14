@@ -28,6 +28,18 @@ interface TabActions {
 
 type TabStore = TabState & TabActions;
 
+// 辅助函数：处理关闭 tab 后设置新激活 tab
+const setNewActiveTabAfterClose = (state: TabState, closedTabId: string, closedTabIndex: number) => {
+  if (state.activeTabId === closedTabId) {
+    if (state.openTabs.length > 0) {
+      const newActiveIndex = Math.min(closedTabIndex, state.openTabs.length - 1);
+      state.activeTabId = state.openTabs[newActiveIndex]?.id || null;
+    } else {
+      state.activeTabId = null;
+    }
+  }
+};
+
 export const useTabStore = create<TabStore>()(
   immer((set) => ({
     // Initial state
@@ -37,23 +49,15 @@ export const useTabStore = create<TabStore>()(
     // Actions
     openTab: (noteId: string, title: string, type: "note" | "settings" = "note") => {
       set((state) => {
-        // Check if tab already exists
         const existingTab = state.openTabs.find((tab) => tab.id === noteId);
 
         if (!existingTab) {
-          // Add new tab
-          state.openTabs.push({
-            id: noteId,
-            title,
-            type
-          });
+          state.openTabs.push({ id: noteId, title, type });
         } else {
-          // Update existing tab title if needed
           existingTab.title = title;
           existingTab.type = type;
         }
 
-        // Set as active tab
         state.activeTabId = noteId;
       });
     },
@@ -61,23 +65,14 @@ export const useTabStore = create<TabStore>()(
     openTagTab: (tagId: number, tagName: string) => {
       set((state) => {
         const tabId = `tag-${tagId}`;
-        // Check if tag tab already exists
         const existingTab = state.openTabs.find((tab) => tab.id === tabId);
 
         if (!existingTab) {
-          // Add new tag tab
-          state.openTabs.push({
-            id: tabId,
-            title: tagName,
-            type: "tag",
-            tagId: tagId
-          });
+          state.openTabs.push({ id: tabId, title: tagName, type: "tag", tagId });
         } else {
-          // Update existing tab title if needed
           existingTab.title = tagName;
         }
 
-        // Set as active tab
         state.activeTabId = tabId;
       });
     },
@@ -88,15 +83,9 @@ export const useTabStore = create<TabStore>()(
         const existingTab = state.openTabs.find((tab) => tab.id === settingsTabId);
 
         if (!existingTab) {
-          // Add settings tab
-          state.openTabs.push({
-            id: settingsTabId,
-            title: "设置",
-            type: "settings"
-          });
+          state.openTabs.push({ id: settingsTabId, title: "设置", type: "settings" });
         }
 
-        // Set as active tab
         state.activeTabId = settingsTabId;
       });
     },
@@ -107,17 +96,7 @@ export const useTabStore = create<TabStore>()(
 
         if (tabIndex !== -1) {
           state.openTabs.splice(tabIndex, 1);
-
-          // If closing active tab, set new active tab
-          if (state.activeTabId === tabId) {
-            if (state.openTabs.length > 0) {
-              // Set the tab to the right, or the last tab if this was the rightmost
-              const newActiveIndex = Math.min(tabIndex, state.openTabs.length - 1);
-              state.activeTabId = state.openTabs[newActiveIndex]?.id || null;
-            } else {
-              state.activeTabId = null;
-            }
-          }
+          setNewActiveTabAfterClose(state, tabId, tabIndex);
         }
       });
     },
@@ -147,16 +126,7 @@ export const useTabStore = create<TabStore>()(
           const tabIndex = state.openTabs.findIndex((t) => t.id === tab.id);
           if (tabIndex !== -1) {
             state.openTabs.splice(tabIndex, 1);
-
-            // If closing active tab, set new active tab
-            if (state.activeTabId === tab.id) {
-              if (state.openTabs.length > 0) {
-                const newActiveIndex = Math.min(tabIndex, state.openTabs.length - 1);
-                state.activeTabId = state.openTabs[newActiveIndex]?.id || null;
-              } else {
-                state.activeTabId = null;
-              }
-            }
+            setNewActiveTabAfterClose(state, tab.id, tabIndex);
           }
         });
       });
@@ -164,7 +134,6 @@ export const useTabStore = create<TabStore>()(
 
     setActiveTab: (tabId: string) => {
       set((state) => {
-        // Only set if tab exists
         const tabExists = state.openTabs.some((tab) => tab.id === tabId);
         if (tabExists) {
           state.activeTabId = tabId;
@@ -183,7 +152,9 @@ export const useTabStore = create<TabStore>()(
 
     reorderTabs: (fromIndex: number, toIndex: number) => {
       set((state) => {
-        if (fromIndex >= 0 && fromIndex < state.openTabs.length && toIndex >= 0 && toIndex < state.openTabs.length) {
+        const isValidRange = (index: number) => index >= 0 && index < state.openTabs.length;
+
+        if (isValidRange(fromIndex) && isValidRange(toIndex)) {
           const [movedTab] = state.openTabs.splice(fromIndex, 1);
           state.openTabs.splice(toIndex, 0, movedTab);
         }
