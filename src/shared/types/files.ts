@@ -127,29 +127,6 @@ export interface SearchOptions {
 }
 
 /**
- * 文件操作类型
- */
-export type FileOperationType = "create" | "read" | "update" | "delete" | "rename" | "move" | "copy";
-
-/**
- * 文件操作结果
- */
-export interface FileOperationResult {
-  /** 操作是否成功 */
-  success: boolean;
-  /** 操作类型 */
-  operation: FileOperationType;
-  /** 源路径 */
-  sourcePath?: string;
-  /** 目标路径 */
-  targetPath?: string;
-  /** 错误信息 */
-  error?: string;
-  /** 操作时间戳 */
-  timestamp: Date;
-}
-
-/**
  * 排序类型
  */
 export type SortType = "name" | "size" | "modified" | "created" | "type";
