@@ -67,8 +67,28 @@ export class FileSystemService {
           continue;
         }
 
+        // 跳过 node_modules 和其他常见的大型目录
+        if (entry.name === "node_modules" || entry.name === ".git") {
+          continue;
+        }
+
         const fullPath = path.join(dirPath, entry.name);
-        const stat = await fs.stat(fullPath);
+
+        // 使用 lstat 而不是 stat，避免跟随符号链接
+        // 并且用 try-catch 包裹以处理损坏的符号链接或权限问题
+        let stat;
+        try {
+          stat = await fs.lstat(fullPath);
+        } catch (error) {
+          // 跳过无法访问的文件/目录（如损坏的符号链接、权限问题等）
+          console.warn(`跳过无法访问的路径: ${fullPath}`, error instanceof Error ? error.message : error);
+          continue;
+        }
+
+        // 跳过符号链接
+        if (stat.isSymbolicLink()) {
+          continue;
+        }
 
         if (entry.isDirectory()) {
           const folderNode: FileNode = {
@@ -349,13 +369,32 @@ export class FileSystemService {
         for (const entry of entries) {
           if (results.length >= maxResults) break;
 
+          // 跳过隐藏文件和特殊目录
+          if (entry.name.startsWith(".") || entry.name === "node_modules") {
+            continue;
+          }
+
           const fullPath = path.join(currentDir, entry.name);
           const entryName = caseSensitive ? entry.name : entry.name.toLowerCase();
+
+          // 使用 lstat 并处理错误
+          let stats;
+          try {
+            stats = await fs.lstat(fullPath);
+          } catch {
+            // 跳过无法访问的文件/目录
+            console.warn(`搜索时跳过无法访问的路径: ${fullPath}`);
+            continue;
+          }
+
+          // 跳过符号链接
+          if (stats.isSymbolicLink()) {
+            continue;
+          }
 
           if (entry.isDirectory()) {
             // 目录名匹配
             if (entryName.includes(searchPattern)) {
-              const stats = await fs.stat(fullPath);
               results.push({
                 name: entry.name,
                 path: fullPath,
@@ -394,7 +433,6 @@ export class FileSystemService {
             }
 
             if (isMatch) {
-              const stats = await fs.stat(fullPath);
               results.push({
                 name: entry.name,
                 path: fullPath,

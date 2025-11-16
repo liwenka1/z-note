@@ -72,7 +72,7 @@ class FileSearchIndexManager {
           // 扫描失败，恢复原索引
           console.error("扫描目录失败:", scanError);
           this.searchIndex = originalIndex;
-          throw scanError;
+          // 不再抛出错误，允许应用继续运行
         }
       } catch (error) {
         console.error("构建文件索引失败:", error);
@@ -97,14 +97,20 @@ class FileSearchIndexManager {
 
         if (entry.isDirectory) {
           // 递归扫描子目录
-          await this.scanDirectoryRecursively(fullPath);
+          try {
+            await this.scanDirectoryRecursively(fullPath);
+          } catch (error) {
+            // 记录错误但继续扫描其他目录
+            console.warn(`跳过无法扫描的目录: ${fullPath}`, error instanceof Error ? error.message : error);
+          }
         } else if (!entry.isDirectory && entry.name.endsWith(".json")) {
           // 处理 JSON 笔记文件 - 效仿读取 .md 文件的逻辑
           await this.indexNoteFile(fullPath);
         }
       }
     } catch (error) {
-      console.error(`扫描目录失败: ${dirPath}`, error);
+      console.warn(`扫描目录时出现问题: ${dirPath}`, error instanceof Error ? error.message : error);
+      // 不再抛出错误，让扫描继续进行
     }
   }
 
