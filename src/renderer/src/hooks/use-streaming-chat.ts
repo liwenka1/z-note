@@ -30,6 +30,7 @@ interface UseStreamingChatOptions {
   }) => Promise<string> | string | void;
   onMessageUpdate?: (messageId: string, content: string) => Promise<void> | void;
   onMessageComplete?: (messageId: string) => Promise<void> | void;
+  onError?: (messageId: string | null) => Promise<void> | void;
 }
 
 /**
@@ -41,7 +42,8 @@ export function useStreamingChat({
   contextMessages = [],
   onMessageAdd,
   onMessageUpdate,
-  onMessageComplete
+  onMessageComplete,
+  onError
 }: UseStreamingChatOptions): UseStreamingChatReturn {
   const messagesRef = useRef<ChatMessage[]>([]);
   const [messages, setMessages] = useState<UIMessage[]>([]);
@@ -52,12 +54,14 @@ export function useStreamingChat({
   const onMessageAddRef = useRef(onMessageAdd);
   const onMessageUpdateRef = useRef(onMessageUpdate);
   const onMessageCompleteRef = useRef(onMessageComplete);
+  const onErrorRef = useRef(onError);
 
   // 更新refs
   useEffect(() => {
     onMessageAddRef.current = onMessageAdd;
     onMessageUpdateRef.current = onMessageUpdate;
     onMessageCompleteRef.current = onMessageComplete;
+    onErrorRef.current = onError;
   });
 
   // 同步上下文消息到内部状态
@@ -207,6 +211,11 @@ export function useStreamingChat({
             case "error":
               setStatus("error");
               currentStreamIdRef.current = null;
+
+              // 调用错误回调来清理消息状态
+              if (onErrorRef.current && currentAssistantMessageIdRef.current) {
+                onErrorRef.current(currentAssistantMessageIdRef.current);
+              }
               currentAssistantMessageIdRef.current = null;
 
               // 移除错误的消息
@@ -222,6 +231,14 @@ export function useStreamingChat({
         cleanupRef.current = cleanup;
       } catch (error) {
         setStatus("error");
+
+        // 调用错误回调来清理消息状态
+        if (onErrorRef.current && currentAssistantMessageIdRef.current) {
+          onErrorRef.current(currentAssistantMessageIdRef.current);
+        }
+        currentAssistantMessageIdRef.current = null;
+        currentStreamIdRef.current = null;
+
         messagesRef.current = messagesRef.current.slice(0, -1);
         setMessages((prev) => prev.slice(0, -1));
         ErrorHandler.handle(error, "AI 流式聊天");

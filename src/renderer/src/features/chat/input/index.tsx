@@ -29,7 +29,7 @@ export function ChatInput() {
   // 获取当前选中的配置
   const selectedConfig = currentConfig || getCurrentConfig();
 
-  const { addMessage, createSession, updateMessage } = useChatStore();
+  const { addMessage, createSession, updateMessage, deleteMessage } = useChatStore();
   const currentSession = useChatStore((state) => {
     const current = state.sessions.find((s) => s.id === state.currentSessionId);
     return current || null;
@@ -113,6 +113,13 @@ export function ChatInput() {
       const sessionId = currentSession?.id;
       if (sessionId) {
         await updateMessage(sessionId, messageId, { isStreaming: false, isLoading: false });
+      }
+    },
+    onError: async (messageId) => {
+      const sessionId = currentSession?.id;
+      if (sessionId && messageId) {
+        // 删除出错的助手消息，避免显示"AI正在思考..."
+        await deleteMessage(sessionId, messageId);
       }
     }
   });
