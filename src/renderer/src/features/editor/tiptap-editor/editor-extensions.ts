@@ -11,6 +11,7 @@ import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import Color from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
+import Image from "@tiptap/extension-image";
 
 /**
  * 编辑器扩展配置
@@ -55,6 +56,14 @@ export function createEditorExtensions(placeholder = "开始写作...") {
     TextStyle,
     Color.configure({
       types: ["textStyle"]
+    }),
+    // 图片扩展
+    Image.configure({
+      inline: false, // 块级图片
+      allowBase64: false, // 不使用 base64
+      HTMLAttributes: {
+        class: "rounded-lg max-w-full h-auto"
+      }
     })
   ];
 }
