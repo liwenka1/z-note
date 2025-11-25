@@ -62,7 +62,7 @@ export function createEditorExtensions(placeholder = "开始写作...") {
       inline: false, // 块级图片
       allowBase64: false, // 不使用 base64
       HTMLAttributes: {
-        class: "rounded-lg max-w-full h-auto"
+        class: "rounded-lg max-w-full h-auto max-h-[300px] object-contain cursor-pointer"
       }
     })
   ];

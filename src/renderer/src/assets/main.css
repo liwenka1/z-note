@@ -178,6 +178,21 @@
   }
 }
 
+/* TipTap 编辑器图片样式 */
+.ProseMirror img {
+  max-height: 300px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.ProseMirror img:hover {
+  opacity: 0.9;
+}
+
 /* 自定义 prose 主题 - 与应用设计系统完全一致 */
 @utility prose-custom {
   /* 浅色模式 */

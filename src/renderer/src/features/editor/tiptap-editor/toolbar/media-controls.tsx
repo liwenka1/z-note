@@ -83,11 +83,7 @@ export function MediaControls({ editor }: MediaControlsProps) {
             disabled={isUploading}
             className="h-8 w-max gap-1 px-2"
           >
-            {isUploading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <ImagePlus className="h-4 w-4" />
-            )}
+            {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
             <span className="text-xs">添加图片</span>
           </Button>
         </TooltipTrigger>
