@@ -1,24 +1,24 @@
 import { Node, mergeAttributes } from "@tiptap/core";
-import { ReactNodeViewRenderer, NodeViewWrapper } from "@tiptap/react";
+import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
 import { useCallback, useRef, useState } from "react";
 import { cn } from "@renderer/lib/utils";
+
+// 图片属性类型
+interface ImageAttrs {
+  src: string;
+  alt?: string;
+  title?: string;
+  width?: string | number;
+}
 
 /**
  * 可调整大小的图片节点视图
  */
-function ResizableImageView({
-  node,
-  updateAttributes,
-  selected
-}: {
-  node: { attrs: { src: string; alt?: string; title?: string; width?: string | number } };
-  updateAttributes: (attrs: Record<string, unknown>) => void;
-  selected: boolean;
-}) {
+function ResizableImageView({ node, updateAttributes, selected }: NodeViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isResizing, setIsResizing] = useState(false);
 
-  const { src, alt, title, width } = node.attrs;
+  const { src, alt, title, width } = node.attrs as ImageAttrs;
 
   // 开始调整大小
   const handleResizeStart = useCallback(
