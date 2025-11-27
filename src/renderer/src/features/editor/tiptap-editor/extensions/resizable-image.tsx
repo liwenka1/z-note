@@ -61,7 +61,7 @@ function ResizableImageView({
   const displayWidth = typeof width === "number" ? `${width}px` : width || "100%";
 
   return (
-    <NodeViewWrapper className="relative my-4">
+    <NodeViewWrapper className="relative">
       <div
         ref={containerRef}
         className={cn(

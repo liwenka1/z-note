@@ -3,6 +3,8 @@
   max-width: 100%;
   height: auto;
   border-radius: var(--radius);
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 /* 可调整大小的图片节点 */
