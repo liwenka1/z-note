@@ -71,13 +71,7 @@ function ResizableImageView({ node, updateAttributes, selected }: NodeViewProps)
         )}
         style={{ width: width || "100%", maxWidth: "100%" }}
       >
-        <img
-          src={src}
-          alt={alt || ""}
-          title={title || ""}
-          className="h-auto w-full rounded-lg object-contain"
-          draggable={false}
-        />
+        <img src={src} alt={alt || ""} title={title || ""} className="h-auto w-full object-contain" draggable={false} />
 
         {/* 选中时显示调整控件 */}
         {selected && (
