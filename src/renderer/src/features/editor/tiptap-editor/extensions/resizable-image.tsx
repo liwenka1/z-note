@@ -2,6 +2,10 @@ import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
 import { useCallback, useRef, useState } from "react";
 import { cn } from "@renderer/lib/utils";
+import { AlignLeft, AlignCenter, AlignRight } from "lucide-react";
+
+// 图片对齐方式
+type ImageAlignment = "left" | "center" | "right";
 
 // 图片属性类型
 interface ImageAttrs {
@@ -9,6 +13,7 @@ interface ImageAttrs {
   alt?: string;
   title?: string;
   width?: string | number;
+  alignment?: ImageAlignment;
 }
 
 /**
@@ -18,7 +23,7 @@ function ResizableImageView({ node, updateAttributes, selected }: NodeViewProps)
   const containerRef = useRef<HTMLDivElement>(null);
   const [isResizing, setIsResizing] = useState(false);
 
-  const { src, alt, title, width } = node.attrs as ImageAttrs;
+  const { src, alt, title, width, alignment = "left" } = node.attrs as ImageAttrs;
 
   // 开始调整大小
   const handleResizeStart = useCallback(
@@ -49,29 +54,32 @@ function ResizableImageView({ node, updateAttributes, selected }: NodeViewProps)
     [updateAttributes]
   );
 
-  // 预设尺寸按钮（使用百分比字符串）
-  const presetWidths = [
-    { label: "25%", value: "25%" },
-    { label: "50%", value: "50%" },
-    { label: "75%", value: "75%" },
-    { label: "100%", value: "100%" }
+  // 对齐选项
+  const alignmentOptions: { value: ImageAlignment; icon: typeof AlignLeft; label: string }[] = [
+    { value: "left", icon: AlignLeft, label: "居左" },
+    { value: "center", icon: AlignCenter, label: "居中" },
+    { value: "right", icon: AlignRight, label: "居右" }
   ];
 
-  // 获取当前显示的宽度值
-  const displayWidth = typeof width === "number" ? `${width}px` : width || "100%";
-
   return (
-    <NodeViewWrapper className="relative">
+    <NodeViewWrapper
+      className={cn(
+        "relative flex",
+        alignment === "left" && "justify-start",
+        alignment === "center" && "justify-center",
+        alignment === "right" && "justify-end"
+      )}
+    >
       <div
         ref={containerRef}
         className={cn(
-          "relative inline-block",
+          "relative inline-block max-w-full",
           selected && "ring-primary ring-2 ring-offset-2",
           isResizing && "select-none"
         )}
-        style={{ width: width || "100%", maxWidth: "100%" }}
+        style={width ? { width } : undefined}
       >
-        <img src={src} alt={alt || ""} title={title || ""} className="h-auto w-full object-contain" draggable={false} />
+        <img src={src} alt={alt || ""} title={title || ""} className="h-auto max-w-full object-contain" draggable={false} />
 
         {/* 选中时显示调整控件 */}
         {selected && (
@@ -88,26 +96,22 @@ function ResizableImageView({ node, updateAttributes, selected }: NodeViewProps)
               onMouseDown={(e) => handleResizeStart(e, "right")}
             />
 
-            {/* 预设尺寸按钮 */}
-            <div className="bg-popover absolute -top-10 left-0 flex gap-1 rounded-lg border p-1 shadow-lg">
-              {presetWidths.map(({ label, value }) => (
+            {/* 对齐按钮 */}
+            <div className="bg-popover absolute -top-10 left-1/2 -translate-x-1/2 flex gap-1 rounded-lg border p-1 shadow-lg">
+              {alignmentOptions.map(({ value, icon: Icon, label }) => (
                 <button
-                  key={label}
+                  key={value}
                   type="button"
+                  title={label}
                   className={cn(
-                    "rounded px-2 py-1 text-xs font-medium transition-colors",
-                    width === value ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                    "rounded p-1.5 transition-colors",
+                    alignment === value ? "bg-primary text-primary-foreground" : "hover:bg-muted"
                   )}
-                  onClick={() => updateAttributes({ width: value })}
+                  onClick={() => updateAttributes({ alignment: value })}
                 >
-                  {label}
+                  <Icon className="h-4 w-4" />
                 </button>
               ))}
-            </div>
-
-            {/* 当前宽度显示 */}
-            <div className="bg-popover absolute -bottom-8 left-1/2 -translate-x-1/2 rounded border px-2 py-1 text-xs shadow-lg">
-              {displayWidth}
             </div>
           </>
         )}
@@ -138,6 +142,15 @@ export const ResizableImage = Node.create({
       },
       width: {
         default: null
+      },
+      alignment: {
+        default: "left",
+        parseHTML: (element) => element.getAttribute("data-alignment") || "left",
+        renderHTML: (attributes) => {
+          return {
+            "data-alignment": attributes.alignment
+          };
+        }
       }
     };
   },
