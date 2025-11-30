@@ -79,7 +79,13 @@ function ResizableImageView({ node, updateAttributes, selected }: NodeViewProps)
         )}
         style={width ? { width } : undefined}
       >
-        <img src={src} alt={alt || ""} title={title || ""} className="h-auto max-w-full object-contain" draggable={false} />
+        <img
+          src={src}
+          alt={alt || ""}
+          title={title || ""}
+          className="h-auto max-w-full object-contain"
+          draggable={false}
+        />
 
         {/* 选中时显示调整控件 */}
         {selected && (
@@ -96,8 +102,8 @@ function ResizableImageView({ node, updateAttributes, selected }: NodeViewProps)
               onMouseDown={(e) => handleResizeStart(e, "right")}
             />
 
-            {/* 对齐按钮 */}
-            <div className="bg-popover absolute -top-10 left-1/2 -translate-x-1/2 flex gap-1 rounded-lg border p-1 shadow-lg">
+            {/* 对齐按钮 - 放在图片内部底部 */}
+            <div className="bg-popover/90 absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1 rounded-lg border p-1 shadow-lg backdrop-blur-sm">
               {alignmentOptions.map(({ value, icon: Icon, label }) => (
                 <button
                   key={value}
