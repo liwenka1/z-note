@@ -2,7 +2,7 @@ import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
 import { useCallback, useRef, useState } from "react";
 import { cn } from "@renderer/lib/utils";
-import { AlignLeft, AlignCenter, AlignRight } from "lucide-react";
+import { AlignLeft, AlignCenter, AlignRight, ArrowDownRight } from "lucide-react";
 
 // 图片对齐方式
 type ImageAlignment = "left" | "center" | "right";
@@ -22,6 +22,7 @@ interface ImageAttrs {
 function ResizableImageView({ node, updateAttributes, selected }: NodeViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isResizing, setIsResizing] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const { src, alt, title, width, alignment = "left" } = node.attrs as ImageAttrs;
 
@@ -61,10 +62,13 @@ function ResizableImageView({ node, updateAttributes, selected }: NodeViewProps)
     { value: "right", icon: AlignRight, label: "居右" }
   ];
 
+  // 是否显示调整大小按钮
+  const showResizeHandle = isHovered || isResizing;
+
   return (
     <NodeViewWrapper
       className={cn(
-        "relative flex",
+        "relative my-2 flex",
         alignment === "left" && "justify-start",
         alignment === "center" && "justify-center",
         alignment === "right" && "justify-end"
@@ -73,11 +77,13 @@ function ResizableImageView({ node, updateAttributes, selected }: NodeViewProps)
       <div
         ref={containerRef}
         className={cn(
-          "relative inline-block max-w-full",
-          selected && "ring-primary ring-2 ring-offset-2",
+          "group relative inline-block max-w-full",
+          selected && "ring-1 ring-blue-500",
           isResizing && "select-none"
         )}
         style={width ? { width } : undefined}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => !isResizing && setIsHovered(false)}
       >
         <img
           src={src}
@@ -87,35 +93,32 @@ function ResizableImageView({ node, updateAttributes, selected }: NodeViewProps)
           draggable={false}
         />
 
-        {/* 选中时显示调整控件 */}
-        {selected && (
+        {/* Hover 时显示控制按钮 */}
+        {showResizeHandle && (
           <>
-            {/* 右下角拖拽句柄 */}
+            {/* 右下角调整大小按钮 */}
             <div
-              className="border-primary bg-background hover:bg-primary hover:border-primary-foreground absolute -right-2 -bottom-2 h-4 w-4 cursor-se-resize rounded-full border-2 shadow-md"
+              className="bg-popover/90 absolute right-1 bottom-1 flex cursor-se-resize items-center justify-center rounded border p-0.5 shadow-sm backdrop-blur-sm"
               onMouseDown={(e) => handleResizeStart(e, "bottom-right")}
-            />
+              title="拖拽调整大小"
+            >
+              <ArrowDownRight className="h-3 w-3" />
+            </div>
 
-            {/* 右侧拖拽句柄 */}
-            <div
-              className="border-primary bg-background hover:bg-primary absolute top-1/2 -right-2 h-8 w-2 -translate-y-1/2 cursor-e-resize rounded-full border-2 shadow-md"
-              onMouseDown={(e) => handleResizeStart(e, "right")}
-            />
-
-            {/* 对齐按钮 - 放在图片内部底部 */}
-            <div className="bg-popover/90 absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1 rounded-lg border p-1 shadow-lg backdrop-blur-sm">
+            {/* 顶部对齐按钮 */}
+            <div className="bg-popover/90 absolute top-1 left-1/2 flex -translate-x-1/2 gap-0.5 rounded border p-0.5 shadow-sm backdrop-blur-sm">
               {alignmentOptions.map(({ value, icon: Icon, label }) => (
                 <button
                   key={value}
                   type="button"
                   title={label}
                   className={cn(
-                    "rounded p-1.5 transition-colors",
+                    "rounded p-1 transition-colors",
                     alignment === value ? "bg-primary text-primary-foreground" : "hover:bg-muted"
                   )}
                   onClick={() => updateAttributes({ alignment: value })}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-3 w-3" />
                 </button>
               ))}
             </div>
